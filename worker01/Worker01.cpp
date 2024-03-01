@@ -17,7 +17,7 @@ Worker01::~Worker01()
 int Worker01::start(std::shared_ptr<std::promise<void>> stop_promise)
 {
     start_stop_mutex.lock();
-    std::experimental::scope_exit(
+    auto se01 = std::experimental::scope_exit(
         [&]()
         {
             start_stop_mutex.unlock();
@@ -44,7 +44,7 @@ int Worker01::start(std::shared_ptr<std::promise<void>> stop_promise)
 void Worker01::stop()
 {
     start_stop_mutex.lock();
-    std::experimental::scope_exit(
+    auto se01 = std::experimental::scope_exit(
         [&]()
         {
             start_stop_mutex.unlock();
@@ -86,7 +86,7 @@ bool Worker01::isStopped()
 
 void Worker01::threaded_function_wrapper()
 {
-    std::experimental::scope_exit(
+    auto se01 = std::experimental::scope_exit(
         [&]()
         {
             _status = stopped;

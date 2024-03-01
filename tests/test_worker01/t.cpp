@@ -9,7 +9,7 @@
 
 void worker_thr(std::function<bool()> is_stop_flag)
 {
-    std::experimental::scope_exit(
+    auto x = std::experimental::scope_exit(
         []()
         {
             std::cout << "worker function exit" << std::endl;
