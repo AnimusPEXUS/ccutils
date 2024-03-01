@@ -13,12 +13,11 @@ void worker_thr(std::function<bool()> is_stop_flag)
         []()
         {
             std::cout << "worker function exit" << std::endl;
-            std::cout.flush();
         }
     );
 
     bool ticker    = false;
-    int  countdown = 20;
+    int  countdown = 10;
     for (;;)
     {
         if (is_stop_flag())
@@ -48,12 +47,14 @@ void worker_thr(std::function<bool()> is_stop_flag)
         std::this_thread::sleep_for(std::chrono::seconds(1));
         countdown--;
     }
+
+    std::cout << "loop exit" << std::endl;
 }
 
 int main(int argc, char **args)
 {
 
-    std::shared_ptr<std::promise<void>> stop_promise = std::shared_ptr<std::promise<void>>(new (std::promise<void>));
+    auto stop_promise = std::shared_ptr<std::promise<void>>(new (std::promise<void>));
 
     wayround_i2p::ccutils::worker01::Worker01 w(&worker_thr);
 
@@ -63,7 +64,15 @@ int main(int argc, char **args)
     {
         std::cout << "enter \"END\" to exit" << std::endl;
         std::string x;
+        if (std::cin.eof())
+        {
+            break;
+        }
         std::cin >> x;
+        if (std::cin.eof())
+        {
+            break;
+        }
         if (x == "END")
         {
             break;
@@ -76,7 +85,7 @@ int main(int argc, char **args)
 
     stop_promise->get_future().wait();
 
-    std::cout << "wating done" << std::endl;
+    std::cout << "   done" << std::endl;
 
     return 0;
 }
