@@ -1,5 +1,5 @@
-/build
-/build_debug
+**/build
+**/build_debug
 *.gch
 *.o
 *.so

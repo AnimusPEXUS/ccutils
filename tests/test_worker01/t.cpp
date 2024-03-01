@@ -1,0 +1,83 @@
+
+#include <iostream>
+#include <memory>
+
+#include <experimental/scope>
+
+#include <unistd.h>
+
+#include <wayround_i2p/ccutils/worker01/Worker01.hpp>
+
+void worker_thr(std::function<bool()> is_stop_flag)
+{
+    std::experimental::scope_exit(
+        []()
+        {
+            std::cout << "worker function exit" << std::endl;
+            std::cout.flush();
+        }
+    );
+
+    bool ticker    = false;
+    int  countdown = 20;
+    for (;;)
+    {
+        if (is_stop_flag())
+        {
+            std::cout << "got stop signal" << std::endl;
+            break;
+        }
+
+        std::cout << "countdown: " << countdown << std::endl;
+        if (countdown == 0)
+        {
+            std::cout << "  time to break" << std::endl;
+            break;
+        }
+
+        ticker = !ticker;
+
+        if (ticker)
+        {
+            std::cout << "tick" << std::endl;
+        }
+        else
+        {
+            std::cout << "tack" << std::endl;
+        }
+
+        ::sleep(1);
+        countdown--;
+    }
+}
+
+int main(int argc, char **args)
+{
+
+    std::shared_ptr<std::promise<void>> stop_promise = std::shared_ptr<std::promise<void>>(new (std::promise<void>));
+
+    wayround_i2p::ccutils::worker01::Worker01 w(&worker_thr);
+
+    w.start(stop_promise);
+
+    for (;;)
+    {
+        std::cout << "enter \"END\" to exit" << std::endl;
+        std::string x;
+        std::cin >> x;
+        if (x == "END")
+        {
+            break;
+        }
+    }
+
+    w.stop();
+
+    std::cout << "waiting" << std::endl;
+
+    stop_promise->get_future().wait();
+
+    std::cout << "wating done" << std::endl;
+
+    return 0;
+}
