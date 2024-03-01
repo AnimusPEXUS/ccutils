@@ -36,6 +36,7 @@ int Worker01::start(std::shared_ptr<std::promise<void>> stop_promise)
         &Worker01::threaded_function_wrapper,
         this
     );
+    thr.detach();
 
     return 0;
 }

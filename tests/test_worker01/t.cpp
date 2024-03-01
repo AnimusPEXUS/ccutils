@@ -1,10 +1,9 @@
 
+#include <chrono>
 #include <iostream>
 #include <memory>
 
 #include <experimental/scope>
-
-#include <unistd.h>
 
 #include <wayround_i2p/ccutils/worker01/Worker01.hpp>
 
@@ -46,7 +45,7 @@ void worker_thr(std::function<bool()> is_stop_flag)
             std::cout << "tack" << std::endl;
         }
 
-        ::sleep(1);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         countdown--;
     }
 }
