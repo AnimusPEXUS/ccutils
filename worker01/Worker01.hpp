@@ -33,22 +33,21 @@ class Worker01
     Worker01(Worker01ThreadFunction f);
     ~Worker01();
 
-    int                      start();
-    void                     stop();
-    int                      restart();
-    WorkerStatus             status();
-    bool                     isStopped();
-    std::shared_future<void> futureForStop();
+    int          start(std::shared_ptr<std::promise<void>> stop_promise);
+    void         stop();
+    int          restart(std::shared_ptr<std::promise<void>> stop_promise);
+    WorkerStatus status();
+    bool         isStopped();
 
   private:
     std::thread                  thr;
     const Worker01ThreadFunction threaded_function;
     void                         threaded_function_wrapper();
 
-    WorkerStatus       _status   = stopped;
-    bool               stop_flag = false;
-    std::mutex         start_stop_mutex;
-    std::promise<void> stop_promise;
+    WorkerStatus                        _status   = stopped;
+    bool                                stop_flag = false;
+    std::mutex                          start_stop_mutex;
+    std::shared_ptr<std::promise<void>> stop_promise;
 };
 
 } // namespace wayround_i2p::ccutils::worker01

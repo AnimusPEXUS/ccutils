@@ -14,7 +14,7 @@ Worker01::~Worker01()
 {
 }
 
-int Worker01::start()
+int Worker01::start(std::shared_ptr<std::promise<void>> stop_promise)
 {
     start_stop_mutex.lock();
     std::experimental::scope_exit(
@@ -29,10 +29,13 @@ int Worker01::start()
         return 1;
     }
 
-    _status = starting;
-
-    stop_flag = false;
-    thr       = std::thread(&Worker01::threaded_function_wrapper, this);
+    this->stop_promise = stop_promise;
+    _status            = starting;
+    stop_flag          = false;
+    thr                = std::thread(
+        &Worker01::threaded_function_wrapper,
+        this
+    );
 
     return 0;
 }
@@ -50,17 +53,18 @@ void Worker01::stop()
     _status   = stopping;
 }
 
-int Worker01::restart()
+int Worker01::restart(std::shared_ptr<std::promise<void>> stop_promise)
 {
     int err = 0;
 
     stop();
 
-    auto f = futureForStop();
+    if (this->stop_promise)
+    {
+        this->stop_promise->get_future().wait();
+    }
 
-    f.wait();
-
-    err = start();
+    err = start(stop_promise);
     if (err != 0)
     {
         return err;
@@ -79,18 +83,16 @@ bool Worker01::isStopped()
     return _status == stopped;
 }
 
-std::shared_future<void> Worker01::futureForStop()
-{
-    return stop_promise.get_future().share();
-}
-
 void Worker01::threaded_function_wrapper()
 {
     std::experimental::scope_exit(
         [&]()
         {
             _status = stopped;
-            stop_promise.set_value();
+            if (stop_promise)
+            {
+                stop_promise->set_value();
+            }
         }
     );
     _status = working;
