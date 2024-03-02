@@ -9,6 +9,12 @@ Worker01::Worker01() :
 {
 }
 
+Worker01::Worker01(Worker01ThreadFunction f) :
+    Worker01()
+{
+    setFunction(f);
+}
+
 Worker01::~Worker01()
 {
 }

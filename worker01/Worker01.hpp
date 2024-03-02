@@ -41,6 +41,7 @@ class Worker01 : public Worker01I
     // static std::shared_ptr<Worker01> create(Worker01ThreadFunction f);
 
     Worker01();
+    Worker01(Worker01ThreadFunction f);
     ~Worker01();
 
     void setFunction(Worker01ThreadFunction f);
