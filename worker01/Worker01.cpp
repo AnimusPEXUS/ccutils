@@ -28,6 +28,11 @@ int Worker01::start(std::shared_ptr<std::promise<void>> stop_promise)
         }
     );
 
+    if (!threaded_function)
+    {
+        return 2;
+    }
+
     if (!isStopped())
     {
         return 1;
