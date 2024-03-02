@@ -24,6 +24,11 @@ void Worker01::setFunction(Worker01ThreadFunction f)
     threaded_function = f;
 }
 
+int Worker01::start()
+{
+    return start(nullptr);
+}
+
 int Worker01::start(std::shared_ptr<std::promise<void>> stop_promise)
 {
     start_stop_mutex.lock();
@@ -67,6 +72,11 @@ void Worker01::stop()
     );
     stop_flag = true;
     _status   = stopping;
+}
+
+int Worker01::restart()
+{
+    return restart(nullptr);
 }
 
 int Worker01::restart(std::shared_ptr<std::promise<void>> stop_promise)

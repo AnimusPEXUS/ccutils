@@ -46,8 +46,10 @@ class Worker01 : public Worker01I
 
     void setFunction(Worker01ThreadFunction f);
 
+    int          start();
     int          start(std::shared_ptr<std::promise<void>> stop_promise);
     void         stop();
+    int          restart();
     int          restart(std::shared_ptr<std::promise<void>> stop_promise);
     WorkerStatus status();
     bool         isStopped();
