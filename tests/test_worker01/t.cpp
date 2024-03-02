@@ -56,7 +56,9 @@ int main(int argc, char **args)
 
     auto stop_promise = std::shared_ptr<std::promise<void>>(new (std::promise<void>));
 
-    wayround_i2p::ccutils::worker01::Worker01 w(&worker_thr);
+    wayround_i2p::ccutils::worker01::Worker01 w;
+
+    w.setFunction(&worker_thr);
 
     w.start(stop_promise);
 

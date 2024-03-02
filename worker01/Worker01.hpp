@@ -40,8 +40,10 @@ class Worker01 : public Worker01I
 
     // static std::shared_ptr<Worker01> create(Worker01ThreadFunction f);
 
-    Worker01(Worker01ThreadFunction f);
+    Worker01();
     ~Worker01();
+
+    void setFunction(Worker01ThreadFunction f);
 
     int          start(std::shared_ptr<std::promise<void>> stop_promise);
     void         stop();
@@ -50,9 +52,9 @@ class Worker01 : public Worker01I
     bool         isStopped();
 
   private:
-    std::thread                  thr;
-    const Worker01ThreadFunction threaded_function;
-    void                         threaded_function_wrapper();
+    std::thread            thr;
+    Worker01ThreadFunction threaded_function;
+    void                   threaded_function_wrapper();
 
     WorkerStatus                        _status   = stopped;
     bool                                stop_flag = false;

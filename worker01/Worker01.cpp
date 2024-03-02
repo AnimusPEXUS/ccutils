@@ -4,14 +4,18 @@
 namespace wayround_i2p::ccutils::worker01
 {
 
-Worker01::Worker01(Worker01ThreadFunction f) :
-    threaded_function(f),
+Worker01::Worker01() :
     _status(stopped)
 {
 }
 
 Worker01::~Worker01()
 {
+}
+
+void Worker01::setFunction(Worker01ThreadFunction f)
+{
+    threaded_function = f;
 }
 
 int Worker01::start(std::shared_ptr<std::promise<void>> stop_promise)
