@@ -21,7 +21,17 @@ enum WorkerStatus : unsigned char
 
 using Worker01ThreadFunction = std::function<void(std::function<bool()>)>;
 
-class Worker01
+class Worker01I
+{
+  public:
+    virtual int          start(std::shared_ptr<std::promise<void>> stop_promise)   = 0;
+    virtual void         stop()                                                    = 0;
+    virtual int          restart(std::shared_ptr<std::promise<void>> stop_promise) = 0;
+    virtual WorkerStatus status()                                                  = 0;
+    virtual bool         isStopped()                                               = 0;
+};
+
+class Worker01 : public Worker01I
 {
   public:
     // NOTE: this is intentionnaly without ready to use std::shared_ptr creator:
