@@ -106,4 +106,14 @@ create_ccutils_component(
   Worker01.hpp
 )
 
+create_ccutils_component(
+  TARGETNAME ccutils_io_tools
+  SUBDIR io_tools
+  SOURCES
+  utils.cpp
+  HEADERS
+  utils.hpp
+)
+
+
 
