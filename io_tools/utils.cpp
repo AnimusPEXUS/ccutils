@@ -8,7 +8,11 @@ int getRecvTimeout(int fd, timeval &r)
 {
     int err = 0;
 
-    err = getsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(timeval));
+    // todo: questionable. testing required. is this correct acquision of
+    //       getsockopt results ?
+    socklen_t res_optlen = 0;
+
+    err = getsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &r, &res_optlen);
     if (err != 0)
     {
         return err;
@@ -21,11 +25,16 @@ int getSendTimeout(int fd, timeval &s)
 {
     int err = 0;
 
-    err = getsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(timeval));
+    // todo: questionable. testing required. is this correct acquision of
+    //       getsockopt results ?
+    socklen_t res_optlen = 0;
+
+    err = getsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &s, &res_optlen);
     if (err != 0)
     {
         return err;
     }
+
     return 0;
 }
 
@@ -33,7 +42,7 @@ int setRecvTimeout(int fd, timeval &r)
 {
     int err = 0;
 
-    err = getsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(timeval));
+    err = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(r));
     if (err != 0)
     {
         return err;
@@ -46,16 +55,19 @@ int setSendTimeout(int fd, timeval &s)
 {
     int err = 0;
 
-    err = setsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(timeval));
+    err = setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(s));
     if (err != 0)
     {
         return err;
     }
+
     return 0;
 }
 
 int isNonBlocking(int fd, bool &ret)
 {
+    // note: if better function for work with fcntl appears - use it
+
     int res = fcntl(fd, F_GETFL, 0);
     if (res == -1)
     {
@@ -67,6 +79,8 @@ int isNonBlocking(int fd, bool &ret)
 
 int setNonBlocking(int fd, bool blocking)
 {
+    // note: if better function for work with fcntl appears - use it
+
     int res = fcntl(fd, F_GETFL, 0);
     if (res == -1)
     {

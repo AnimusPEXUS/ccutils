@@ -115,5 +115,19 @@ create_ccutils_component(
   utils.hpp
 )
 
+create_ccutils_component(
+  TARGETNAME ccutils_akigo
+  SUBDIR akigo
+  SOURCES
+  builtin.cpp
+  io.cpp
+  net.cpp
+  time.cpp
+  HEADERS
+  builtin.hpp
+  io.hpp
+  net.hpp
+  time.hpp
+)
 
 
