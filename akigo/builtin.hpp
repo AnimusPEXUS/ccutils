@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240308_140051_32431
-#define WAYROUND_I2P_20240308_140051_32431
+#ifndef WAYROUND_I2P_20240310_155748_299808
+#define WAYROUND_I2P_20240310_155748_299808
 
 #include <cstdint>
 #include <memory>
@@ -15,12 +15,12 @@ namespace wayround_i2p::akigo::builtin
 using size_type   = std::vector<std::uint8_t>::size_type;
 using byte_vector = std::vector<std::uint8_t>;
 
-class error_nsp
+class error
 {
     virtual std::string Error() = 0;
 };
 
-using error = std::shared_ptr<error_nsp>;
+using error_ptr = std::shared_ptr<error>;
 
 } // namespace wayround_i2p::akigo::builtin
 

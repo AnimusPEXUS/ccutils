@@ -49,8 +49,24 @@ function(create_ccutils_component)
     list(
       APPEND
       formatted_sources_list
-      "${create_ccutils_component_SUBDIR}/${i}"
+      "${create_ccutils_component_SUBDIR}/${i}.cpp"
     )
+
+    foreach(sysname LINUX UNIX WIN32)
+
+      if ((DEFINED ${sysname}) AND (${sysname} EQUAL 1))
+	set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}_${sysname}.cpp")
+	if (EXISTS ${nfn})
+	  list(
+	    APPEND
+	    formatted_sources_list
+	    "${nfn}"
+	  )
+	endif()
+      endif()
+
+    endforeach()
+
   endforeach()
 
   target_sources(
@@ -64,7 +80,7 @@ function(create_ccutils_component)
     list(
       APPEND
       formatted_headers_list
-      "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}"
+      "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}.hpp"
     )
   endforeach()
 
@@ -101,33 +117,34 @@ create_ccutils_component(
   TARGETNAME ccutils_worker01
   SUBDIR worker01
   SOURCES
-  Worker01.cpp
+  Worker01
   HEADERS
-  Worker01.hpp
+  Worker01
 )
 
 create_ccutils_component(
   TARGETNAME ccutils_io_tools
   SUBDIR io_tools
   SOURCES
-  utils.cpp
+  utils
   HEADERS
-  utils.hpp
+  utils
 )
 
 create_ccutils_component(
   TARGETNAME ccutils_akigo
   SUBDIR akigo
   SOURCES
-  builtin.cpp
-  io.cpp
-  net.cpp
-  time.cpp
+  builtin
+  io
+  net
+  time
+  context
   HEADERS
-  builtin.hpp
-  io.hpp
-  net.hpp
-  time.hpp
+  _pkg
+  builtin
+  io
+  net
+  time
+  context
 )
-
-

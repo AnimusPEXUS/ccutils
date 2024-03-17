@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240308_131206_300425
-#define WAYROUND_I2P_20240308_131206_300425
+#ifndef WAYROUND_I2P_20240310_155748_300881
+#define WAYROUND_I2P_20240310_155748_300881
 
 #include <memory>
 #include <tuple>
@@ -9,54 +9,56 @@
 namespace wayround_i2p::akigo::io
 {
 
-using error       = wayround_i2p::akigo::builtin::error;
+using error_ptr   = wayround_i2p::akigo::builtin::error_ptr;
 using size_type   = wayround_i2p::akigo::builtin::size_type;
 using byte_vector = wayround_i2p::akigo::builtin::byte_vector;
 
 class Reader
 {
-    virtual std::tuple<size_type, error> Read(byte_vector p) = 0;
+    virtual std::tuple<size_type, error_ptr> Read(byte_vector p) = 0;
 };
 
 using Reader_ptr = std::shared_ptr<Reader>;
 
 class Writer
 {
-    virtual std::tuple<size_type, error> Write(byte_vector p) = 0;
+    virtual std::tuple<size_type, error_ptr> Write(byte_vector p) = 0;
 };
 
 using Writer_ptr = std::shared_ptr<Writer>;
 
-std::tuple<size_type, error> Copy(
+/*
+std::tuple<size_type, error_ptr> Copy(
     Writer_ptr dst,
     Reader_ptr src
 );
 
-std::tuple<size_type, error> CopyBuffer(
+std::tuple<size_type, error_ptr> CopyBuffer(
     Writer_ptr  dst,
     Reader_ptr  src,
     byte_vector buf
 );
 
-std::tuple<size_type, error> CopyN(
+std::tuple<size_type, error_ptr> CopyN(
     Writer_ptr  dst,
     Reader_ptr  src,
     byte_vector buf
 );
 
-std::tuple<byte_vector, error> ReadAll(
+std::tuple<byte_vector, error_ptr> ReadAll(
     Reader_ptr r
 );
 
-class ByteReader_nsp
+class ByteReader
 {
-    virtual std::tuple<std::uint8_t, error> ReadByte() = 0;
+    virtual std::tuple<std::uint8_t, error_ptr> ReadByte() = 0;
 };
 
-class ByteScanner_nsp : public ByteReader_nsp
+class ByteScanner : public ByteReader
 {
-    virtual error UnreadByte() = 0;
+    virtual error_ptr UnreadByte() = 0;
 };
+*/
 
 } // namespace wayround_i2p::akigo::io
 
