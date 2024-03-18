@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set(ICU_DEBUG ON)
 
-set(CCUTILS_COMPONENTS ccutils_worker_01)
+#set(CCUTILS_COMPONENTS ccutils_worker_01)
 
 function(create_ccutils_component)
   set(options )
@@ -49,7 +49,7 @@ function(create_ccutils_component)
     list(
       APPEND
       formatted_sources_list
-      "${create_ccutils_component_SUBDIR}/${i}.cpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}.cpp"
     )
 
     foreach(sysname LINUX UNIX WIN32)
@@ -82,6 +82,22 @@ function(create_ccutils_component)
       formatted_headers_list
       "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}.hpp"
     )
+
+    foreach(sysname LINUX UNIX WIN32)
+
+      if ((DEFINED ${sysname}) AND (${sysname} EQUAL 1))
+	set(nfn "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}_${sysname}.hpp")
+	if (EXISTS ${nfn})
+	  list(
+	    APPEND
+	    formatted_headers_list
+	    "${nfn}"
+	  )
+	endif()
+      endif()
+
+    endforeach()
+
   endforeach()
 
 

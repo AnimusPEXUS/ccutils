@@ -1,2 +1,1 @@
-
-#error test
+#warning UNIX source used
