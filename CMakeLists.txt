@@ -38,7 +38,11 @@ function(create_ccutils_component)
     ${ARGN}
   )
 
-  message("  component: ${create_ccutils_component_TARGETNAME}")
+  list(SORT create_ccutils_component_SOURCES)
+  list(SORT create_ccutils_component_HEADERS)
+  
+  message("  processing component: ${create_ccutils_component_TARGETNAME}")
+  
 
   add_library(
     ${create_ccutils_component_TARGETNAME}
@@ -83,6 +87,7 @@ function(create_ccutils_component)
       "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}.hpp"
     )
 
+   # platform-specific headers maybe useless idea.. but maybe not.
     foreach(sysname LINUX UNIX WIN32)
 
       if ((DEFINED ${sysname}) AND (${sysname} EQUAL 1))
