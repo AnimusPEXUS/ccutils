@@ -9,7 +9,7 @@ add_subdirectory(../.. ccutils-bindir)
 
 add_executable(
 	ccutils_akigo_test_unix
-	t.cpp
+	t_net_unix_server_cc.cpp
     )
 
 target_link_libraries(
@@ -19,7 +19,7 @@ target_link_libraries(
     )
 
 target_include_directories(
-    ccutils_io_tools_test01 
+    ccutils_akigo_test_unix
     PRIVATE 
     ${ccutils_akigo_INCLUDE_DIRS}
     )

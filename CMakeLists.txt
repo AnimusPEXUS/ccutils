@@ -12,24 +12,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(Boost_USE_RELEASE_LIBS       ON)
 #set(Boost_USE_MULTITHREADED      ON)
 
-
 #find_package(Boost REQUIRED COMPONENTS json regex)
 
-#pkg_check_modules(gtk4 REQUIRED IMPORTED_TARGET gtk4)
-#pkg_check_modules(glib REQUIRED IMPORTED_TARGET glib-2.0)
-#pkg_check_modules(gtkmm4 REQUIRED IMPORTED_TARGET gtkmm-4.0)
-#pkg_check_modules(sigc REQUIRED IMPORTED_TARGET sigc++-3.0)
-
-#find_package(ICU 73.0 COMPONENTS uc i18n REQUIRED)
+find_package(ICU 73.0 COMPONENTS uc i18n REQUIRED)
 
 #set(ICU_DEBUG ON)
-
-#set(CCUTILS_COMPONENTS ccutils_worker_01)
 
 function(create_ccutils_component)
   set(options )
   set(oneValueArgs TARGETNAME SUBDIR)
-  set(multiValueArgs SOURCES HEADERS)
+  set(multiValueArgs SOURCES HEADERS LIBS_PUB LIBS_PRIV INC_DIRS_PUB INC_DIRS_PRIV)
   cmake_parse_arguments(
     create_ccutils_component
     "${options}"
@@ -40,9 +32,10 @@ function(create_ccutils_component)
 
   list(SORT create_ccutils_component_SOURCES)
   list(SORT create_ccutils_component_HEADERS)
-  
+
+
   message("  processing component: ${create_ccutils_component_TARGETNAME}")
-  
+
 
   add_library(
     ${create_ccutils_component_TARGETNAME}
@@ -87,7 +80,7 @@ function(create_ccutils_component)
       "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}.hpp"
     )
 
-   # platform-specific headers maybe useless idea.. but maybe not.
+    # platform-specific headers maybe useless idea.. but maybe not.
     foreach(sysname LINUX UNIX WIN32)
 
       if ((DEFINED ${sysname}) AND (${sysname} EQUAL 1))
@@ -116,11 +109,23 @@ function(create_ccutils_component)
     ${formatted_headers_list}
   )
 
+  target_link_libraries(
+    ${create_ccutils_component_TARGETNAME}
+    PUBLIC
+    ${create_ccutils_component_LIBS_PUB}
+    PRIVATE
+    ${create_ccutils_component_LIBS_PRIV}
+  )
+
   target_include_directories(
     ${create_ccutils_component_TARGETNAME}
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/includes>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}>
+    PUBLIC
+    ${create_ccutils_component_INC_DIRS_PUB}
+    PRIVATE
+    ${create_ccutils_component_INC_DIRS_PRIV}
   )
 
   install(
@@ -155,12 +160,14 @@ create_ccutils_component(
 create_ccutils_component(
   TARGETNAME ccutils_akigo
   SUBDIR akigo
+
   SOURCES
   builtin
   io
   net
   time
   context
+
   HEADERS
   _pkg
   builtin
@@ -168,4 +175,12 @@ create_ccutils_component(
   net
   time
   context
+
+  LIBS_PUB
+  ICU::uc
+  ICU::i18n
+
+  INC_DIRS_PUB
+  ICU::uc
+  ICU::i18n
 )

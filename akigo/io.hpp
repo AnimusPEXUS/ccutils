@@ -56,7 +56,7 @@ class ByteReader
 
 class ByteScanner : public ByteReader
 {
-    virtual error_ptr UnreadByte() = 0;
+    virtual error UnreadByte() = 0;
 };
 */
 

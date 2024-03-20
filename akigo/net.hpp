@@ -13,14 +13,15 @@
 namespace wayround_i2p::akigo::net
 {
 using error_ptr   = wayround_i2p::akigo::builtin::error_ptr;
+using error       = wayround_i2p::akigo::builtin::error;
 using size_type   = wayround_i2p::akigo::builtin::size_type;
 using byte_vector = wayround_i2p::akigo::builtin::byte_vector;
 using Context_ptr = wayround_i2p::akigo::context::Context_ptr;
 using File_ptr    = wayround_i2p::akigo::os::File_ptr;
 
-class Error : public error_ptr
+class Error : public error
 {
-    bool Timeout();
+    virtual bool Timeout() = 0;
 };
 
 class Addr
