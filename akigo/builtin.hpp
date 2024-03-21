@@ -36,11 +36,12 @@ class uchar32
     UChar32 chr;
 };
 
-class ustring : icu::UnicodeString
+class ustring
 {
   public:
     ustring();
 
+    ustring(const char *val, std::string encoding = "utf-8");
     ustring(std::string val, std::string encoding = "utf-8");
 
     ~ustring();
@@ -48,6 +49,9 @@ class ustring : icu::UnicodeString
     std::tuple<byte_vector, error> encode(std::string encoding = "utf-8");
 
     uchar32 operator[](std::int32_t offset);
+
+  private:
+    icu::UnicodeString data;
 };
 
 } // namespace wayround_i2p::akigo::builtin

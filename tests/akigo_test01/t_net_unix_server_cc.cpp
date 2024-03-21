@@ -88,8 +88,8 @@ int main(int argc, char **args)
 
     akigo_ns::os::Remove("./test_unix_socket");
 
-    akigo_ns::net::Conn_ptr      s;
-    akigo_ns::builtin::error_ptr err;
+    akigo_ns::net::UnixListener_ptr s;
+    akigo_ns::builtin::error_ptr    err;
 
     std::tie(s, err) = akigo_ns::net::ListenUnix("unix", uaddr);
     if (err)
@@ -101,7 +101,7 @@ int main(int argc, char **args)
     for (;;)
     {
         akigo_ns::net::Conn_ptr c;
-        std::tie(c, err) = s.Accept();
+        std::tie(c, err) = s->Accept();
         if (err)
         {
             std::cout << "Accept err: " << err << std::endl;

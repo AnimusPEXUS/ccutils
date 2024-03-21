@@ -200,6 +200,13 @@ class UnixListener : public Listener
 {
 };
 
+using UnixListener_ptr = std::shared_ptr<UnixListener>;
+
+std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
+    std::string  network,
+    UnixAddr_ptr laddr
+);
+
 } // namespace wayround_i2p::akigo::net
 
 #endif
