@@ -5,6 +5,17 @@ project(ccutils)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# system detection. this is used to select/provide system-specific sources and headers
+
+set(PARTICULAR_SYSTEM_NAME "")
+# todo: detection should be improver here in future
+if (((DEFINED UNIX) AND (UNIX EQUAL 1)) AND ((DEFINED LINUX) AND (LINUX EQUAL 1)))
+  set(PARTICULAR_SYSTEM_NAME "linux-gnu")
+else()
+  message(FATAL_ERROR "system not supported")
+endif()
+
+
 #find_package(PkgConfig REQUIRED)
 
 # set(Boost_USE_STATIC_LIBS        ON)
@@ -18,18 +29,13 @@ find_package(ICU 73.0 COMPONENTS uc i18n REQUIRED)
 
 #set(ICU_DEBUG ON)
 
-set(PARTICULAR_SYSTEM_NAME "")
-# todo: detection should be improver here in future
-if (((DEFINED UNIX) AND (UNIX EQUAL 1)) AND ((DEFINED LINUX) AND (LINUX EQUAL 1)))
-  set(PARTICULAR_SYSTEM_NAME "linux-gnu")
-endif()
 
 function(create_ccutils_component)
   set(options )
   set(oneValueArgs TARGETNAME SUBDIR)
-  set(multiValueArgs 
-    SOURCES HEADERS 
-    LIBS_PUB LIBS_PRIV 
+  set(multiValueArgs
+    SOURCES HEADERS
+    LIBS_PUB LIBS_PRIV
     INC_DIRS_PUB INC_DIRS_PRIV
   )
   cmake_parse_arguments(
@@ -60,7 +66,7 @@ function(create_ccutils_component)
     )
 
 
-    
+
     set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.cpp")
     if (EXISTS ${nfn})
       list(
@@ -69,7 +75,7 @@ function(create_ccutils_component)
 	"${nfn}"
       )
     endif()
-    
+
 
 
   endforeach()
