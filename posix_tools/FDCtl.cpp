@@ -1,7 +1,7 @@
 
-#include <wayround_i2p/ccutils/io_tools/utils.hpp>
+#include <wayround_i2p/ccutils/posix_tools/FDCtl.hpp>
 
-namespace wayround_i2p::ccutils::io_tools
+namespace wayround_i2p::ccutils::posix_tools
 {
 
 int getRecvTimeout(int fd, timeval &r)
@@ -104,4 +104,4 @@ int setNonBlocking(int fd, bool blocking)
     return 0;
 }
 
-} // namespace wayround_i2p::ccutils::io_tools
+} // namespace wayround_i2p::ccutils::posix_tools

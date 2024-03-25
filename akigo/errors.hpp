@@ -1,34 +1,40 @@
-#ifndef WAYROUND_I2P_20240310_155748_30004a
-#define WAYROUND_I2P_20240310_155748_30004a
+#ifndef WAYROUND_I2P_20240323_153956_246513
+#define WAYROUND_I2P_20240323_153956_246513
 
 #include <wayround_i2p/ccutils/akigo/builtin.hpp>
 
 namespace wayround_i2p::akigo::errors
 {
 using error_ptr = wayround_i2p::akigo::builtin::error_ptr;
+using error     = wayround_i2p::akigo::builtin::error;
+using ustring   = wayround_i2p::akigo::builtin::ustring;
 
-class error
+class BasicStringError : public error
 {
   public:
-    static error_ptr New(std::string text)
-    {
-        auto ret = error_ptr(new error(text));
-        return ret;
-    }
-
-  protected:
-    error(std::string text) :
+    BasicStringError(ustring text) :
         text(text)
     {
     }
 
-    ~error()
+    ~BasicStringError()
     {
     }
 
+    ustring Error()
+    {
+        return text;
+    }
+
   private:
-    std::string text;
+    ustring text;
 };
+
+error_ptr New(ustring text)
+{
+    auto ret = error_ptr(dynamic_cast<error *>(new BasicStringError(text)));
+    return ret;
+}
 
 } // namespace wayround_i2p::akigo::errors
 

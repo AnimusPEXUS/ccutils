@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240310_155748_299808
-#define WAYROUND_I2P_20240310_155748_299808
+#ifndef WAYROUND_I2P_20240323_153956_245116
+#define WAYROUND_I2P_20240323_153956_245116
 
 #include <cstdint>
 #include <memory>
@@ -7,11 +7,12 @@
 #include <tuple>
 #include <vector>
 
+#include <unicode/stringpiece.h>
 #include <unicode/unistr.h>
 #include <unicode/utypes.h>
 
 // note: no 'ccutils' in namespace.
-//       why? - because I fill akigo as separate project but don't
+//       why? - because I feel akigo as separate project but don't
 //       think it should really be separate from ccutils.
 
 namespace wayround_i2p::akigo::builtin
@@ -19,9 +20,11 @@ namespace wayround_i2p::akigo::builtin
 using size_type   = std::vector<std::uint8_t>::size_type;
 using byte_vector = std::vector<std::uint8_t>;
 
+class ustring;
+
 class error
 {
-    virtual std::string Error() = 0;
+    virtual ustring Error() = 0;
 };
 
 using error_ptr = std::shared_ptr<error>;
@@ -48,7 +51,12 @@ class ustring
 
     std::tuple<byte_vector, error> encode(std::string encoding = "utf-8");
 
+    std::string string_utf8();
+
     uchar32 operator[](std::int32_t offset);
+
+    ustring operator+(ustring &other);
+    ustring operator+(std::string &other);
 
   private:
     icu::UnicodeString data;

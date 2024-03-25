@@ -18,10 +18,20 @@ find_package(ICU 73.0 COMPONENTS uc i18n REQUIRED)
 
 #set(ICU_DEBUG ON)
 
+set(PARTICULAR_SYSTEM_NAME "")
+# todo: detection should be improver here in future
+if (((DEFINED UNIX) AND (UNIX EQUAL 1)) AND ((DEFINED LINUX) AND (LINUX EQUAL 1)))
+  set(PARTICULAR_SYSTEM_NAME "linux-gnu")
+endif()
+
 function(create_ccutils_component)
   set(options )
   set(oneValueArgs TARGETNAME SUBDIR)
-  set(multiValueArgs SOURCES HEADERS LIBS_PUB LIBS_PRIV INC_DIRS_PUB INC_DIRS_PRIV)
+  set(multiValueArgs 
+    SOURCES HEADERS 
+    LIBS_PUB LIBS_PRIV 
+    INC_DIRS_PUB INC_DIRS_PRIV
+  )
   cmake_parse_arguments(
     create_ccutils_component
     "${options}"
@@ -49,20 +59,18 @@ function(create_ccutils_component)
       "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}.cpp"
     )
 
-    foreach(sysname LINUX UNIX WIN32)
 
-      if ((DEFINED ${sysname}) AND (${sysname} EQUAL 1))
-	set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}_${sysname}.cpp")
-	if (EXISTS ${nfn})
-	  list(
-	    APPEND
-	    formatted_sources_list
-	    "${nfn}"
-	  )
-	endif()
-      endif()
+    
+    set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.cpp")
+    if (EXISTS ${nfn})
+      list(
+	APPEND
+	formatted_sources_list
+	"${nfn}"
+      )
+    endif()
+    
 
-    endforeach()
 
   endforeach()
 
@@ -80,21 +88,15 @@ function(create_ccutils_component)
       "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}.hpp"
     )
 
-    # platform-specific headers maybe useless idea.. but maybe not.
-    foreach(sysname LINUX UNIX WIN32)
 
-      if ((DEFINED ${sysname}) AND (${sysname} EQUAL 1))
-	set(nfn "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}_${sysname}.hpp")
-	if (EXISTS ${nfn})
-	  list(
-	    APPEND
-	    formatted_headers_list
-	    "${nfn}"
-	  )
-	endif()
-      endif()
-
-    endforeach()
+    set(nfn "${create_ccutils_component_SUBDIR}/includes/wayround_i2p/ccutils/${create_ccutils_component_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.hpp")
+    if (EXISTS ${nfn})
+      list(
+	APPEND
+	formatted_headers_list
+	"${nfn}"
+      )
+    endif()
 
   endforeach()
 
@@ -149,12 +151,14 @@ create_ccutils_component(
 )
 
 create_ccutils_component(
-  TARGETNAME ccutils_io_tools
-  SUBDIR io_tools
+  TARGETNAME ccutils_posix_tools
+  SUBDIR posix_tools
   SOURCES
-  utils
+  FDCtl
   HEADERS
-  utils
+  FDCtl
+  LIBS_PUB
+  ccutils_akigo
 )
 
 create_ccutils_component(
