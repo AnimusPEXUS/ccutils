@@ -4,7 +4,21 @@
 namespace wayround_i2p::ccutils::posix_tools
 {
 
-int getRecvTimeout(int fd, timeval &r)
+FDCtl::FDCtl(int fd, bool close_on_destroy)
+{
+    active_fd              = fd;
+    this->close_on_destroy = close_on_destroy;
+}
+
+FDCtl::~FDCtl()
+{
+    if (!closed && close_on_destroy)
+    {
+        close(active_fd);
+    }
+}
+
+int FDCtl::getRecvTimeout(timeval &r)
 {
     int err = 0;
 
@@ -12,7 +26,7 @@ int getRecvTimeout(int fd, timeval &r)
     //       getsockopt results ?
     socklen_t res_optlen = 0;
 
-    err = getsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &r, &res_optlen);
+    err = this->getsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, &res_optlen);
     if (err != 0)
     {
         return err;
@@ -21,7 +35,7 @@ int getRecvTimeout(int fd, timeval &r)
     return 0;
 }
 
-int getSendTimeout(int fd, timeval &s)
+int FDCtl::getSendTimeout(timeval &s)
 {
     int err = 0;
 
@@ -29,7 +43,7 @@ int getSendTimeout(int fd, timeval &s)
     //       getsockopt results ?
     socklen_t res_optlen = 0;
 
-    err = getsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &s, &res_optlen);
+    err = this->getsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, &res_optlen);
     if (err != 0)
     {
         return err;
@@ -38,11 +52,11 @@ int getSendTimeout(int fd, timeval &s)
     return 0;
 }
 
-int setRecvTimeout(int fd, timeval &r)
+int FDCtl::setRecvTimeout(timeval &r)
 {
     int err = 0;
 
-    err = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(r));
+    err = this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(r));
     if (err != 0)
     {
         return err;
@@ -51,11 +65,11 @@ int setRecvTimeout(int fd, timeval &r)
     return 0;
 }
 
-int setSendTimeout(int fd, timeval &s)
+int FDCtl::setSendTimeout(timeval &s)
 {
     int err = 0;
 
-    err = setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(s));
+    err = this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(s));
     if (err != 0)
     {
         return err;
@@ -64,11 +78,11 @@ int setSendTimeout(int fd, timeval &s)
     return 0;
 }
 
-int isNonBlocking(int fd, bool &ret)
+int FDCtl::isNonBlocking(bool &ret)
 {
     // note: if better function for work with fcntl appears - use it
 
-    int res = fcntl(fd, F_GETFL, 0);
+    int res = this->fcntl(F_GETFL, 0);
     if (res == -1)
     {
         return -1;
@@ -77,11 +91,11 @@ int isNonBlocking(int fd, bool &ret)
     return 0;
 }
 
-int setNonBlocking(int fd, bool blocking)
+int FDCtl::setNonBlocking(bool blocking)
 {
     // note: if better function for work with fcntl appears - use it
 
-    int res = fcntl(fd, F_GETFL, 0);
+    int res = this->fcntl(F_GETFL, 0);
     if (res == -1)
     {
         return -1;
@@ -96,7 +110,7 @@ int setNonBlocking(int fd, bool blocking)
         res &= !O_NONBLOCK;
     }
 
-    res = fcntl(fd, F_SETFL, res);
+    res = this->fcntl(F_SETFL, res);
     if (res == -1)
     {
         return -1;
