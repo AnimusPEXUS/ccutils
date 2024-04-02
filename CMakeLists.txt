@@ -161,10 +161,10 @@ create_ccutils_component(
   SUBDIR posix_tools
   SOURCES
   FDCtl
+  FDAddress
   HEADERS
   FDCtl
-  LIBS_PUB
-  ccutils_akigo
+  FDAddress
 )
 
 create_ccutils_component(
