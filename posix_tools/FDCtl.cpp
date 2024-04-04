@@ -51,20 +51,20 @@ void FDCtl::SetCloseOnDestory(bool value)
     close_on_destroy = value;
 }
 
-int FDAddress::setFDAddress(std::shared_ptr<FDAddress> addr)
+int FDCtl::setFDAddress(std::shared_ptr<FDAddress> addr)
 {
-    if (!fd)
+    if (!addr)
     {
         return -3;
     }
 
     std::vector<std::uint8_t> tmp_addr_buff;
     tmp_addr_buff.clear();
-    socklen_t getsockname_size;
+    socklen_t getsockname_size = 0;
 
     int err = 0;
 
-    err = temp_fd->getsockname(tmp_addr_buff.data, &getsockname_size);
+    err = this->getsockname(tmp_addr_buff.data, &getsockname_size);
     if (err != 0)
     {
         return err;
@@ -72,7 +72,7 @@ int FDAddress::setFDAddress(std::shared_ptr<FDAddress> addr)
 
     tmp_addr_buff.assign(getsockname_size, 0);
 
-    err = temp_fd->getsockname(tmp_addr_buff.data, &getsockname_size);
+    err = this->getsockname(tmp_addr_buff.data, &getsockname_size);
     if (err != 0)
     {
         return err;

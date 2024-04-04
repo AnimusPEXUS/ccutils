@@ -45,6 +45,25 @@ class FDAddress
     std::tuple<sa_family_t, int> getFamily();
     std::tuple<std::string, int> getFamilyString();
 
+    int setAddress(std::string text);
+
+    int setAddress(unsigned char addr[4], in_port_t port);
+    int setAddress(std::uint8_t addr[4], in_port_t port);
+    int setAddress(std::uint32_t addr, in_port_t port);
+
+    int setAddress(unsigned char addr[16], in_port_t port);
+    int setAddress(std::uint8_t addr[16], in_port_t port);
+
+    int setAddress(std::vector<unsigned char> addr);
+    int setAddress(std::vector<std::uint8_t> addr);
+
+    int setUnixAddress(std::string text);
+    int setUnixAddress(icu::UnicodeString text);
+
+    int setUnixAddress(std::shared_ptr<sockaddr_un> addr);
+    int setInetAddress(std::shared_ptr<sockaddr_in> addr);
+    int setInet6Address(std::shared_ptr<sockaddr_in6> addr);
+
     std::tuple<std::shared_ptr<sockaddr_un>, int>  getUnixAddress();
     std::tuple<std::shared_ptr<sockaddr_in>, int>  getInetAddress();
     std::tuple<std::shared_ptr<sockaddr_in6>, int> getInet6Address();
@@ -52,7 +71,6 @@ class FDAddress
   protected:
     FDAddress();
     FDAddress(std::vector<std::uint8_t> addr_buff);
-    FDAddress(std::weak_ptr<FDCtl> fd);
 }
 
 } // namespace wayround_i2p::ccutils::posix_tools
