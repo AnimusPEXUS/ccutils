@@ -4,330 +4,486 @@
 namespace wayround_i2p::ccutils::posix_tools
 {
 
-std::shared_ptr<FDCtl> FDCtl::create(int fd, bool close_on_destroy)
+std::shared_ptr<FDCtl> FDCtl::create(FDCtlInitOptions opts)
 {
-    auto ret = std::shared_ptr<FDCtl>(new FDCtl(fd, close_on_destroy));
-    // ret->own_ptr = ret;
+    auto ret     = std::shared_ptr<FDCtl>(new FDCtl(opts));
+    ret->own_ptr = ret;
     return ret;
 }
 
-FDCtl::FDCtl(int fd, bool close_on_destroy)
+FDCtl::FDCtl(FDCtlInitOptions opts)
 {
-    active_fd              = fd;
-    this->close_on_destroy = close_on_destroy;
+    this->opts = opts;
 }
 
 FDCtl::~FDCtl()
 {
-    if (close_on_destroy)
+    if (opts.close_on_destroy)
     {
         this->close();
     }
 }
 
-int FDCtl::close()
+err_errNoS FDCtl::close()
 {
-    int ret = 0;
-    if (!closed)
+    opts.is_closed = true;
+
+    int ret = ::close(opts.fd);
+    if (ret != 0)
     {
-        ret    = ::close(active_fd);
-        closed = true;
+        return {ret, errno};
     }
-    return ret;
+
+    return {0, 0};
+}
+
+err_errNoS FDCtl::Close()
+{
+    if (!opts.is_closed)
+    {
+        return this->close();
+    }
+    else
+    {
+        return {0, 0};
+    }
 }
 
 int FDCtl::getFD()
 {
-    return active_fd;
+    return opts.fd;
 }
 
-bool FDCtl::GetCloseOnDestory()
+bool FDCtl::GetCloseOnDestroy()
 {
-    return close_on_destroy;
+    return opts.close_on_destroy;
 }
 
-void FDCtl::SetCloseOnDestory(bool value)
+void FDCtl::SetCloseOnDestroy(bool value)
 {
-    close_on_destroy = value;
+    opts.close_on_destroy = value;
 }
 
-int FDCtl::setFDAddress(std::shared_ptr<FDAddress> addr)
+err_errNoS FDCtl::setFDAddress(std::shared_ptr<FDAddress> addr)
 {
     if (!addr)
     {
-        return -3;
+        return {-3, 0};
     }
 
     std::vector<std::uint8_t> tmp_addr_buff;
     tmp_addr_buff.clear();
     socklen_t getsockname_size = 0;
 
-    int err = 0;
+    err_errNoS err = {0};
 
-    err = this->getsockname(tmp_addr_buff.data, &getsockname_size);
-    if (err != 0)
+    err = this->getsockname(
+        reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
+        &getsockname_size
+    );
+    if (err.not_ok())
     {
         return err;
     }
 
     tmp_addr_buff.assign(getsockname_size, 0);
 
-    err = this->getsockname(tmp_addr_buff.data, &getsockname_size);
-    if (err != 0)
+    err = this->getsockname(
+        reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
+        &getsockname_size
+    );
+    if (err.not_ok())
     {
         return err;
     }
 
-    err = fd->setAddrBuff(tmp_addr_buff);
-    if (err != 0)
+    int err_int = addr->setAddrBuff(tmp_addr_buff);
+    if (err_int != 0)
     {
-        return err;
+        return {err_int, 0};
     }
 
-    return 0;
+    return {0, 0};
 }
 
-int FDAddress::reGetAddress()
+res_errNoS FDCtl::dup()
 {
-    if (auto temp_fd = this->fd.lock(); temp_fd)
+    res_errNoS ret = {0, 0};
+
+    ret.res = ::dup(this->opts.fd);
+    if (ret.not_ok())
     {
-        this->addr_buff.clear();
-
-        this->addr_buff = tmp_addr_buff;
+        ret.errNo = errno;
     }
-    else
+    return ret;
+}
+
+res_errNoS FDCtl::dup2(int newfd)
+{
+    res_errNoS ret = {0, 0};
+
+    ret.res = ::dup2(this->opts.fd, newfd);
+    if (ret.not_ok())
     {
-        return -1;
+        ret.errNo = errno;
     }
-
-    return 0;
+    return ret;
 }
 
-int FDCtl::dup()
+res_errNoS FDCtl::socket(int domain, int type, int protocol)
 {
-    return ::dup(this->active_fd);
+    res_errNoS ret = {0, 0};
+
+    ret.res = ::socket(domain, type, protocol);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
-int FDCtl::dup2(int new)
+err_errNoS FDCtl::bind(struct sockaddr *addr, socklen_t length)
 {
-    return ::dup2(this->active_fd, new);
+    err_errNoS ret = {0, 0};
+
+    ret.err = ::bind(this->opts.fd, addr, length);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
-int FDCtl::socket(int namespace, int style, int protocol)
+err_errNoS FDCtl::getsockname(struct sockaddr *addr, socklen_t *length)
 {
-    return ::socket(namespace, style, protocol);
+    err_errNoS ret = {0, 0};
+
+    ret.err = ::getsockname(this->opts.fd, addr, length);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
-int FDCtl::bind(struct sockaddr *addr, socklen_t length)
+err_errNoS FDCtl::connect(struct sockaddr *addr, socklen_t length)
 {
-    return ::bind(this->active_fd, addr, length);
+    err_errNoS ret = {0, 0};
+
+    ret.err = ::connect(this->opts.fd, addr, length);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
-int FDCtl::getsockname(struct sockaddr *addr, socklen_t *length)
+err_errNoS FDCtl::listen(int n)
 {
-    return ::getsockname(this->active_fd, addr, length);
+    err_errNoS ret = {0, 0};
+
+    ret.err = ::listen(this->opts.fd, n);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
-int FDCtl::connect(struct sockaddr *addr, socklen_t length)
+err_errNoS FDCtl::accept(struct sockaddr *addr, socklen_t *length)
 {
-    return ::connect(this->active_fd, addr, length);
-}
+    err_errNoS ret = {0, 0};
 
-int FDCtl::listen(int n)
-{
-    return ::listen(this->active_fd, n);
-}
-
-int FDCtl::accept(struct sockaddr *addr, socklen_t *length)
-{
-    return ::accept(this->active_fd, addr, length);
+    ret.err = ::accept(this->opts.fd, addr, length);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
 template <typename... Args>
-int FDCtl::ioctl(unsigned long request, Args... args)
+res_errNoS FDCtl::ioctl(unsigned long request, Args... args)
 {
-    return ::ioctl(this->active_fd, request, args...);
+    res_errNoS ret = {0, 0};
+
+    ret.res = ::ioctl(this->opts.fd, request, args...);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
 template <typename... Args>
-int FDCtl::fcntl(int cmd, Args... args)
+res_errNoS FDCtl::fcntl(int cmd, Args... args)
 {
-    return ::fcntl(this->active_fd, cmd, args...);
+    res_errNoS ret = {0, 0};
+
+    ret.res = ::fcntl(this->opts.fd, cmd, args...);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
-int FDCtl::getsockopt(
+res_errNoS FDCtl::getsockopt(
     int        level,
     int        optname,
     void      *optval,
     socklen_t *optlen
 )
 {
-    return ::getsocket(level, optname, optval, optlen);
+    res_errNoS ret = {0, 0};
+
+    ret.res = ::getsockopt(this->opts.fd, level, optname, optval, optlen);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
 }
 
-int FDCtl::setsockopt(
+res_errNoS FDCtl::setsockopt(
     int         level,
     int         optname,
     const void *optval,
     socklen_t   optlen
 )
 {
-    return ::setsocket(level, optname, optval, optlen);
-}
+    res_errNoS ret = {0, 0};
 
-ssize_t FDCtl::read(void *buffer, size_t size)
-{
-    return ::read(this->active_fd, buffer, size);
-}
-
-ssize_t FDCtl::write(const void *buffer, size_t size)
-{
-    return ::write(this->active_fd, buffer, size);
-}
-
-ssize_t FDCtl::send(const void *buffer, size_t size, int flags)
-{
-    return ::send(this->active_fd, buffer, size, flags);
-}
-
-ssize_t FDCtl::recv(void *buffer, size_t size, int flags)
-{
-    return ::recv(this->active_fd, buffer, size, flags);
-}
-
-std::tuple(std::shared_ptr<FDCtl>, int) Dup(bool close_on_destroy = false)
-{
-    int ret = this->dup();
-    if (ret < 0)
+    ret.res = ::setsockopt(this->opts.fd, level, optname, optval, optlen);
+    if (ret.not_ok())
     {
-        return std::tuple(nullptr, ret);
+        ret.errNo = errno;
+    }
+    return ret;
+}
+
+size_errNoS FDCtl::read(void *buffer, size_t size)
+{
+    size_errNoS ret = {0, 0};
+
+    ret.size = ::read(this->opts.fd, buffer, size);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
+}
+
+size_errNoS FDCtl::write(const void *buffer, size_t size)
+{
+    size_errNoS ret = {0, 0};
+
+    ret.size = ::write(this->opts.fd, buffer, size);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
+}
+
+size_errNoS FDCtl::send(const void *buffer, size_t size, int flags)
+{
+    size_errNoS ret = {0, 0};
+
+    ret.size = ::send(this->opts.fd, buffer, size, flags);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
+}
+
+size_errNoS FDCtl::recv(void *buffer, size_t size, int flags)
+{
+    size_errNoS ret = {0, 0};
+
+    ret.size = ::recv(this->opts.fd, buffer, size, flags);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
+}
+
+FDCtl_res_errNoS FDCtl::Dup(bool close_on_destroy)
+{
+    res_errNoS res = this->dup();
+    if (res.not_ok())
+    {
+        return FDCtl_res_errNoS{
+            res,
+            nullptr
+        };
     }
 
-    return std::tuple(this->create(ret, close_on_destroy), 0);
+    return {
+        res,
+        FDCtl::create(
+            {.fd               = res.res,
+             .is_closed        = false,
+             .close_on_destroy = true
+            }
+        )
+    };
 }
 
-std::tuple(std::shared_ptr<FDCtl>, int) Dup2(int newfd, bool close_on_destroy = false)
+FDCtl_res_errNoS FDCtl::Dup2(
+    int  newfd,
+    bool close_on_destroy
+)
 {
-    int ret = this->dup2(new);
-    if (ret < 0)
+    res_errNoS res = this->dup2(newfd);
+    if (res.not_ok())
     {
-        return std::tuple(nullptr, ret);
+        return FDCtl_res_errNoS{
+            res,
+            nullptr
+        };
     }
 
-    return std::tuple(this->create(ret, close_on_destroy), 0);
+    return {
+        res,
+        FDCtl::create(
+            {.fd               = res.res,
+             .is_closed        = false,
+             .close_on_destroy = true
+            }
+        )
+    };
 }
 
 /*
 // note: see header for info on why this is disabled
-std::shared_ptr<FDCtl> Dup2(std::shared_ptr<FDCtl> newfd)
+std::shared_ptr<FDCtl> FDCtl::Dup2(std::shared_ptr<FDCtl> newfd)
 {
 }
 */
 
-int FDCtl::getRecvTimeout(timeval &r)
+res_errNoS FDCtl::Socket(int domain, int type, int protocol)
 {
-    int err = 0;
+    // todo: additional checks
+    return this->socket(domain, type, protocol);
+}
+
+res_errNoS FDCtl::getRecvTimeout(timeval &r)
+{
+    // todo: questionable. testing required. is this correct acquision of
+    //       getsockopt results ?
+    socklen_t res_optlen = 0;
+
+    auto res = this->getsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, &res_optlen);
+    if (res.not_ok())
+    {
+        return res;
+    }
+
+    // todo: additional checks?
+
+    return res;
+}
+
+res_errNoS FDCtl::getSendTimeout(timeval &s)
+{
 
     // todo: questionable. testing required. is this correct acquision of
     //       getsockopt results ?
     socklen_t res_optlen = 0;
 
-    err = this->getsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, &res_optlen);
-    if (err != 0)
+    auto res = this->getsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, &res_optlen);
+    if (res.not_ok())
     {
-        return err;
+        return res;
     }
 
-    return 0;
+    // todo: additional checks?
+
+    return res;
 }
 
-int FDCtl::getSendTimeout(timeval &s)
+res_errNoS FDCtl::setRecvTimeout(timeval &r)
 {
-    int err = 0;
-
-    // todo: questionable. testing required. is this correct acquision of
-    //       getsockopt results ?
-    socklen_t res_optlen = 0;
-
-    err = this->getsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, &res_optlen);
-    if (err != 0)
+    auto res = this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(r));
+    if (res.not_ok())
     {
-        return err;
+        return res;
     }
 
-    return 0;
+    // todo: additional checks?
+
+    return res;
 }
 
-int FDCtl::setRecvTimeout(timeval &r)
+res_errNoS FDCtl::setSendTimeout(timeval &s)
 {
-    int err = 0;
-
-    err = this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, &r, sizeof(r));
-    if (err != 0)
+    auto res = this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(s));
+    if (res.not_ok())
     {
-        return err;
+        return res;
     }
 
-    return 0;
+    // todo: additional checks?
+
+    return res;
 }
 
-int FDCtl::setSendTimeout(timeval &s)
-{
-    int err = 0;
-
-    err = this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, &s, sizeof(s));
-    if (err != 0)
-    {
-        return err;
-    }
-
-    return 0;
-}
-
-int FDCtl::isNonBlocking(bool &ret)
+res_errNoS FDCtl::isNonBlocking(bool &ret)
 {
     // note: if better function for work with fcntl appears - use it
 
-    int res = this->fcntl(F_GETFL, 0);
-    if (res == -1)
+    res_errNoS res = this->fcntl(F_GETFL, 0);
+    if (res.not_ok())
     {
-        return -1;
+        return res;
     }
-    ret = (res & O_NONBLOCK) != 0;
-    return 0;
+
+    ret = (res.res & O_NONBLOCK) != 0;
+
+    return res;
 }
 
-int FDCtl::setNonBlocking(bool blocking)
+res_errNoS FDCtl::setNonBlocking(bool blocking)
 {
     // note: if better function for work with fcntl appears - use it
 
-    int res = this->fcntl(F_GETFL, 0);
-    if (res == -1)
+    res_errNoS res = this->fcntl(F_GETFL, 0);
+    if (res.not_ok())
     {
-        return -1;
+        return res;
     }
 
     if (blocking)
     {
-        res |= O_NONBLOCK;
+        res.res |= O_NONBLOCK;
     }
     else
     {
-        res &= !O_NONBLOCK;
+        res.res &= !O_NONBLOCK;
     }
 
     res = this->fcntl(F_SETFL, res);
-    if (res == -1)
+    if (res.not_ok())
     {
-        return -1;
+        return res;
     }
 
-    return 0;
+    return res;
 }
 
-int FDCtl::getType(int &type)
+res_errNoS FDCtl::getType(int &type)
 {
-    return this->getsockopt(SOL_SOCKET, SO_TYPE, &type, sizeof(int));
+    socklen_t optlen;
+
+    return this->getsockopt(
+        SOL_SOCKET,
+        SO_TYPE,
+        &type,
+        &optlen
+    );
 }
 
 } // namespace wayround_i2p::ccutils::posix_tools

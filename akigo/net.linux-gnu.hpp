@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240325_015305_233621
-#define WAYROUND_I2P_20240325_015305_233621
+#ifndef WAYROUND_I2P_20240408_004458_734600
+#define WAYROUND_I2P_20240408_004458_734600
 
 #include <wayround_i2p/ccutils/akigo/net.hpp>
 
@@ -8,45 +8,21 @@
 namespace wayround_i2p::akigo::net
 {
 
-// on GNU+Linux akigo uses posix interface to implement Go's-like net-like
-// functionality.
-//
-// here is Golang documentation quote with all it's
-// supported net names used net package
-//
-// Known networks are       "tcp", "tcp4"   (IPv4-only),
-//   "tcp6"    (IPv6-only), "udp", "udp4"   (IPv4-only),
-//   "udp6"  (IPv6 - only),  "ip",  "ip4" (IPv4 - only),
-//    "ip6"    (IPv6-only),
-//
-//   "unix", "unixgram" and "unixpacket".
-//
-//  In posix, ip and tcp/udp are separate things,
-//    which means there is no tcp4/6 udp4/6 etc in posix
-//    and number is reference to ipv4/ipv6 correspondingly.
-//
-//  So in posix, Golang's "tcp4" means `socket(AF_INET, SOCK_STREAM, 0)` 
-//    (man 2 socket)
-
-class StdSocketConn : wayround_i2p::akigo::net::Conn,
-                      wayround_i2p::akigo::net::PacketConn
+class PosixFDCtlNetConnAdaptor : wayround_i2p::akigo::net::Conn,
+                                 wayround_i2p::akigo::net::PacketConn
 {
   private:
     std::shared_ptr<FDCtl> fd;
 
   protected:
-    StdSocketConn(std::shared_ptr<FDCtl> fd);
+    PosixFDCtlNetConnAdaptor(std::shared_ptr<FDCtl> fd);
 
   public:
-    static std::shared_ptr<StdSocketConn> create();
-    static std::shared_ptr<StdSocketConn> create(
-        int  fd,
-        bool close_on_destroy = false
-    );
-    static std::shared_ptr<StdSocketConn> create(std::shared_ptr<FDCtl> fd);
+    static std::shared_ptr<PosixFDCtlNetConnAdaptor> create();
 
-    ~StdSocketConn();
+    ~PosixFDCtlNetConnAdaptor();
 
+    void                   setFDCtl(std::shared_ptr<FDCtl> fd);
     std::shared_ptr<FDCtl> getFDCtl();
 
     error_ptr Close();

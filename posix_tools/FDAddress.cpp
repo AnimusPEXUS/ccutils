@@ -1,3 +1,5 @@
+#include <bit>
+#include <cstring>
 
 #include <wayround_i2p/ccutils/posix_tools/FDAddress.hpp>
 
@@ -11,7 +13,7 @@ std::shared_ptr<FDAddress> FDAddress::create()
     return ret;
 }
 
-static std::shared_ptr<FDAddress> FDAddress::create(
+std::shared_ptr<FDAddress> FDAddress::create(
     std::vector<std::uint8_t> addr_buff
 )
 {
@@ -33,22 +35,24 @@ FDAddress::~FDAddress()
 {
 }
 
-int FDAddress::setAddressFromFDCtl(std::shared_ptr<FDCtl> fd)
+/* // circular dependency :(
+err_errNoS FDAddress::setAddressFromFDCtl(std::shared_ptr<FDCtl> fd)
 {
     if (!fd)
     {
-        return -4;
+        return {-4, 0};
     }
-    return fd->setFDAddr(own_ptr.lock());
+    return fd->setFDAddress(own_ptr.lock());
 }
+*/
 
 int FDAddress::setAddrBuff(std::vector<std::uint8_t> addr_buff)
 {
-    if (remove_fdctl_binding)
-    {
-        fd.reset();
-    }
+    // note: theoretically here can be check (parameter validation,
+    //       or something else), so this function can return non-0
+    //       on error
     this->addr_buff = addr_buff;
+    return 0;
 }
 
 std::tuple<sa_family_t, int> FDAddress::getFamily()
@@ -57,12 +61,12 @@ std::tuple<sa_family_t, int> FDAddress::getFamily()
 
     if (addr_buff.size() < sizeof(sa_family_t))
     {
-        return tuple(0, -1);
+        return std::tuple(0, -1);
     }
 
-    ret_sa_family_t = *(cast_reinterprete<sa_family_t *>(addr_buff.data));
+    ret_sa_family_t = *(reinterpret_cast<sa_family_t *>(addr_buff.data()));
 
-    return tuple(ret_sa_family_t, 0);
+    return std::tuple(ret_sa_family_t, 0);
 }
 
 std::tuple<std::string, int> FDAddress::getFamilyString()
@@ -86,23 +90,59 @@ std::tuple<std::string, int> FDAddress::getFamilyString()
     }
 }
 
-int setAddress(std::string text)
+int FDAddress::setInetAddress(
+    wayround_i2p::ccutils::unicode::UString text,
+    in_port_t                               port
+)
 {
     // todo: todo
     return -10;
 }
 
-int setAddress(unsigned char addr[4], in_port_t port)
+int FDAddress::setInetAddress(std::vector<std::uint8_t> addr, in_port_t port)
 {
-    return setAddress(cast_reinterprete<uint32_t>(addr), port)
+    auto s = addr.size();
+
+    switch (s)
+    {
+        default:
+            return -1;
+        case 4:
+            return setInetAddress(
+                reinterpret_cast<std::uint8_t *>(addr.data()),
+                port
+            );
+        case 16:
+            return setInet6Address(
+                reinterpret_cast<std::uint8_t *>(addr.data()),
+                port
+            );
+    }
 }
 
-int setAddress(std::uint8_t addr[4], in_port_t port)
+int FDAddress::setInetAddress(std::uint8_t addr[4], in_port_t port)
 {
-    return setAddress(cast_reinterprete<uint32_t>(addr), port)
+    std::uint32_t t;
+
+    if constexpr (std::endian::native == std::endian::big)
+    {
+        for (int i = 0; i != sizeof(std::uint32_t); i++)
+        {
+            ((std::uint8_t *)&t)[i] = addr[i];
+        }
+    }
+    else
+    {
+        for (int i = 0; i != sizeof(std::uint32_t); i++)
+        {
+            ((std::uint8_t *)&t)[sizeof(std::uint32_t) - 1 - i] = addr[i];
+        }
+    }
+
+    return setInetAddress(t, port);
 }
 
-int setAddress(uint32_t addr, in_port_t port)
+int FDAddress::setInetAddress(std::uint32_t addr, in_port_t port)
 {
     auto addr_st = std::shared_ptr<sockaddr_in>(new sockaddr_in());
 
@@ -112,51 +152,29 @@ int setAddress(uint32_t addr, in_port_t port)
     return setInetAddress(addr_st);
 }
 
-int setAddress(unsigned char addr[16])
+int FDAddress::setInet6Address(std::uint8_t addr[16], in_port_t port)
 {
     auto addr_st = std::shared_ptr<sockaddr_in6>(new sockaddr_in6());
 
-    addr_st->sin6_family       = AF_INET6;
-    addr_st->sin6_port         = port;
-    addr_st->sin6_addr.s6_addr = addr;
+    for (auto i = 0; i != 16; i++)
+    {
+        addr_st->sin6_addr.s6_addr[i] = addr[i];
+    }
+
+    addr_st->sin6_family = AF_INET6;
+    addr_st->sin6_port   = port;
+    // addr_st->sin6_addr.s6_addr = addr;
     return setInet6Address(addr_st);
 }
 
-int setAddress(std::uint8_t addr[16])
+int FDAddress::setUnixAddress(wayround_i2p::ccutils::unicode::UString text)
 {
-    return setAddress(cast_reinterprete<unsigned char[16]>(addr))
-}
+    std::string utf8_str;
+    size_t      utf8_str_size = 0;
 
-int setAddress(std::vector<std::uint8_t> addr)
-{
-    auto s = addr.size();
+    utf8_str = text.string_utf8();
 
-    switch (s)
-    {
-        default:
-            return -1;
-        case 4:
-            return setAddress(cast_reinterprete<uint32_t>(*(addr.data())));
-        case 16:
-            return setAddress(cast_reinterprete<unsigned char[16]>(*(addr.data())))
-    }
-}
-
-int setUnixAddress(std::string text)
-{
-    auto ustr = icu::UnicodeString(text);
-    return setUnixAddress(ustr);
-}
-
-int setUnixAddress(icu::UnicodeString text)
-{
-
-    auto std::string utf8_str;
-    size_t           utf8_str_size = 0;
-
-    utf8_str = text.toUTF8String(utf8_str);
-
-    utf8_str_size = std::strlen(utf8_str);
+    utf8_str_size = std::strlen(utf8_str.c_str());
 
     if (utf8_str_size >= 107)
     {
@@ -167,34 +185,37 @@ int setUnixAddress(icu::UnicodeString text)
 
     addr_st->sun_family = AF_UNIX;
 
-    std::strcpy(addr_st->sun_path, utf8_str);
+    std::strcpy(addr_st->sun_path, utf8_str.c_str());
 
     return setUnixAddress(addr_st);
 }
 
 int FDAddress::setUnixAddress(std::shared_ptr<sockaddr_un> addr)
 {
-    if (std::strlen(addr->get()) >= 107)
+    if (std::strlen(addr.get()->sun_path) >= 107)
     {
         return -3;
     }
     addr_buff.assign(sizeof(sockaddr_un), 0);
-    return ::memcpy(addr_buff.data(), addr.get(), sizeof(sockaddr_un));
+    ::memcpy(addr_buff.data(), addr.get(), sizeof(sockaddr_un));
+    return 0;
 }
 
 int FDAddress::setInetAddress(std::shared_ptr<sockaddr_in> addr)
 {
     addr_buff.assign(sizeof(sockaddr_in), 0);
-    return ::memcpy(addr_buff.data(), addr.get(), sizeof(sockaddr_in));
+    ::memcpy(addr_buff.data(), addr.get(), sizeof(sockaddr_in));
+    return 0;
 }
 
 int FDAddress::setInet6Address(std::shared_ptr<sockaddr_in6> addr)
 {
     addr_buff.assign(sizeof(sockaddr_in6), 0);
-    return ::memcpy(addr_buff.data(), addr.get(), sizeof(sockaddr_in6));
+    ::memcpy(addr_buff.data(), addr.get(), sizeof(sockaddr_in6));
+    return 0;
 }
 
-std::tuple<std::shared_ptr<sockaddr_un>, int> getUnixAddress()
+std::tuple<std::shared_ptr<sockaddr_un>, int> FDAddress::get_sockaddr_un()
 {
     auto [family, err] = getFamily();
     if (err != 0)
@@ -209,12 +230,12 @@ std::tuple<std::shared_ptr<sockaddr_un>, int> getUnixAddress()
 
     auto ret = std::shared_ptr<sockaddr_un>(new sockaddr_un());
 
-    ::memcpy(ret.data, add_buff.data, add_buff.data.size());
+    ::memcpy(ret.get(), addr_buff.data(), addr_buff.size());
 
     return std::tuple(ret, 0);
 }
 
-std::tuple<std::shared_ptr<sockaddr_in>, int> getInetAddress()
+std::tuple<std::shared_ptr<sockaddr_in>, int> FDAddress::get_sockaddr_in()
 {
     auto [family, err] = getFamily();
     if (err != 0)
@@ -229,12 +250,12 @@ std::tuple<std::shared_ptr<sockaddr_in>, int> getInetAddress()
 
     auto ret = std::shared_ptr<sockaddr_in>(new sockaddr_in());
 
-    ::memcpy(ret.data, add_buff.data, add_buff.data.size());
+    ::memcpy(ret.get(), addr_buff.data(), addr_buff.size());
 
     return std::tuple(ret, 0);
 }
 
-std::tuple<std::shared_ptr<sockaddr_in6>, int> getInet6Address()
+std::tuple<std::shared_ptr<sockaddr_in6>, int> FDAddress::get_sockaddr_in6()
 {
     auto [family, err] = getFamily();
     if (err != 0)
@@ -249,7 +270,7 @@ std::tuple<std::shared_ptr<sockaddr_in6>, int> getInet6Address()
 
     auto ret = std::shared_ptr<sockaddr_in6>(new sockaddr_in6());
 
-    ::memcpy(ret.data, add_buff.data, add_buff.data.size());
+    ::memcpy(ret.get(), addr_buff.data(), addr_buff.size());
 
     return std::tuple(ret, 0);
 }

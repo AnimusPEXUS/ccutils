@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240325_015305_232695
-#define WAYROUND_I2P_20240325_015305_232695
+#ifndef WAYROUND_I2P_20240408_004458_732699
+#define WAYROUND_I2P_20240408_004458_732699
 
 #include <cstdint>
 #include <memory>
@@ -7,9 +7,8 @@
 #include <tuple>
 #include <vector>
 
-#include <unicode/stringpiece.h>
-#include <unicode/unistr.h>
-#include <unicode/utypes.h>
+#include <wayround_i2p/ccutils/errors/e.hpp>
+#include <wayround_i2p/ccutils/unicode/u.hpp>
 
 // note: no 'ccutils' in namespace.
 //       why? - because I feel akigo as separate project but don't
@@ -17,50 +16,13 @@
 
 namespace wayround_i2p::akigo::builtin
 {
+
+using error     = wayround_i2p::ccutils::errors::error;
+using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
+
 using size_type   = std::vector<std::uint8_t>::size_type;
 using byte_vector = std::vector<std::uint8_t>;
-
-class ustring;
-
-class error
-{
-    virtual ustring Error() = 0;
-};
-
-using error_ptr = std::shared_ptr<error>;
-
-class uchar32
-{
-  public:
-    uchar32();
-    ~uchar32();
-
-  private:
-    UChar32 chr;
-};
-
-class ustring
-{
-  public:
-    ustring();
-
-    ustring(const char *val, std::string encoding = "utf-8");
-    ustring(std::string val, std::string encoding = "utf-8");
-
-    ~ustring();
-
-    std::tuple<byte_vector, error> encode(std::string encoding = "utf-8");
-
-    std::string string_utf8();
-
-    uchar32 operator[](std::int32_t offset);
-
-    ustring operator+(ustring &other);
-    ustring operator+(std::string &other);
-
-  private:
-    icu::UnicodeString data;
-};
+using ustring     = wayround_i2p::ccutils::unicode::UString;
 
 } // namespace wayround_i2p::akigo::builtin
 

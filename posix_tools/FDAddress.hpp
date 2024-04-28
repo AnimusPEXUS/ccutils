@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240323_153956_24413a
-#define WAYROUND_I2P_20240323_153956_24413a
+#ifndef WAYROUND_I2P_20240408_004458_731752
+#define WAYROUND_I2P_20240408_004458_731752
 
 #include <cstdint>
 #include <functional>
@@ -9,10 +9,17 @@
 
 #include <fcntl.h>
 #include <stddef.h>
-#include <sys/socket.h>
 #include <time.h>
 
-#include <wayround_i2p/ccutils/posix_tools/FDCtl.hpp>
+#include <sys/socket.h>
+
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <sys/un.h>
+
+#include <wayround_i2p/ccutils/unicode/u.hpp>
+
+// #include <wayround_i2p/ccutils/posix_tools/FDCtl.hpp>
 
 namespace wayround_i2p::ccutils::posix_tools
 {
@@ -22,7 +29,7 @@ class FDAddress
   private:
     std::vector<std::uint8_t> addr_buff;
 
-    std::waek_ptr<FDAddress> own_ptr;
+    std::weak_ptr<FDAddress> own_ptr;
 
   public:
     static std::shared_ptr<FDAddress> create();
@@ -34,8 +41,10 @@ class FDAddress
 
     ~FDAddress();
 
+    /*
     // set from FDCtl
-    int setAddressFromFDCtl(std::shared_ptr<FDCtl> fd);
+    err_errNoS setAddressFromFDCtl(std::shared_ptr<FDCtl> fd);
+    */
 
     // set to custom data
     int setAddrBuff(
@@ -45,33 +54,31 @@ class FDAddress
     std::tuple<sa_family_t, int> getFamily();
     std::tuple<std::string, int> getFamilyString();
 
-    int setAddress(std::string text);
+    int setInetAddress(wayround_i2p::ccutils::unicode::UString text, in_port_t port);
 
-    int setAddress(unsigned char addr[4], in_port_t port);
-    int setAddress(std::uint8_t addr[4], in_port_t port);
-    int setAddress(std::uint32_t addr, in_port_t port);
+    int setInetAddress(std::vector<std::uint8_t> addr, in_port_t port);
+    int setInetAddress(std::uint8_t addr[4], in_port_t port);
+    int setInetAddress(std::uint32_t addr, in_port_t port);
+    int setInet6Address(std::uint8_t addr[16], in_port_t port);
 
-    int setAddress(unsigned char addr[16], in_port_t port);
-    int setAddress(std::uint8_t addr[16], in_port_t port);
-
-    int setAddress(std::vector<unsigned char> addr);
-    int setAddress(std::vector<std::uint8_t> addr);
-
-    int setUnixAddress(std::string text);
-    int setUnixAddress(icu::UnicodeString text);
+    int setUnixAddress(wayround_i2p::ccutils::unicode::UString text);
 
     int setUnixAddress(std::shared_ptr<sockaddr_un> addr);
     int setInetAddress(std::shared_ptr<sockaddr_in> addr);
     int setInet6Address(std::shared_ptr<sockaddr_in6> addr);
 
-    std::tuple<std::shared_ptr<sockaddr_un>, int>  getUnixAddress();
-    std::tuple<std::shared_ptr<sockaddr_in>, int>  getInetAddress();
-    std::tuple<std::shared_ptr<sockaddr_in6>, int> getInet6Address();
+    std::tuple<wayround_i2p::ccutils::unicode::UString, int> getUnixAddress();
+    std::tuple<std::uint8_t[4], in_port_t, int>              getInetAddress();
+    std::tuple<std::uint8_t[16], in_port_t, int>             getInet6Address();
+
+    std::tuple<std::shared_ptr<sockaddr_un>, int>  get_sockaddr_un();
+    std::tuple<std::shared_ptr<sockaddr_in>, int>  get_sockaddr_in();
+    std::tuple<std::shared_ptr<sockaddr_in6>, int> get_sockaddr_in6();
 
   protected:
     FDAddress();
     FDAddress(std::vector<std::uint8_t> addr_buff);
-}
+};
 
 } // namespace wayround_i2p::ccutils::posix_tools
 

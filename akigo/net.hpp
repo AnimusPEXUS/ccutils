@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240325_015305_233002
-#define WAYROUND_I2P_20240325_015305_233002
+#ifndef WAYROUND_I2P_20240408_004458_733381
+#define WAYROUND_I2P_20240408_004458_733381
 
 #include <memory>
 #include <string>
@@ -9,6 +9,26 @@
 #include <wayround_i2p/ccutils/akigo/context.hpp>
 #include <wayround_i2p/ccutils/akigo/os.hpp>
 #include <wayround_i2p/ccutils/akigo/time.hpp>
+
+// on GNU+Linux akigo uses posix interface to implement Go's-like net-like
+// functionality.
+//
+// here is Golang documentation quote with all it's
+// supported net names used net package
+//
+// Known networks are       "tcp", "tcp4"   (IPv4-only),
+//   "tcp6"    (IPv6-only), "udp", "udp4"   (IPv4-only),
+//   "udp6"  (IPv6 - only),  "ip",  "ip4" (IPv4 - only),
+//    "ip6"    (IPv6-only),
+//
+//   "unix", "unixgram" and "unixpacket".
+//
+//  In posix, ip and tcp/udp are separate things,
+//    which means there is no tcp4/6 udp4/6 etc in posix
+//    and number is reference to ipv4/ipv6 correspondingly.
+//
+//  So in posix, Golang's "tcp4" means `socket(AF_INET, SOCK_STREAM, 0)`
+//    (man 2 socket)
 
 namespace wayround_i2p::akigo::net
 {

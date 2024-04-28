@@ -146,12 +146,45 @@ function(create_ccutils_component)
 endfunction()
 
 
+create_ccutils_component(
+  TARGETNAME ccutils_errors
+  SUBDIR errors
+
+  SOURCES
+  e
+
+  HEADERS
+  e
+)
+
+create_ccutils_component(
+  TARGETNAME ccutils_unicode
+  SUBDIR unicode
+
+  SOURCES
+  u
+
+  HEADERS
+  u
+
+  LIBS_PUB
+  ICU::uc
+  ICU::i18n
+  ccutils_errors
+
+  INC_DIRS_PUB
+  ICU::uc
+  ICU::i18n
+  ${ccutils_errors_INCLUDE_DIRS}
+)
 
 create_ccutils_component(
   TARGETNAME ccutils_worker01
   SUBDIR worker01
+
   SOURCES
   Worker01
+
   HEADERS
   Worker01
 )
@@ -159,12 +192,20 @@ create_ccutils_component(
 create_ccutils_component(
   TARGETNAME ccutils_posix_tools
   SUBDIR posix_tools
+
   SOURCES
   FDCtl
   FDAddress
+
   HEADERS
   FDCtl
   FDAddress
+
+  LIBS_PUB
+  ccutils_unicode
+
+  INC_DIRS_PUB
+  ${ccutils_unicode_INCLUDE_DIRS}
 )
 
 create_ccutils_component(
@@ -187,10 +228,12 @@ create_ccutils_component(
   context
 
   LIBS_PUB
-  ICU::uc
-  ICU::i18n
+  ccutils_posix_tools
+  ccutils_unicode
 
   INC_DIRS_PUB
   ICU::uc
   ICU::i18n
+  ${ccutils_posix_tools_INCLUDE_DIRS}
+  ${ccutils_unicode_INCLUDE_DIRS}
 )

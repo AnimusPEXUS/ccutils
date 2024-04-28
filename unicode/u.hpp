@@ -1,0 +1,60 @@
+#ifndef WAYROUND_I2P_20240408_004458_732262
+#define WAYROUND_I2P_20240408_004458_732262
+
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
+
+#include <unicode/stringpiece.h>
+#include <unicode/unistr.h>
+#include <unicode/utypes.h>
+
+// #include <wayround_i2p/ccutils/errors/e.hpp>
+
+namespace wayround_i2p::ccutils::unicode
+{
+using byte_vector = std::vector<std::uint8_t>;
+
+class error;
+using error_ptr = std::shared_ptr<error>;
+
+class UChar
+{
+  public:
+    UChar();
+    ~UChar();
+
+  private:
+    UChar32 chr;
+};
+
+class UString
+{
+  public:
+    UString();
+
+    // todo: make wise copy constructor
+
+    UString(const char *val, std::string encoding = "utf-8");
+    UString(std::string val, std::string encoding = "utf-8");
+
+    ~UString();
+
+    std::tuple<byte_vector, error_ptr> encode(std::string encoding = "utf-8");
+
+    std::string string_utf8();
+
+    UChar operator[](std::int32_t offset);
+
+    UString operator+(UString &other);
+    UString operator+(std::string &other);
+
+  private:
+    icu::UnicodeString data;
+};
+
+} // namespace wayround_i2p::ccutils::unicode
+
+#endif
