@@ -81,25 +81,37 @@ struct FDAddress_err_errNoS : err_errNoS
 
 struct FDCtlInitOptions
 {
-    int  fd               = 0;
-    bool is_closed        = true;
-    bool close_on_destroy = false;
+    bool is_open                                       = false;
+    bool close_on_destroy                              = false;
+    bool guard_lower_functions_from_running_if_closed  = false;
+    bool guard_higher_functions_from_running_if_closed = false;
 };
+
+FDCtlInitOptions dup_suggested_options()
+{
+    return {
+        .is_open                                       = true,
+        .close_on_destroy                              = true,
+        .guard_lower_functions_from_running_if_closed  = true,
+        .guard_higher_functions_from_running_if_closed = true
+    };
+}
 
 class FDCtl
 {
   private:
-    FDCtlInitOptions opts;
-
     std::weak_ptr<FDCtl> own_ptr;
 
   protected:
-    FDCtl(FDCtlInitOptions opts);
+    FDCtl(int fd, FDCtlInitOptions opts);
 
   public:
-    static std::shared_ptr<FDCtl> create(FDCtlInitOptions opts);
+    static std::shared_ptr<FDCtl> create(int fd, FDCtlInitOptions opts);
 
     ~FDCtl();
+
+    int              effective_fd = 0;
+    FDCtlInitOptions opts;
 
     // does direct call without any checks and/or precautions.
     // in any case this puts FDCtl into closed state.
@@ -109,15 +121,18 @@ class FDCtl
     // if already closed - this is not error.
     err_errNoS Close();
 
-    int getFD();
+    void setFD(int newfd, FDCtlInitOptions opts);
+    int  getFD();
 
-    bool GetCloseOnDestroy();
-    void SetCloseOnDestroy(bool);
+    bool isOpen();
+    void setOpen(bool value);
 
     // gets address data from fd in this FDCtl and puts it into addr
     err_errNoS setFDAddress(std::shared_ptr<FDAddress> addr);
 
-    // v v v function direct forwardings v v v
+    // -----------------------------------------------------
+    // v v v function direct forwardings v v v (lower functions)
+    // -----------------------------------------------------
 
     res_errNoS dup();
     res_errNoS dup2(int newfd);
@@ -165,13 +180,17 @@ class FDCtl
     size_errNoS send(const void *buffer, size_t size, int flags);
     size_errNoS recv(void *buffer, size_t size, int flags);
 
+    // -----------------------------------------------------
     // ^ ^ ^ function direct forwardings ^ ^ ^
+    // -----------------------------------------------------
+    // v v v function shortcuts and usages v v v (higher functions)
+    // -----------------------------------------------------
 
-    // v v v function shortcuts and usages v v v
+    // suggesting use dup_suggested_options() to get options
+    FDCtl_res_errNoS Dup(FDCtlInitOptions opts);
 
-    FDCtl_res_errNoS Dup(bool close_on_destroy = false);
-
-    FDCtl_res_errNoS Dup2(int newfd, bool close_on_destroy = false);
+    // suggesting use dup_suggested_options() to get options
+    FDCtl_res_errNoS Dup2(int newfd, FDCtlInitOptions opts);
 
     // note: making this function will introduce problem: this will
     //   require maintaining db and checking if result of dup2 is same as newfd
@@ -179,7 +198,13 @@ class FDCtl
 
     // closes current fd (if it [is set] and [not closed]) and
     // calls socket() in this object's class with same parameters
-    res_errNoS Socket(int domain, int type, int protocol);
+    res_errNoS Socket(
+        int              domain,
+        int              type,
+        int              protocol,
+        FDCtlInitOptions opts,
+        bool             dont_close_if_open = false
+    );
 
     err_errNoS Bind(std::shared_ptr<FDAddress> addr);
 
@@ -210,7 +235,9 @@ class FDCtl
     // 0 on success
     res_errNoS getType(int &type);
 
+    // -----------------------------------------------------
     // ^ ^ ^ function shortcuts and usages ^ ^ ^
+    // -----------------------------------------------------
 
     res_errNoS sendFixedData(
         byte_vector              &buff,

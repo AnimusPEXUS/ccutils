@@ -44,8 +44,7 @@ class BasicStringError : public error
 
 error_ptr New(UString text)
 {
-    auto ret = error_ptr(dynamic_cast<error *>(new BasicStringError(text)));
-    return ret;
+    return error_ptr(dynamic_cast<error *>(new BasicStringError(text)));
 }
 
 } // namespace wayround_i2p::ccutils::errors

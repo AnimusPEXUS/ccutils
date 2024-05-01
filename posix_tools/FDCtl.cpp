@@ -4,16 +4,17 @@
 namespace wayround_i2p::ccutils::posix_tools
 {
 
-std::shared_ptr<FDCtl> FDCtl::create(FDCtlInitOptions opts)
+std::shared_ptr<FDCtl> FDCtl::create(int fd, FDCtlInitOptions opts)
 {
-    auto ret     = std::shared_ptr<FDCtl>(new FDCtl(opts));
+    auto ret     = std::shared_ptr<FDCtl>(new FDCtl(fd, opts));
     ret->own_ptr = ret;
     return ret;
 }
 
-FDCtl::FDCtl(FDCtlInitOptions opts)
+FDCtl::FDCtl(int fd, FDCtlInitOptions opts)
 {
-    this->opts = opts;
+    this->opts         = opts;
+    this->effective_fd = fd;
 }
 
 FDCtl::~FDCtl()
@@ -26,9 +27,9 @@ FDCtl::~FDCtl()
 
 err_errNoS FDCtl::close()
 {
-    opts.is_closed = true;
+    opts.is_open = false;
 
-    int ret = ::close(opts.fd);
+    int ret = ::close(effective_fd);
     if (ret != 0)
     {
         return {ret, errno};
@@ -39,7 +40,7 @@ err_errNoS FDCtl::close()
 
 err_errNoS FDCtl::Close()
 {
-    if (!opts.is_closed)
+    if (opts.is_open)
     {
         return this->close();
     }
@@ -49,19 +50,26 @@ err_errNoS FDCtl::Close()
     }
 }
 
+void FDCtl::setFD(int newfd, FDCtlInitOptions opts)
+{
+    effective_fd = newfd;
+    this->opts   = opts;
+    return;
+}
+
 int FDCtl::getFD()
 {
-    return opts.fd;
+    return effective_fd;
 }
 
-bool FDCtl::GetCloseOnDestroy()
+void FDCtl::setOpen(bool value)
 {
-    return opts.close_on_destroy;
+    opts.is_open = value;
 }
 
-void FDCtl::SetCloseOnDestroy(bool value)
+bool FDCtl::isOpen()
 {
-    opts.close_on_destroy = value;
+    return opts.is_open;
 }
 
 err_errNoS FDCtl::setFDAddress(std::shared_ptr<FDAddress> addr)
@@ -75,7 +83,7 @@ err_errNoS FDCtl::setFDAddress(std::shared_ptr<FDAddress> addr)
     tmp_addr_buff.clear();
     socklen_t getsockname_size = 0;
 
-    err_errNoS err = {0};
+    err_errNoS err;
 
     err = this->getsockname(
         reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
@@ -110,7 +118,7 @@ res_errNoS FDCtl::dup()
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::dup(this->opts.fd);
+    ret.res = ::dup(this->effective_fd);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -122,7 +130,7 @@ res_errNoS FDCtl::dup2(int newfd)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::dup2(this->opts.fd, newfd);
+    ret.res = ::dup2(this->effective_fd, newfd);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -146,7 +154,7 @@ err_errNoS FDCtl::bind(struct sockaddr *addr, socklen_t length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::bind(this->opts.fd, addr, length);
+    ret.err = ::bind(this->effective_fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -158,7 +166,7 @@ err_errNoS FDCtl::getsockname(struct sockaddr *addr, socklen_t *length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::getsockname(this->opts.fd, addr, length);
+    ret.err = ::getsockname(this->effective_fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -170,7 +178,7 @@ err_errNoS FDCtl::connect(struct sockaddr *addr, socklen_t length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::connect(this->opts.fd, addr, length);
+    ret.err = ::connect(this->effective_fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -182,7 +190,7 @@ err_errNoS FDCtl::listen(int n)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::listen(this->opts.fd, n);
+    ret.err = ::listen(this->effective_fd, n);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -194,7 +202,7 @@ err_errNoS FDCtl::accept(struct sockaddr *addr, socklen_t *length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::accept(this->opts.fd, addr, length);
+    ret.err = ::accept(this->effective_fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -207,7 +215,7 @@ res_errNoS FDCtl::ioctl(unsigned long request, Args... args)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::ioctl(this->opts.fd, request, args...);
+    ret.res = ::ioctl(this->effective_fd, request, args...);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -220,7 +228,7 @@ res_errNoS FDCtl::fcntl(int cmd, Args... args)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::fcntl(this->opts.fd, cmd, args...);
+    ret.res = ::fcntl(this->effective_fd, cmd, args...);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -237,7 +245,7 @@ res_errNoS FDCtl::getsockopt(
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::getsockopt(this->opts.fd, level, optname, optval, optlen);
+    ret.res = ::getsockopt(this->effective_fd, level, optname, optval, optlen);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -254,7 +262,7 @@ res_errNoS FDCtl::setsockopt(
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::setsockopt(this->opts.fd, level, optname, optval, optlen);
+    ret.res = ::setsockopt(this->effective_fd, level, optname, optval, optlen);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -266,7 +274,7 @@ size_errNoS FDCtl::read(void *buffer, size_t size)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::read(this->opts.fd, buffer, size);
+    ret.size = ::read(this->effective_fd, buffer, size);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -278,7 +286,7 @@ size_errNoS FDCtl::write(const void *buffer, size_t size)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::write(this->opts.fd, buffer, size);
+    ret.size = ::write(this->effective_fd, buffer, size);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -290,7 +298,7 @@ size_errNoS FDCtl::send(const void *buffer, size_t size, int flags)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::send(this->opts.fd, buffer, size, flags);
+    ret.size = ::send(this->effective_fd, buffer, size, flags);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -302,7 +310,7 @@ size_errNoS FDCtl::recv(void *buffer, size_t size, int flags)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::recv(this->opts.fd, buffer, size, flags);
+    ret.size = ::recv(this->effective_fd, buffer, size, flags);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -310,7 +318,7 @@ size_errNoS FDCtl::recv(void *buffer, size_t size, int flags)
     return ret;
 }
 
-FDCtl_res_errNoS FDCtl::Dup(bool close_on_destroy)
+FDCtl_res_errNoS FDCtl::Dup(FDCtlInitOptions opts)
 {
     res_errNoS res = this->dup();
     if (res.not_ok())
@@ -324,17 +332,15 @@ FDCtl_res_errNoS FDCtl::Dup(bool close_on_destroy)
     return {
         res,
         FDCtl::create(
-            {.fd               = res.res,
-             .is_closed        = false,
-             .close_on_destroy = true
-            }
+            res.res,
+            opts
         )
     };
 }
 
 FDCtl_res_errNoS FDCtl::Dup2(
-    int  newfd,
-    bool close_on_destroy
+    int              newfd,
+    FDCtlInitOptions opts
 )
 {
     res_errNoS res = this->dup2(newfd);
@@ -349,10 +355,8 @@ FDCtl_res_errNoS FDCtl::Dup2(
     return {
         res,
         FDCtl::create(
-            {.fd               = res.res,
-             .is_closed        = false,
-             .close_on_destroy = true
-            }
+            res.res,
+            opts
         )
     };
 }
@@ -364,10 +368,30 @@ std::shared_ptr<FDCtl> FDCtl::Dup2(std::shared_ptr<FDCtl> newfd)
 }
 */
 
-res_errNoS FDCtl::Socket(int domain, int type, int protocol)
+res_errNoS FDCtl::Socket(
+    int              domain,
+    int              type,
+    int              protocol,
+    FDCtlInitOptions opts,
+    bool             dont_close_if_open
+)
 {
     // todo: additional checks
-    return this->socket(domain, type, protocol);
+    if (opts.close_on_destroy && opts.is_open && !dont_close_if_open)
+    {
+        Close();
+        // todo: report errors?
+    }
+
+    auto res = this->socket(domain, type, protocol);
+    if (res.not_ok())
+    {
+        return res;
+    }
+
+    setFD(res.res, opts);
+
+    return res;
 }
 
 res_errNoS FDCtl::getRecvTimeout(timeval &r)
