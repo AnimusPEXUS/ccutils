@@ -1,25 +1,34 @@
 #ifndef WAYROUND_I2P_20240408_004458_734600
 #define WAYROUND_I2P_20240408_004458_734600
 
+#include <wayround_i2p/ccutils/akigo/errors.hpp>
 #include <wayround_i2p/ccutils/akigo/net.hpp>
 
-#include <wayround_i2p/posix-tools/FDCtl.hpp>
+#include <wayround_i2p/ccutils/posix_tools/FDCtl.hpp>
 
 namespace wayround_i2p::akigo::net
 {
 
+using FDCtl = wayround_i2p::ccutils::posix_tools::FDCtl;
+
+// todo: make better CMakeLists.txt and move PosixFDCtlNetConnAdaptor
+//       to separate source file
+
 class PosixFDCtlNetConnAdaptor : wayround_i2p::akigo::net::Conn,
                                  wayround_i2p::akigo::net::PacketConn
 {
-  private:
-    std::shared_ptr<FDCtl> fd;
-
-  protected:
-    PosixFDCtlNetConnAdaptor(std::shared_ptr<FDCtl> fd);
-
   public:
     static std::shared_ptr<PosixFDCtlNetConnAdaptor> create();
 
+  private:
+    std::shared_ptr<FDCtl> fd;
+
+    std::weak_ptr<PosixFDCtlNetConnAdaptor> own_ptr;
+
+  protected:
+    PosixFDCtlNetConnAdaptor();
+
+  public:
     ~PosixFDCtlNetConnAdaptor();
 
     void                   setFDCtl(std::shared_ptr<FDCtl> fd);

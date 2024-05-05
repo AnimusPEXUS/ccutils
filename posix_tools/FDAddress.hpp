@@ -39,6 +39,12 @@ class FDAddress
         std::vector<std::uint8_t> addr_buff
     );
 
+    // create from memory
+    static std::shared_ptr<FDAddress> create(
+        struct sockaddr *addr,
+        socklen_t        length
+    );
+
     ~FDAddress();
 
     /*
@@ -47,9 +53,10 @@ class FDAddress
     */
 
     // set to custom data
-    int setAddrBuff(
-        std::vector<std::uint8_t> addr_buff
-    );
+    int setAddrBuff(std::vector<std::uint8_t> addr_buff);
+
+    // get raw sockaddr data
+    std::vector<std::uint8_t> getAddrBuff();
 
     std::tuple<sa_family_t, int> getFamily();
     std::tuple<std::string, int> getFamilyString();

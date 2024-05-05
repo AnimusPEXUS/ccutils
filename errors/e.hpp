@@ -24,28 +24,17 @@ using error_ptr = std::shared_ptr<error>;
 class BasicStringError : public error
 {
   public:
-    BasicStringError(UString text) :
-        text(text)
-    {
-    }
+    BasicStringError(UString text);
 
-    ~BasicStringError()
-    {
-    }
+    ~BasicStringError();
 
-    UString Error()
-    {
-        return text;
-    }
+    UString Error();
 
   private:
     UString text;
 };
 
-error_ptr New(UString text)
-{
-    return error_ptr(dynamic_cast<error *>(new BasicStringError(text)));
-}
+error_ptr New(UString text);
 
 } // namespace wayround_i2p::ccutils::errors
 

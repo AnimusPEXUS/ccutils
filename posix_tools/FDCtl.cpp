@@ -4,6 +4,23 @@
 namespace wayround_i2p::ccutils::posix_tools
 {
 
+consteval FDCtlInitOptions fdctl_normal_closed_options()
+{
+    return {
+        .is_open                                       = false,
+        .close_on_destroy                              = true,
+        .guard_lower_functions_from_running_if_closed  = true,
+        .guard_higher_functions_from_running_if_closed = true
+    };
+}
+
+consteval FDCtlInitOptions fdctl_normal_open_options()
+{
+    auto ret    = fdctl_normal_closed_options();
+    ret.is_open = true;
+    return ret;
+}
+
 std::shared_ptr<FDCtl> FDCtl::create(int fd, FDCtlInitOptions opts)
 {
     auto ret     = std::shared_ptr<FDCtl>(new FDCtl(fd, opts));
@@ -72,48 +89,6 @@ bool FDCtl::isOpen()
     return opts.is_open;
 }
 
-err_errNoS FDCtl::setFDAddress(std::shared_ptr<FDAddress> addr)
-{
-    if (!addr)
-    {
-        return {-3, 0};
-    }
-
-    std::vector<std::uint8_t> tmp_addr_buff;
-    tmp_addr_buff.clear();
-    socklen_t getsockname_size = 0;
-
-    err_errNoS err;
-
-    err = this->getsockname(
-        reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
-        &getsockname_size
-    );
-    if (err.not_ok())
-    {
-        return err;
-    }
-
-    tmp_addr_buff.assign(getsockname_size, 0);
-
-    err = this->getsockname(
-        reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
-        &getsockname_size
-    );
-    if (err.not_ok())
-    {
-        return err;
-    }
-
-    int err_int = addr->setAddrBuff(tmp_addr_buff);
-    if (err_int != 0)
-    {
-        return {err_int, 0};
-    }
-
-    return {0, 0};
-}
-
 res_errNoS FDCtl::dup()
 {
     res_errNoS ret = {0, 0};
@@ -174,11 +149,23 @@ err_errNoS FDCtl::getsockname(struct sockaddr *addr, socklen_t *length)
     return ret;
 }
 
-err_errNoS FDCtl::connect(struct sockaddr *addr, socklen_t length)
+err_errNoS FDCtl::getpeername(struct sockaddr *addr, socklen_t *length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::connect(this->effective_fd, addr, length);
+    ret.err = ::getpeername(this->effective_fd, addr, length);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
+}
+
+res_errNoS FDCtl::connect(struct sockaddr *addr, socklen_t length)
+{
+    res_errNoS ret = {0, 0};
+
+    ret.res = ::connect(this->effective_fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -198,11 +185,11 @@ err_errNoS FDCtl::listen(int n)
     return ret;
 }
 
-err_errNoS FDCtl::accept(struct sockaddr *addr, socklen_t *length)
+res_errNoS FDCtl::accept(struct sockaddr *addr, socklen_t *length)
 {
-    err_errNoS ret = {0, 0};
+    res_errNoS ret = {0, 0};
 
-    ret.err = ::accept(this->effective_fd, addr, length);
+    ret.res = ::accept(this->effective_fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -369,6 +356,21 @@ std::shared_ptr<FDCtl> FDCtl::Dup2(std::shared_ptr<FDCtl> newfd)
 */
 
 res_errNoS FDCtl::Socket(
+    int domain,
+    int type,
+    int protocol
+)
+{
+    return this->Socket(
+        domain,
+        type,
+        protocol,
+        fdctl_normal_closed_options(),
+        false
+    );
+}
+
+res_errNoS FDCtl::Socket(
     int              domain,
     int              type,
     int              protocol,
@@ -392,6 +394,133 @@ res_errNoS FDCtl::Socket(
     setFD(res.res, opts);
 
     return res;
+}
+
+FDAddress_err_errNoS FDCtl::Get_X_Name(bool sock_or_peer)
+{
+    std::vector<std::uint8_t> tmp_addr_buff;
+    tmp_addr_buff.clear();
+    socklen_t getsockname_size = 0;
+
+    err_errNoS err;
+
+    if (!sock_or_peer)
+    {
+        err = this->getsockname(
+            reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
+            &getsockname_size
+        );
+    }
+    else
+    {
+        err = this->getpeername(
+            reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
+            &getsockname_size
+        );
+    }
+
+    if (err.not_ok())
+    {
+        return FDAddress_err_errNoS{err.err, err.errNo, nullptr};
+    }
+
+    tmp_addr_buff.assign(getsockname_size, 0);
+
+    err = this->getsockname(
+        reinterpret_cast<sockaddr *>(tmp_addr_buff.data()),
+        &getsockname_size
+    );
+    if (err.not_ok())
+    {
+        return FDAddress_err_errNoS{err.err, err.errNo, nullptr};
+    }
+
+    auto fdaddr = FDAddress::create(tmp_addr_buff);
+
+    return FDAddress_err_errNoS{0, 0, fdaddr};
+}
+
+FDAddress_err_errNoS FDCtl::GetSockName()
+{
+    return Get_X_Name(false);
+}
+
+FDAddress_err_errNoS FDCtl::GetPeerName()
+{
+    return Get_X_Name(true);
+}
+
+FDCtl_res_errNoS FDCtl::Connect(
+    std::shared_ptr<FDAddress> addr
+)
+{
+    return this->Connect(addr, fdctl_normal_open_options());
+}
+
+FDCtl_res_errNoS FDCtl::Connect(
+    std::shared_ptr<FDAddress> addr,
+    FDCtlInitOptions           opts
+)
+{
+    auto addr_buff = addr->getAddrBuff();
+
+    auto res = this->connect(
+        reinterpret_cast<sockaddr *>(addr_buff.data()),
+        addr_buff.size()
+    );
+    if (res.not_ok())
+    {
+        FDCtl_res_errNoS ret;
+        ret.fdctl = nullptr;
+        ret.res   = res.res;
+        ret.errNo = res.errNo;
+        return ret;
+    }
+
+    FDCtl_res_errNoS ret;
+
+    ret.fdctl = FDCtl::create(res.res, opts);
+
+    ret.res   = res.res;
+    ret.errNo = 0;
+
+    return ret;
+}
+
+FDCtl_FDAddress_res_errNoS FDCtl::Accept()
+{
+    return this->Accept(fdctl_normal_open_options());
+}
+
+FDCtl_FDAddress_res_errNoS FDCtl::Accept(FDCtlInitOptions opts)
+{
+    struct sockaddr addr;
+    socklen_t       length;
+
+    auto res = this->accept(&addr, &length);
+    if (res.not_ok())
+    {
+        FDCtl_FDAddress_res_errNoS ret;
+        ret.fdctl = nullptr;
+        ret.addr  = nullptr;
+        ret.res   = res.res;
+        ret.errNo = res.errNo;
+        return ret;
+    }
+
+    auto fd_addr = FDAddress::create(&addr, length);
+
+    // todo: check fd_addr is ok and sane
+
+    FDCtl_FDAddress_res_errNoS ret;
+
+    ret.fdctl = FDCtl::create(res.res, opts);
+    ret.addr  = fd_addr;
+
+    ret.res   = res.res;
+    ret.errNo = 0;
+
+    return ret;
 }
 
 res_errNoS FDCtl::getRecvTimeout(timeval &r)

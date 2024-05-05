@@ -71,31 +71,32 @@ struct size_errNoS : sizeS, errNoS
 
 struct FDCtl_res_errNoS : res_errNoS
 {
-    std::shared_ptr<FDCtl> fd;
+    std::shared_ptr<FDCtl> fdctl;
 };
 
 struct FDAddress_err_errNoS : err_errNoS
 {
-    std::shared_ptr<FDCtl> fd;
+    std::shared_ptr<FDAddress> addr;
+};
+
+struct FDCtl_FDAddress_res_errNoS : res_errNoS
+{
+    std::shared_ptr<FDCtl>     fdctl;
+    std::shared_ptr<FDAddress> addr;
 };
 
 struct FDCtlInitOptions
 {
-    bool is_open                                       = false;
-    bool close_on_destroy                              = false;
+    bool is_open          = false;
+    bool close_on_destroy = false;
+
+    // todo: make funcs use those
     bool guard_lower_functions_from_running_if_closed  = false;
     bool guard_higher_functions_from_running_if_closed = false;
 };
 
-FDCtlInitOptions dup_suggested_options()
-{
-    return {
-        .is_open                                       = true,
-        .close_on_destroy                              = true,
-        .guard_lower_functions_from_running_if_closed  = true,
-        .guard_higher_functions_from_running_if_closed = true
-    };
-}
+consteval FDCtlInitOptions fdctl_normal_closed_options();
+consteval FDCtlInitOptions fdctl_normal_open_options();
 
 class FDCtl
 {
@@ -127,9 +128,6 @@ class FDCtl
     bool isOpen();
     void setOpen(bool value);
 
-    // gets address data from fd in this FDCtl and puts it into addr
-    err_errNoS setFDAddress(std::shared_ptr<FDAddress> addr);
-
     // -----------------------------------------------------
     // v v v function direct forwardings v v v (lower functions)
     // -----------------------------------------------------
@@ -146,9 +144,10 @@ class FDCtl
 
     err_errNoS bind(struct sockaddr *addr, socklen_t length);
     err_errNoS getsockname(struct sockaddr *addr, socklen_t *length);
-    err_errNoS connect(struct sockaddr *addr, socklen_t length);
+    err_errNoS getpeername(struct sockaddr *addr, socklen_t *length);
+    res_errNoS connect(struct sockaddr *addr, socklen_t length);
     err_errNoS listen(int n);
-    err_errNoS accept(struct sockaddr *addr, socklen_t *length_ptr);
+    res_errNoS accept(struct sockaddr *addr, socklen_t *length_ptr);
 
     // man 2 ioctl
     template <typename... Args>
@@ -199,6 +198,12 @@ class FDCtl
     // closes current fd (if it [is set] and [not closed]) and
     // calls socket() in this object's class with same parameters
     res_errNoS Socket(
+        int domain,
+        int type,
+        int protocol
+    );
+
+    res_errNoS Socket(
         int              domain,
         int              type,
         int              protocol,
@@ -208,11 +213,23 @@ class FDCtl
 
     err_errNoS Bind(std::shared_ptr<FDAddress> addr);
 
+  private:
+    FDAddress_err_errNoS Get_X_Name(bool sock_or_peer);
+
+  public:
     FDAddress_err_errNoS GetSockName();
+    FDAddress_err_errNoS GetPeerName();
 
-    err_errNoS Connect(std::shared_ptr<FDAddress> addr);
+    FDCtl_res_errNoS Connect(
+        std::shared_ptr<FDAddress> addr
+    );
+    FDCtl_res_errNoS Connect(
+        std::shared_ptr<FDAddress> addr,
+        FDCtlInitOptions           opts
+    );
 
-    FDAddress_err_errNoS Accept();
+    FDCtl_FDAddress_res_errNoS Accept();
+    FDCtl_FDAddress_res_errNoS Accept(FDCtlInitOptions opts);
 
     // 0 on success // shortcut to getsockopt
     res_errNoS getRecvTimeout(timeval &r);

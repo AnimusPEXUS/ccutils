@@ -155,6 +155,9 @@ create_ccutils_component(
 
   HEADERS
   e
+
+  LIBS_PUB
+  ccutils_unicode
 )
 
 create_ccutils_component(
@@ -218,6 +221,7 @@ create_ccutils_component(
   net
   time
   context
+  os
 
   HEADERS
   _pkg
@@ -226,10 +230,12 @@ create_ccutils_component(
   net
   time
   context
+  os
 
   LIBS_PUB
   ccutils_posix_tools
   ccutils_unicode
+  ccutils_errors
 
   INC_DIRS_PUB
   ICU::uc

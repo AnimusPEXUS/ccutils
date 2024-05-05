@@ -22,6 +22,25 @@ std::shared_ptr<FDAddress> FDAddress::create(
     return ret;
 }
 
+std::shared_ptr<FDAddress> FDAddress::create(
+    struct sockaddr *addr,
+    socklen_t        length
+)
+{
+    if (length != sizeof(sockaddr))
+    {
+        return nullptr;
+    }
+
+    std::vector<uint8_t> addr_buff;
+
+    addr_buff.resize(length);
+
+    ::memcpy(addr_buff.data(), addr, length);
+
+    return FDAddress::create(addr_buff);
+}
+
 FDAddress::FDAddress()
 {
 }
@@ -53,6 +72,11 @@ int FDAddress::setAddrBuff(std::vector<std::uint8_t> addr_buff)
     //       on error
     this->addr_buff = addr_buff;
     return 0;
+}
+
+std::vector<std::uint8_t> FDAddress::getAddrBuff()
+{
+    return addr_buff;
 }
 
 std::tuple<sa_family_t, int> FDAddress::getFamily()
