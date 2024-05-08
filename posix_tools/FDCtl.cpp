@@ -627,16 +627,31 @@ res_errNoS FDCtl::setNonBlocking(bool blocking)
     return res;
 }
 
-res_errNoS FDCtl::getType(int &type)
+socktype_res_errNoS FDCtl::getType()
 {
-    socklen_t optlen;
+    socktype_res_errNoS ret;
+    socklen_t           optlen;
 
-    return this->getsockopt(
+    auto res = this->getsockopt(
         SOL_SOCKET,
         SO_TYPE,
-        &type,
+        &ret.type,
         &optlen
     );
+
+    if (res.not_ok())
+    {
+        socktype_res_errNoS err;
+        err.type  = 0;
+        err.res   = res.res;
+        err.errNo = res.errNo;
+        return err;
+    }
+
+    ret.res   = res.res;
+    ret.errNo = 0;
+
+    return ret;
 }
 
 } // namespace wayround_i2p::ccutils::posix_tools

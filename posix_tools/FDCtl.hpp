@@ -85,6 +85,11 @@ struct FDCtl_FDAddress_res_errNoS : res_errNoS
     std::shared_ptr<FDAddress> addr;
 };
 
+struct socktype_res_errNoS : res_errNoS
+{
+    int type;
+};
+
 struct FDCtlInitOptions
 {
     bool is_open          = false;
@@ -250,7 +255,7 @@ class FDCtl
     res_errNoS setNonBlocking(bool blocking);
 
     // 0 on success
-    res_errNoS getType(int &type);
+    socktype_res_errNoS getType();
 
     // -----------------------------------------------------
     // ^ ^ ^ function shortcuts and usages ^ ^ ^

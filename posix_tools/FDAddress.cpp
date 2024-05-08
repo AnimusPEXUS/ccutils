@@ -54,17 +54,6 @@ FDAddress::~FDAddress()
 {
 }
 
-/* // circular dependency :(
-err_errNoS FDAddress::setAddressFromFDCtl(std::shared_ptr<FDCtl> fd)
-{
-    if (!fd)
-    {
-        return {-4, 0};
-    }
-    return fd->setFDAddress(own_ptr.lock());
-}
-*/
-
 int FDAddress::setAddrBuff(std::vector<std::uint8_t> addr_buff)
 {
     // note: theoretically here can be check (parameter validation,

@@ -18,7 +18,7 @@
 //
 // Known networks are       "tcp", "tcp4"   (IPv4-only),
 //   "tcp6"    (IPv6-only), "udp", "udp4"   (IPv4-only),
-//   "udp6"  (IPv6 - only),  "ip",  "ip4" (IPv4 - only),
+//   "udp6"  (IPv6 - only),  "ip",  "ip4"   (IPv4-only),
 //    "ip6"    (IPv6-only),
 //
 //   "unix", "unixgram" and "unixpacket".
@@ -34,6 +34,7 @@ namespace wayround_i2p::akigo::net
 {
 using error_ptr   = wayround_i2p::akigo::builtin::error_ptr;
 using error       = wayround_i2p::akigo::builtin::error;
+using ustring     = wayround_i2p::akigo::builtin::ustring;
 using size_type   = wayround_i2p::akigo::builtin::size_type;
 using byte_vector = wayround_i2p::akigo::builtin::byte_vector;
 using Context_ptr = wayround_i2p::akigo::context::Context_ptr;
@@ -46,8 +47,8 @@ class Error : public error
 
 class Addr
 {
-    virtual std::string Network() = 0;
-    virtual std::string String()  = 0;
+    virtual ustring Network() = 0;
+    virtual ustring String()  = 0;
 };
 
 using Addr_ptr = std::shared_ptr<Addr>;
@@ -88,13 +89,13 @@ class PacketConn : public ConnBase
 using PacketConn_ptr = std::shared_ptr<PacketConn>;
 
 std::tuple<Conn_ptr, error_ptr> Dial(
-    std::string network,
-    std::string address
+    ustring network,
+    ustring address
 );
 
 std::tuple<Conn_ptr, error_ptr> DialTimeout(
-    std::string                         network,
-    std::string                         address,
+    ustring                             network,
+    ustring                             address,
     wayround_i2p::akigo::time::Duration timeout
 );
 
@@ -159,8 +160,8 @@ std::tuple<Listener_ptr, error_ptr> FileListener(File_ptr f);
 class TCPAddr : public IP
 {
   public:
-    int         Port;
-    std::string Zone;
+    int     Port;
+    ustring Zone;
 };
 
 class TCPConn : public Conn
@@ -174,8 +175,8 @@ class TCPListener : public Listener
 class UDPAddr : public IP
 {
   public:
-    int         Port;
-    std::string Zone;
+    int     Port;
+    ustring Zone;
 };
 
 class UDPConn : public Conn, public PacketConn
@@ -185,8 +186,8 @@ class UDPConn : public Conn, public PacketConn
 class UnixAddr : public IP
 {
   public:
-    std::string Name;
-    std::string Net;
+    ustring Name;
+    ustring Net;
 };
 
 using UnixAddr_ptr = std::shared_ptr<UnixAddr>;
@@ -206,13 +207,13 @@ class UnixConn : public Conn
 using UnixConn_ptr = std::shared_ptr<UnixConn>;
 
 std::tuple<UnixConn_ptr, error_ptr> DialUnix(
-    std::string  network,
+    ustring      network,
     UnixAddr_ptr laddr,
     UnixAddr_ptr raddr
 );
 
 std::tuple<UnixConn_ptr, error_ptr> ListenUnixgram(
-    std::string  network,
+    ustring      network,
     UnixAddr_ptr laddr
 );
 
@@ -223,7 +224,7 @@ class UnixListener : public Listener
 using UnixListener_ptr = std::shared_ptr<UnixListener>;
 
 std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
-    std::string  network,
+    ustring      network,
     UnixAddr_ptr laddr
 );
 

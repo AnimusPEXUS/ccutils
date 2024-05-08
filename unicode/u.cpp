@@ -52,4 +52,20 @@ std::string UString::string_utf8()
     return ret;
 }
 
+bool operator==(
+    const UString &lhs,
+    const UString &rhs
+)
+{
+    return lhs.data == rhs.data;
+};
+
+bool operator!=(
+    const UString &lhs,
+    const UString &rhs
+)
+{
+    return !(lhs == rhs);
+};
+
 } // namespace wayround_i2p::ccutils::unicode

@@ -49,11 +49,26 @@ class UString
     UChar operator[](std::int32_t offset);
 
     UString operator+(UString &other);
-    UString operator+(std::string &other);
+    // UString operator+(std::string &other);
+
+    friend bool operator==(
+        const UString &lhs,
+        const UString &rhs
+    );
 
   private:
     icu::UnicodeString data;
 };
+
+bool operator==(
+    const UString &lhs,
+    const UString &rhs
+);
+
+bool operator!=(
+    const UString &lhs,
+    const UString &rhs
+);
 
 } // namespace wayround_i2p::ccutils::unicode
 
