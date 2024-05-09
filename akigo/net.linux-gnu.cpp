@@ -102,6 +102,65 @@ Addr_ptr PosixFDCtlNetConnAdaptor::RemoteAddr()
     );
 }
 
+bool PosixFDCtlNetConnAdaptor::SupportsNonBlocking()
+{
+    return true;
+}
+
+bool PosixFDCtlNetConnAdaptor::GetNonBlocking()
+{
+    bool ret;
+
+    fdctl->isNonBlocking(ret);
+
+    return ret;
+}
+
+void PosixFDCtlNetConnAdaptor::SetNonBlocking(bool value)
+{
+    fdctl->setNonBlocking(value);
+}
+
+error_ptr PosixFDCtlNetConnAdaptor::SetDeadline(wayround_i2p::akigo::time::Time t)
+{
+    // todo: todo
+    return nullptr;
+}
+
+error_ptr PosixFDCtlNetConnAdaptor::SetReadDeadline(wayround_i2p::akigo::time::Time t)
+{
+    // todo: todo
+    return nullptr;
+}
+
+error_ptr PosixFDCtlNetConnAdaptor::SetWriteDeadline(wayround_i2p::akigo::time::Time t)
+{
+    // todo: todo
+    return nullptr;
+}
+
+std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdaptor::Read(byte_vector b)
+{
+    return std::tuple<size_type, error_ptr>();
+}
+
+std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdaptor::Write(byte_vector b)
+{
+    return std::tuple<size_type, error_ptr>();
+}
+
+std::tuple<size_type, Addr_ptr, error_ptr> PosixFDCtlNetConnAdaptor::ReadFrom(byte_vector b)
+{
+    // todo: todo
+    return std::tuple<size_type, Addr_ptr, error_ptr>();
+}
+
+std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdaptor::WriteTo(byte_vector b, Addr_ptr addr)
+{
+    // todo: todo
+    return std::tuple<size_type, error_ptr>();
+}
+
 std::tuple<
     std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
     int> // todo: use akigo::error ?
@@ -109,7 +168,7 @@ std::tuple<
         std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl
     )
 {
-    return PosixFDCtlNetConnAdaptorAddr ::create_for_x(fdctl, false);
+    return PosixFDCtlNetConnAdaptorAddr::create_for_x(fdctl, false);
 }
 
 std::tuple<
@@ -119,7 +178,7 @@ std::tuple<
         std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl
     )
 {
-    return PosixFDCtlNetConnAdaptorAddr ::create_for_x(fdctl, true);
+    return PosixFDCtlNetConnAdaptorAddr::create_for_x(fdctl, true);
 }
 
 std::tuple<std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
@@ -213,8 +272,8 @@ std::tuple<std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
             }
 
             {
-                std::uint8_t ip[4]; // = std::get<0>(addr2);
-                ::memcpy(ip, std::get<0>(addr2), 4);
+                std::array<std::uint8_t, 4> ip; // = std::get<0>(addr2);
+                ::memcpy(ip.data(), std::get<0>(addr2).data(), ip.size());
                 in_port_t port = std::get<1>(addr2);
 
                 ret->_string = std::format(
@@ -252,8 +311,8 @@ std::tuple<std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
             }
 
             {
-                std::uint8_t ip[16]; // = std::get<0>(addr2);
-                ::memcpy(ip, std::get<0>(addr2), 16);
+                std::array<std::uint8_t, 16> ip; // = std::get<0>(addr2);
+                ::memcpy(ip.data(), std::get<0>(addr2).data(), ip.size());
                 in_port_t port = std::get<1>(addr2);
 
                 ret->_string = std::format(
