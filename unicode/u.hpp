@@ -54,9 +54,17 @@ class UString
     UString &operator+=(UString &other);
     UString &operator+=(UString &&other);
 
+    operator std::string();
+    operator const char *();
+
     friend bool operator==(
         const UString &lhs,
         const UString &rhs
+    );
+
+    friend bool operator==(
+        const UString &lhs,
+        const char    *rhs
     );
 
   private:
@@ -71,6 +79,16 @@ bool operator==(
 bool operator!=(
     const UString &lhs,
     const UString &rhs
+);
+
+bool operator==(
+    const UString &lhs,
+    const char    *rhs
+);
+
+bool operator!=(
+    const UString &lhs,
+    const char    *rhs
 );
 
 } // namespace wayround_i2p::ccutils::unicode

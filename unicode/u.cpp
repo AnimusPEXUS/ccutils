@@ -59,6 +59,16 @@ UString &UString::operator+=(UString &&other)
     return *this;
 }
 
+UString::operator std::string()
+{
+    return this->string_utf8();
+}
+
+UString::operator const char *()
+{
+    return this->string_utf8().c_str();
+}
+
 std::string UString::string_utf8()
 {
     std::string ret;
@@ -77,6 +87,22 @@ bool operator==(
 bool operator!=(
     const UString &lhs,
     const UString &rhs
+)
+{
+    return !(lhs == rhs);
+};
+
+bool operator==(
+    const UString &lhs,
+    const char    *rhs
+)
+{
+    return lhs.data == UString(rhs).data;
+};
+
+bool operator!=(
+    const UString &lhs,
+    const char    *rhs
 )
 {
     return !(lhs == rhs);

@@ -31,10 +31,12 @@ int main(int argc, char **args)
                 goto end;
             }
 
-            if (s_err->Error() != "not set")
+            auto s_err_s = s_err->Error();
+
+            if (s_err_s != "not set")
             {
-                std::cout << "FAIL: this case should return 'not set' error"
-                          << std::endl;
+                std::cout << "FAIL: this case should return 'not set' error."
+                          << " returned err is: " << s_err_s << std::endl;
                 errors_count++;
                 goto end;
             }
