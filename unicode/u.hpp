@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240408_004458_732262
-#define WAYROUND_I2P_20240408_004458_732262
+#ifndef WAYROUND_I2P_20240511_072523_288868
+#define WAYROUND_I2P_20240511_072523_288868
 
 #include <cstdint>
 #include <memory>
@@ -50,6 +50,9 @@ class UString
 
     UString operator+(UString &other);
     // UString operator+(std::string &other);
+
+    UString &operator+=(UString &other);
+    UString &operator+=(UString &&other);
 
     friend bool operator==(
         const UString &lhs,

@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240408_004458_736737
-#define WAYROUND_I2P_20240408_004458_736737
+#ifndef WAYROUND_I2P_20240511_072523_292537
+#define WAYROUND_I2P_20240511_072523_292537
 
 #include <cstdint>
 #include <memory>
@@ -16,6 +16,7 @@ using UString = wayround_i2p::ccutils::unicode::UString;
 
 class error
 {
+  public:
     virtual UString Error() = 0;
 };
 

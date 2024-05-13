@@ -206,9 +206,25 @@ create_ccutils_component(
 
   LIBS_PUB
   ccutils_unicode
+  ccutils_ip
 
   INC_DIRS_PUB
   ${ccutils_unicode_INCLUDE_DIRS}
+)
+
+create_ccutils_component(
+  TARGETNAME ccutils_ip
+  SUBDIR ip
+
+  SOURCES
+  ip
+
+  HEADERS
+  ip
+
+  LIBS_PUB
+  ccutils_unicode
+  ccutils_errors
 )
 
 create_ccutils_component(
