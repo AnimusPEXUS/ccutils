@@ -64,9 +64,16 @@ UString::operator std::string()
     return this->string_utf8();
 }
 
+/*
 UString::operator const char *()
 {
     return this->string_utf8().c_str();
+}
+*/
+
+size_t UString::length()
+{
+    return this->data.length();
 }
 
 std::string UString::string_utf8()
@@ -107,5 +114,11 @@ bool operator!=(
 {
     return !(lhs == rhs);
 };
+
+std::ostream &operator<<(std::ostream &os, const UString &obj)
+{
+    os << obj.data;
+    return os;
+}
 
 } // namespace wayround_i2p::ccutils::unicode

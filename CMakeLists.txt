@@ -25,7 +25,7 @@ endif()
 
 #find_package(Boost REQUIRED COMPONENTS json regex)
 
-find_package(ICU 73.0 COMPONENTS uc i18n REQUIRED)
+find_package(ICU 73.0 COMPONENTS uc i18n io REQUIRED)
 
 #set(ICU_DEBUG ON)
 
@@ -173,11 +173,13 @@ create_ccutils_component(
   LIBS_PUB
   ICU::uc
   ICU::i18n
+  ICU::io
   ccutils_errors
 
   INC_DIRS_PUB
   ICU::uc
-  ICU::i18n
+  ICU::i18n  
+  ICU::io
   ${ccutils_errors_INCLUDE_DIRS}
 )
 

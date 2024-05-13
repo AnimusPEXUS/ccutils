@@ -9,6 +9,7 @@
 
 #include <unicode/stringpiece.h>
 #include <unicode/unistr.h>
+#include <unicode/ustream.h>
 #include <unicode/utypes.h>
 
 // #include <wayround_i2p/ccutils/errors/e.hpp>
@@ -44,6 +45,8 @@ class UString
 
     std::tuple<byte_vector, error_ptr> encode(std::string encoding = "utf-8");
 
+    size_t length();
+
     std::string string_utf8();
 
     UChar operator[](std::int32_t offset);
@@ -55,7 +58,7 @@ class UString
     UString &operator+=(UString &&other);
 
     operator std::string();
-    operator const char *();
+    // operator const char *();
 
     friend bool operator==(
         const UString &lhs,
@@ -66,6 +69,8 @@ class UString
         const UString &lhs,
         const char    *rhs
     );
+
+    friend std::ostream &operator<<(std::ostream &os, const UString &obj);
 
   private:
     icu::UnicodeString data;
@@ -90,6 +95,8 @@ bool operator!=(
     const UString &lhs,
     const char    *rhs
 );
+
+std::ostream &operator<<(std::ostream &os, const UString &obj);
 
 } // namespace wayround_i2p::ccutils::unicode
 
