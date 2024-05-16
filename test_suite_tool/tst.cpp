@@ -1,28 +1,20 @@
 
-#include <wayround_i2p/ccutils/test_suite_tool/tdt.hpp>
+#include <wayround_i2p/ccutils/test_suite_tool/tst.hpp>
 
 namespace wayround_i2p::ccutils::tst
 {
 
-std::shared_ptr<Logger> Logger::create()
+void run_tests_Options::Log(LoggerMSGType t, std::string msg)
 {
-    auto ret = std::shared_ptr<Logger>(new Logger());
-    return ret;
+    std::cout << std::format("todo: run_tests_Options::Log") << std::endl;
 }
 
-Logger::Logger()
-{
-}
-
-Logger::~Logger()
+TSTFuncOpts::TSTFuncOpts(const TSTFunctionInfo &func_info) :
+    func_info(func_info)
 {
 }
 
-void Logger::Log(
-    const TSTFunctionInfo &func_info,
-    LoggerMSGType          t,
-    std::string            msg
-)
+TSTFuncOpts::~TSTFuncOpts()
 {
 }
 
@@ -33,25 +25,29 @@ int run_tests(run_tests_Options &tlo)
     {
 
         if (
-            auto group_itr = tlo.find(tlo.groups.begin(), tlo.groups.end(), group_name);
-            group_itr == tlo.groups.end()
+            auto group_itr = tlo.groups.find(
+                group_name
+            );
+            group_itr == std::end(tlo.groups)
         )
         {
-            tlo.logger.Log(Error, std::format("'{}' not in groups", group_name));
+            tlo.Log(Error, std::format("'{}' not in groups", group_name));
             return 1;
         }
         else
         {
-            auto &group = group_itr.get();
+            const GroupsMapItem &group = std::get<1>(*group_itr);
 
             std::map<std::string, std::any> ingroup_inter_test_memory = {};
 
             for (auto &test_name : group.test_order)
             {
-                if (auto test_itr = tlo.find(group.tests.begin(), group.tests.end(), test_name);
-                    test_itr == group.tests.end())
+                if (auto test_itr = group.tests.find(
+                        test_name
+                    );
+                    test_itr == std::end(group.tests))
                 {
-                    tlo.logger.Log(
+                    tlo.Log(
                         Error,
                         std::format(
                             "'{}' not in tests of group",
@@ -63,7 +59,11 @@ int run_tests(run_tests_Options &tlo)
                 }
                 else
                 {
-                    TSTFunctionInfo &x = test_itr.get();
+                    const TSTFunctionInfo &x = std::get<1>(*test_itr);
+
+                    TSTFuncOpts opts(x);
+                    opts.ingroup_inter_test_memory = ingroup_inter_test_memory;
+                    opts.log;
                 }
             }
         }

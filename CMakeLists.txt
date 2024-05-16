@@ -145,6 +145,20 @@ function(create_ccutils_component)
 
 endfunction()
 
+create_ccutils_component(
+  TARGETNAME ccutils_tst
+  SUBDIR test_suite_tool
+
+  SOURCES
+  tst
+
+  HEADERS
+  tst
+
+  LIBS_PUB
+
+)
+
 
 create_ccutils_component(
   TARGETNAME ccutils_errors
@@ -178,7 +192,7 @@ create_ccutils_component(
 
   INC_DIRS_PUB
   ICU::uc
-  ICU::i18n  
+  ICU::i18n
   ICU::io
   ${ccutils_errors_INCLUDE_DIRS}
 )

@@ -1,7 +1,13 @@
-#ifndef test_head
-#define test_head
+#ifndef WAYROUND_I2P_20240516_194621_144523
+#define WAYROUND_I2P_20240516_194621_144523
 
+#include <algorithm>
+#include <any>
 #include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <string>
 
 namespace wayround_i2p::ccutils::tst
 {
@@ -14,6 +20,7 @@ enum LoggerMSGType : unsigned char
     Error
 };
 
+/*
 // todo: use (put this, if it's not exists, to) ccutils::logger instead
 class Logger
 {
@@ -30,12 +37,18 @@ class Logger
 
   private:
 }
+*/
+
+struct TSTFunctionInfo;
 
 struct TSTFuncOpts
 {
-    const TSTFunctionInfo                                             &func_info;
-    const std::map<std::string, std::any>                              ingroup_storage;
-    std::function<const TSTFunctionInfo &, LoggerMSGType, std::string> log;
+    TSTFuncOpts(const TSTFunctionInfo &func_info);
+    ~TSTFuncOpts();
+
+    const TSTFunctionInfo                                                   &func_info;
+    std::map<std::string, std::any>                                          ingroup_inter_test_memory;
+    std::function<void(const TSTFunctionInfo &, LoggerMSGType, std::string)> log;
 };
 
 struct TSTFuncResult
@@ -56,19 +69,18 @@ struct TSTFunctionInfo
     TST_TEST_FUNCTION func;
 };
 
+struct GroupsMapItem
+{
+    std::vector<std::string>                       test_order;
+    std::map<std::string, const TSTFunctionInfo &> tests;
+};
+
 struct run_tests_Options
 {
-    std::vector<string> group_order;
-    map < std::string,
-        struct
-    {
-        std::vector<string> test_order;
-        map<
-            std::string,
-            TSTFunctionInfo &>
-            tests;
-    }
-        > groups;
+    std::vector<std::string>                     group_order;
+    std::map<std::string, const GroupsMapItem &> groups;
+
+    void Log(LoggerMSGType, std::string);
 };
 
 int run_tests(run_tests_Options &tl);
