@@ -4,7 +4,7 @@
 namespace wayround_i2p::ccutils::tst
 {
 
-void run_tests_Options::Log(LoggerMSGType t, std::string msg)
+void run_tests_Parameters::Log(LoggerMSGType t, std::string msg)
 {
     std::cout << std::format("todo: run_tests_Options::Log") << std::endl;
 }
@@ -18,9 +18,8 @@ TSTFuncOpts::~TSTFuncOpts()
 {
 }
 
-int run_tests(run_tests_Options &tlo)
+int run_tests(run_tests_Parameters &tlo)
 {
-
     for (auto &group_name : tlo.group_order)
     {
 

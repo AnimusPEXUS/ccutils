@@ -75,7 +75,7 @@ struct GroupsMapItem
     std::map<std::string, const TSTFunctionInfo &> tests;
 };
 
-struct run_tests_Options
+struct run_tests_Parameters
 {
     std::vector<std::string>                     group_order;
     std::map<std::string, const GroupsMapItem &> groups;
@@ -83,7 +83,7 @@ struct run_tests_Options
     void Log(LoggerMSGType, std::string);
 };
 
-int run_tests(run_tests_Options &tl);
+int run_tests(run_tests_Parameters &tl);
 
 } // namespace wayround_i2p::ccutils::tst
 

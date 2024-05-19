@@ -146,7 +146,7 @@ function(create_ccutils_component)
 endfunction()
 
 create_ccutils_component(
-  TARGETNAME ccutils_tst
+  TARGETNAME ccutils_test_suite_tool
   SUBDIR test_suite_tool
 
   SOURCES
@@ -156,7 +156,6 @@ create_ccutils_component(
   tst
 
   LIBS_PUB
-
 )
 
 
