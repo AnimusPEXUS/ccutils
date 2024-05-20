@@ -3,11 +3,14 @@
 
 #include <algorithm>
 #include <any>
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <string>
+
+#include <experimental/scope>
 
 namespace wayround_i2p::ccutils::tst
 {
@@ -17,38 +20,21 @@ enum LoggerMSGType : unsigned char
     Status,
     Info,
     Warning,
-    Error
+    Error,
+    Failure,
+    Success
 };
 
-/*
-// todo: use (put this, if it's not exists, to) ccutils::logger instead
-class Logger
-{
-  public:
-    static std::shared_ptr<Logger> create();
+std::string icon_by_type(LoggerMSGType);
 
-  protected:
-    Logger();
-
-  public:
-    ~Logger();
-
-    void Log(const TSTFunctionInfo &, LoggerMSGType, std::string);
-
-  private:
-}
-*/
-
-struct TSTFunctionInfo;
+struct TSTInfo;
 
 struct TSTFuncOpts
 {
-    TSTFuncOpts(const TSTFunctionInfo &func_info);
-    ~TSTFuncOpts();
+    TSTInfo                        &func_info;
+    std::map<std::string, std::any> ingroup_inter_test_memory;
 
-    const TSTFunctionInfo                                                   &func_info;
-    std::map<std::string, std::any>                                          ingroup_inter_test_memory;
-    std::function<void(const TSTFunctionInfo &, LoggerMSGType, std::string)> log;
+    void Log(TSTInfo &, LoggerMSGType, std::string);
 };
 
 struct TSTFuncResult
@@ -58,29 +44,35 @@ struct TSTFuncResult
 
 using TST_TEST_FUNCTION = std::function<TSTFuncResult(const TSTFuncOpts &)>;
 
-struct TSTFunctionInfo
+struct TSTInfo
 {
-    std::string name;
-    std::string description_teaser;
+    std::string group_name;
+    std::string test_name;
+    std::string description_short;
     std::string description;
 
-    bool fail_is_ok = false;
+    bool expected_failure = false;
 
     TST_TEST_FUNCTION func;
 };
 
 struct GroupsMapItem
 {
-    std::vector<std::string>                       test_order;
-    std::map<std::string, const TSTFunctionInfo &> tests;
+    std::vector<std::string>       test_order;
+    std::map<std::string, TSTInfo> tests;
 };
 
 struct run_tests_Parameters
 {
-    std::vector<std::string>                     group_order;
-    std::map<std::string, const GroupsMapItem &> groups;
+    std::string                          title;
+    std::string                          description;
+    std::string                          version;
+    std::string                          mod_date;
+    std::vector<std::string>             group_order;
+    std::map<std::string, GroupsMapItem> groups;
 
     void Log(LoggerMSGType, std::string);
+    int  AddTest(TSTInfo info);
 };
 
 int run_tests(run_tests_Parameters &tl);
