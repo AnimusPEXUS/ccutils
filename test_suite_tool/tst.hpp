@@ -18,11 +18,14 @@ namespace wayround_i2p::ccutils::tst
 enum LoggerMSGType : unsigned char
 {
     Status,
+    Text,
     Info,
     Warning,
     Error,
     Failure,
-    Success
+    ExpectedFailure,
+    Success,
+    UnexpectedSuccess
 };
 
 std::string icon_by_type(LoggerMSGType);
@@ -34,7 +37,7 @@ struct TSTFuncOpts
     TSTInfo                        &func_info;
     std::map<std::string, std::any> ingroup_inter_test_memory;
 
-    void Log(TSTInfo &, LoggerMSGType, std::string);
+    void Log(LoggerMSGType, std::string);
 };
 
 struct TSTFuncResult
@@ -42,7 +45,7 @@ struct TSTFuncResult
     bool test_success = false;
 };
 
-using TST_TEST_FUNCTION = std::function<TSTFuncResult(const TSTFuncOpts &)>;
+using TST_TEST_FUNCTION = std::function<TSTFuncResult(TSTFuncOpts &)>;
 
 struct TSTInfo
 {
@@ -64,8 +67,9 @@ struct GroupsMapItem
 
 struct run_tests_Parameters
 {
-    std::string                          title;
+    std::string                          title = "(not set)";
     std::string                          description;
+    std::string                          uri;
     std::string                          version;
     std::string                          mod_date;
     std::vector<std::string>             group_order;

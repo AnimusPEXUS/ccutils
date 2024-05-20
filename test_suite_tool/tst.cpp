@@ -13,8 +13,9 @@ std::string icon_by_type(LoggerMSGType t)
         default:
             icon = "???";
             break;
+        case Text:
         case Status:
-            icon = "-~-";
+            icon = "...";
             break;
         case Info:
             icon = "-i-";
@@ -26,10 +27,16 @@ std::string icon_by_type(LoggerMSGType t)
             icon = "-E-";
             break;
         case Failure:
-            icon = "-F-";
+            icon = "!F!";
             break;
         case Success:
-            icon = "-s-";
+            icon = "+s+";
+            break;
+        case ExpectedFailure:
+            icon = "-f-";
+            break;
+        case UnexpectedSuccess:
+            icon = "O_O";
             break;
     }
 
@@ -42,14 +49,14 @@ std::string timestamp()
     return std::format("{0:%F}T{0:%T}z", t);
 }
 
-void TSTFuncOpts::Log(TSTInfo &i, LoggerMSGType t, std::string msg)
+void TSTFuncOpts::Log(LoggerMSGType t, std::string msg)
 {
     std::cout << std::format(
         "[{}] [{}] [{}:{}] {}",
         icon_by_type(t),
         timestamp(),
-        i.group_name,
-        i.test_name,
+        this->func_info.group_name,
+        this->func_info.test_name,
         msg
     )
               << std::endl;
@@ -80,25 +87,12 @@ int run_tests_Parameters::AddTest(
         )
         == this->group_order.end())
     {
-        // std::cout << "registering new group name: " << info.group_name
-        //          << std::endl;
         this->group_order.push_back(info.group_name);
-    }
-    else
-    {
-        //      std::cout << "group name " << info.group_name << " already registered" << std::endl;
     }
 
     if (this->groups.find(info.group_name) == this->groups.end())
     {
-        //        std::cout << "registering new group: " << info.group_name << std::endl;
         this->groups[info.group_name] = {};
-    }
-    else
-    {
-        /*
-            std::cout << "group " << info.group_name << " already registered" << std::endl;
-    */
     }
 
     auto &grp = this->groups[info.group_name];
@@ -110,26 +104,12 @@ int run_tests_Parameters::AddTest(
         )
         == grp.test_order.end())
     {
-        /*std::cout
-            << "registering new test " << info.test_name
-            << " in group " << info.group_name
-            << std::endl;*/
         grp.test_order.push_back(info.test_name);
-    }
-    else
-    {
-        /*        std::cout << "test \"" << info.test_name << "\" already registered in group "
-                          << info.group_name << std::endl; */
     }
 
     if (grp.tests.find(info.test_name) == grp.tests.end())
     {
-        /*std::cout
-            << "inserting new test info " << info.test_name
-            << " in group " << info.group_name
-            << std::endl;*/
         grp.tests[info.test_name] = info;
-        // std::cout << "grp.tests.size(): " << grp.tests.size() << std::endl;
     }
     else
     {
@@ -146,16 +126,17 @@ int run_tests_Parameters::AddTest(
 
 void print_head(run_tests_Parameters &tlo)
 {
-    std::string for_string = "WayRound.I2P test suite tool";
+    std::string for_string = "WayRound.I2P's tool";
     std::string for_string_line;
     std::string desc_string;
+    std::string uri_string;
     std::string ver_string;
     std::string mod_string;
 
     if (tlo.title != "")
     {
         for_string = std::format(
-            "{} (being tested by {})",
+            "{} (test suite created with {})",
             tlo.title,
             for_string
         );
@@ -171,15 +152,23 @@ void print_head(run_tests_Parameters &tlo)
     if (tlo.description != "")
     {
         desc_string = std::format(
-            "description    |   {}   |\n",
+            "description    |   {}\n",
             tlo.description
+        );
+    }
+
+    if (tlo.uri != "")
+    {
+        uri_string = std::format(
+            "uri            |   {}\n",
+            tlo.uri
         );
     }
 
     if (tlo.version != "")
     {
         ver_string = std::format(
-            "version        |   {}   |\n",
+            "version        |   {}\n",
             tlo.version
         );
     }
@@ -187,7 +176,7 @@ void print_head(run_tests_Parameters &tlo)
     if (tlo.mod_date != "")
     {
         mod_string = std::format(
-            "modified date  |   {}   |\n",
+            "modified date  |   {}\n",
             tlo.mod_date
         );
     }
@@ -196,10 +185,11 @@ void print_head(run_tests_Parameters &tlo)
         R"+++({0:}
 {1}
 {0:}
-{2}{3}{4})+++",
+{2}{3}{4}{5})+++",
         for_string_line,
         for_string,
         desc_string,
+        uri_string,
         ver_string,
         mod_string
     ) << std::endl;
@@ -220,11 +210,12 @@ int run_tests(run_tests_Parameters &rtp)
         [&]()
         {
             std::cout << std::format(R"+++(
-total test count: {}
-             success: {}
-            failures: {}
-   expected failures: {}
-  unexpected success: {}
+   total test count: {}
+                  success: {}
+                 failures: {}
+        expected failures: {}
+       unexpected success: {}
+
 )+++",
                                      total_count,
                                      success_list.size(),
@@ -238,10 +229,26 @@ total test count: {}
 
     print_head(rtp);
 
-    rtp.Log(Status, std::format("{} test group(s) provided", rtp.group_order.size()));
+    rtp.Log(
+        Status,
+        std::format(
+            "{} test group(s) provided",
+            rtp.group_order.size()
+        )
+    );
+
+    rtp.Log(Status, "");
 
     for (auto &group_name : rtp.group_order)
     {
+
+        auto se03 = std::experimental::scope_exit(
+            [&]()
+            {
+                rtp.Log(Status, "");
+            }
+        );
+
         rtp.Log(Status, std::format("next group is: {}", group_name));
 
         if (
@@ -270,8 +277,18 @@ total test count: {}
                 )
             );
 
+            rtp.Log(Status, "");
+
             for (auto &test_name : group.test_order)
             {
+
+                auto se02 = std::experimental::scope_exit(
+                    [&]()
+                    {
+                        rtp.Log(Status, "");
+                    }
+                );
+
                 if (auto test_itr = group.tests.find(
                         test_name
                     );
@@ -290,7 +307,6 @@ total test count: {}
                 }
                 else
                 {
-                    rtp.Log(Status, std::format("next test is: {}:{}", group_name, test_name));
 
                     TSTInfo &x = std::get<1>(*test_itr);
 
@@ -299,6 +315,8 @@ total test count: {}
                     opts.ingroup_inter_test_memory = ingroup_inter_test_memory;
 
                     total_count++;
+
+                    opts.Log(Status, std::format("starting"));
 
                     if (!x.func)
                     {
@@ -319,10 +337,12 @@ total test count: {}
                     {
                         if (x.expected_failure)
                         {
+                            opts.Log(UnexpectedSuccess, "unexpected success B-)");
                             unexpected_success_list.push_back(&x);
                         }
                         else
                         {
+                            opts.Log(Success, "Success :-)");
                             success_list.push_back(&x);
                         }
                     }
@@ -330,19 +350,31 @@ total test count: {}
                     {
                         if (x.expected_failure)
                         {
+                            opts.Log(ExpectedFailure, "as expected ... :-/");
                             expected_failure_list.push_back(&x);
                         }
                         else
                         {
+                            opts.Log(Failure, "failed :-(");
                             failure_list.push_back(&x);
                         }
+                        rtp.Log(Status, "");
                     }
                 }
             }
         }
     }
 
-    ret = 0;
+    if (failure_list.size() == 0)
+    {
+        rtp.Log(Success, "all tests ok");
+        ret = 0;
+    }
+    else
+    {
+        rtp.Log(Failure, "errors found");
+        ret = 5;
+    }
     return ret;
 }
 
