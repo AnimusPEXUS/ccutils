@@ -1,5 +1,5 @@
 wayround_i2p::ccutils::tst::TSTFuncResult main_003_unicode(
-    wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
 )
 {
 

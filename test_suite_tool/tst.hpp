@@ -37,12 +37,12 @@ struct TSTInfo;
 
 struct TSTFuncOpts
 {
-    TSTInfo &func_info;
+    const TSTInfo &func_info;
 
     // iitm - ingroup_inter_test_memory
     std::map<std::string, std::any> &iitm;
 
-    void Log(LoggerMSGType, wayround_i2p::ccutils::unicode::UString);
+    void Log(LoggerMSGType, wayround_i2p::ccutils::unicode::UString) const;
 };
 
 struct TSTFuncResult
@@ -50,7 +50,7 @@ struct TSTFuncResult
     bool test_success = false;
 };
 
-using TST_TEST_FUNCTION = std::function<TSTFuncResult(TSTFuncOpts &)>;
+using TST_TEST_FUNCTION = std::function<TSTFuncResult(const TSTFuncOpts &)>;
 
 struct TSTInfo
 {
@@ -66,8 +66,8 @@ struct TSTInfo
 
 struct GroupsMapItem
 {
-    std::vector<wayround_i2p::ccutils::unicode::UString>         test_order;
-    std::map<wayround_i2p::ccutils::unicode::UString, TSTInfo &> tests;
+    std::vector<wayround_i2p::ccutils::unicode::UString>               test_order;
+    std::map<wayround_i2p::ccutils::unicode::UString, const TSTInfo &> tests;
 };
 
 struct run_tests_Parameters
@@ -80,11 +80,11 @@ struct run_tests_Parameters
     std::vector<wayround_i2p::ccutils::unicode::UString>             group_order;
     std::map<wayround_i2p::ccutils::unicode::UString, GroupsMapItem> groups;
 
-    void Log(LoggerMSGType, wayround_i2p::ccutils::unicode::UString);
-    int  AddTest(TSTInfo &info);
+    void Log(LoggerMSGType, wayround_i2p::ccutils::unicode::UString) const;
+    int  AddTest(const TSTInfo &info);
 };
 
-int run_tests(int argc, char **args, run_tests_Parameters &tl);
+int run_tests(int argc, char **args, const run_tests_Parameters &tl);
 
 } // namespace wayround_i2p::ccutils::tst
 

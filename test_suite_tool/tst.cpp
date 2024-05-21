@@ -57,7 +57,7 @@ wayround_i2p::ccutils::unicode::UString timestamp()
 void TSTFuncOpts::Log(
     LoggerMSGType                           t,
     wayround_i2p::ccutils::unicode::UString msg
-)
+) const
 {
     std::cout << std::format(
         "[{}] [{}] [{}:{}] {}",
@@ -73,7 +73,7 @@ void TSTFuncOpts::Log(
 void run_tests_Parameters::Log(
     LoggerMSGType                           t,
     wayround_i2p::ccutils::unicode::UString msg
-)
+) const
 {
     std::cout << std::format(
         "[{}] [{}] {}",
@@ -85,7 +85,7 @@ void run_tests_Parameters::Log(
 }
 
 int run_tests_Parameters::AddTest(
-    TSTInfo &info
+    const TSTInfo &info
 )
 {
     if (std::find(
@@ -132,7 +132,7 @@ int run_tests_Parameters::AddTest(
     return 0;
 }
 
-void print_head(run_tests_Parameters &tlo)
+void print_head(const run_tests_Parameters &tlo)
 {
     wayround_i2p::ccutils::unicode::UString for_string = "WayRound.I2P's tool";
     wayround_i2p::ccutils::unicode::UString for_string_line;
@@ -201,16 +201,16 @@ void print_head(run_tests_Parameters &tlo)
     ) << std::endl;
 }
 
-int run_tests(int argc, char **args, run_tests_Parameters &rtp)
+int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
 {
     int ret = 1;
 
     unsigned int total_count = 0;
 
-    std::vector<TSTInfo *> success_list;
-    std::vector<TSTInfo *> failure_list;
-    std::vector<TSTInfo *> expected_failure_list;
-    std::vector<TSTInfo *> unexpected_success_list;
+    std::vector<const TSTInfo *> success_list;
+    std::vector<const TSTInfo *> failure_list;
+    std::vector<const TSTInfo *> expected_failure_list;
+    std::vector<const TSTInfo *> unexpected_success_list;
 
     auto se01 = std::experimental::scope_exit(
         [&]()
@@ -270,7 +270,7 @@ int run_tests(int argc, char **args, run_tests_Parameters &rtp)
         }
         else
         {
-            GroupsMapItem &group = std::get<1>(*group_itr);
+            const GroupsMapItem &group = std::get<1>(*group_itr);
 
             std::map<std::string, std::any> iitm = {};
 
@@ -314,7 +314,7 @@ int run_tests(int argc, char **args, run_tests_Parameters &rtp)
                 else
                 {
 
-                    TSTInfo &x = std::get<1>(*test_itr);
+                    const TSTInfo &x = std::get<1>(*test_itr);
 
                     TSTFuncOpts opts{
                         .func_info = x,
