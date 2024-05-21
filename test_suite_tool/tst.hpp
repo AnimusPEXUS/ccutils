@@ -81,7 +81,7 @@ struct run_tests_Parameters
     int  AddTest(TSTInfo info);
 };
 
-int run_tests(run_tests_Parameters &tl);
+int run_tests(int argc, char **args, run_tests_Parameters &tl);
 
 } // namespace wayround_i2p::ccutils::tst
 

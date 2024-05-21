@@ -200,7 +200,7 @@ void print_head(run_tests_Parameters &tlo)
     ) << std::endl;
 }
 
-int run_tests(run_tests_Parameters &rtp)
+int run_tests(int argc, char **args, run_tests_Parameters &rtp)
 {
     int ret = 1;
 
