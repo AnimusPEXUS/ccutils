@@ -4,9 +4,9 @@
 namespace wayround_i2p::ccutils::tst
 {
 
-std::string icon_by_type(LoggerMSGType t)
+wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
 {
-    std::string icon;
+    wayround_i2p::ccutils::unicode::UString icon;
 
     switch (t)
     {
@@ -43,7 +43,7 @@ std::string icon_by_type(LoggerMSGType t)
     return icon;
 }
 
-std::string timestamp()
+wayround_i2p::ccutils::unicode::UString timestamp()
 {
     auto t = std::chrono::utc_clock::now();
     return std::format("{0:%F}T{0:%T}z", t);
@@ -54,29 +54,32 @@ std::string timestamp()
     ~TSTFuncOpts() {};
 */
 
-void TSTFuncOpts::Log(LoggerMSGType t, std::string msg)
+void TSTFuncOpts::Log(
+    LoggerMSGType                           t,
+    wayround_i2p::ccutils::unicode::UString msg
+)
 {
     std::cout << std::format(
         "[{}] [{}] [{}:{}] {}",
-        icon_by_type(t),
-        timestamp(),
-        this->func_info.group_name,
-        this->func_info.test_name,
-        msg
+        icon_by_type(t).string_utf8(),
+        timestamp().string_utf8(),
+        this->func_info.group_name.string_utf8(),
+        this->func_info.test_name.string_utf8(),
+        msg.string_utf8()
     )
               << std::endl;
 }
 
 void run_tests_Parameters::Log(
-    LoggerMSGType t,
-    std::string   msg
+    LoggerMSGType                           t,
+    wayround_i2p::ccutils::unicode::UString msg
 )
 {
     std::cout << std::format(
         "[{}] [{}] {}",
-        icon_by_type(t),
-        timestamp(),
-        msg
+        icon_by_type(t).string_utf8(),
+        timestamp().string_utf8(),
+        msg.string_utf8()
     )
               << std::endl;
 }
@@ -120,8 +123,8 @@ int run_tests_Parameters::AddTest(
     {
         std::cerr << std::format(
             " trying to redefine {}:{}",
-            info.group_name,
-            info.test_name
+            info.group_name.string_utf8(),
+            info.test_name.string_utf8()
         ) << std::endl;
         return 1;
     }
@@ -131,23 +134,23 @@ int run_tests_Parameters::AddTest(
 
 void print_head(run_tests_Parameters &tlo)
 {
-    std::string for_string = "WayRound.I2P's tool";
-    std::string for_string_line;
-    std::string desc_string;
-    std::string uri_string;
-    std::string ver_string;
-    std::string mod_string;
+    wayround_i2p::ccutils::unicode::UString for_string = "WayRound.I2P's tool";
+    wayround_i2p::ccutils::unicode::UString for_string_line;
+    wayround_i2p::ccutils::unicode::UString desc_string;
+    wayround_i2p::ccutils::unicode::UString uri_string;
+    wayround_i2p::ccutils::unicode::UString ver_string;
+    wayround_i2p::ccutils::unicode::UString mod_string;
 
     if (tlo.title != "")
     {
         for_string = std::format(
             "{} (test suite created with {})",
-            tlo.title,
-            for_string
+            tlo.title.string_utf8(),
+            for_string.string_utf8()
         );
     }
 
-    for_string = "  " + for_string;
+    for_string = "  " + for_string.string_utf8();
 
     for (auto i = 0; i != for_string.size() + 2; i++)
     {
@@ -158,7 +161,7 @@ void print_head(run_tests_Parameters &tlo)
     {
         desc_string = std::format(
             "description    |   {}\n",
-            tlo.description
+            tlo.description.string_utf8()
         );
     }
 
@@ -166,7 +169,7 @@ void print_head(run_tests_Parameters &tlo)
     {
         uri_string = std::format(
             "uri            |   {}\n",
-            tlo.uri
+            tlo.uri.string_utf8()
         );
     }
 
@@ -174,7 +177,7 @@ void print_head(run_tests_Parameters &tlo)
     {
         ver_string = std::format(
             "version        |   {}\n",
-            tlo.version
+            tlo.version.string_utf8()
         );
     }
 
@@ -182,7 +185,7 @@ void print_head(run_tests_Parameters &tlo)
     {
         mod_string = std::format(
             "modified date  |   {}\n",
-            tlo.mod_date
+            tlo.mod_date.string_utf8()
         );
     }
 
@@ -191,12 +194,12 @@ void print_head(run_tests_Parameters &tlo)
 {1}
 {0:}
 {2}{3}{4}{5})+++",
-        for_string_line,
-        for_string,
-        desc_string,
-        uri_string,
-        ver_string,
-        mod_string
+        for_string_line.string_utf8(),
+        for_string.string_utf8(),
+        desc_string.string_utf8(),
+        uri_string.string_utf8(),
+        ver_string.string_utf8(),
+        mod_string.string_utf8()
     ) << std::endl;
 }
 
@@ -254,7 +257,7 @@ int run_tests(int argc, char **args, run_tests_Parameters &rtp)
             }
         );
 
-        rtp.Log(Status, std::format("next group is: {}", group_name));
+        rtp.Log(Status, std::format("next group is: {}", group_name.string_utf8()));
 
         if (
             auto group_itr = rtp.groups.find(
@@ -263,7 +266,7 @@ int run_tests(int argc, char **args, run_tests_Parameters &rtp)
             group_itr == std::end(rtp.groups)
         )
         {
-            rtp.Log(Error, std::format("'{}' not in groups", group_name));
+            rtp.Log(Error, std::format("'{}' not in groups", group_name.string_utf8()));
             ret = 1;
             return ret;
         }
@@ -277,7 +280,7 @@ int run_tests(int argc, char **args, run_tests_Parameters &rtp)
                 Status,
                 std::format(
                     "group {} contains {} test(s)",
-                    group_name,
+                    group_name.string_utf8(),
                     group.test_order.size()
                 )
             );
@@ -303,8 +306,8 @@ int run_tests(int argc, char **args, run_tests_Parameters &rtp)
                         Error,
                         std::format(
                             "'{}' not in tests of group {}",
-                            test_name,
-                            group_name
+                            test_name.string_utf8(),
+                            group_name.string_utf8()
                         )
                     );
                     ret = 2;
@@ -330,8 +333,8 @@ int run_tests(int argc, char **args, run_tests_Parameters &rtp)
                             Error,
                             std::format(
                                 "function not defined in '{}:{}'",
-                                test_name,
-                                group_name
+                                test_name.string_utf8(),
+                                group_name.string_utf8()
                             )
                         );
                         ret = 3;

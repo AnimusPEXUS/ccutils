@@ -2,6 +2,7 @@
 #define WAYROUND_I2P_20240516_194621_134382
 
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -46,8 +47,9 @@ class UString
     std::tuple<byte_vector, error_ptr> encode(std::string encoding = "utf-8");
 
     size_t length();
+    size_t size();
 
-    std::string string_utf8();
+    std::string string_utf8() const;
 
     UChar operator[](std::int32_t offset);
 
@@ -62,6 +64,12 @@ class UString
 
     friend bool operator==(
         const UString &lhs,
+        const UString
+            &rhs
+    );
+
+    friend bool operator<(
+        const UString &lhs,
         const UString &rhs
     );
 
@@ -70,7 +78,18 @@ class UString
         const char    *rhs
     );
 
-    friend std::ostream &operator<<(std::ostream &os, const UString &obj);
+    friend std::ostream &operator<<(
+        std::ostream &os,
+        const UString
+            &obj
+    );
+
+    /*
+    friend std::ostringstream & operator<<(
+        std::ostringstream &os,
+        const UString      &obj
+    );
+*/
 
   private:
     icu::UnicodeString data;
@@ -86,6 +105,11 @@ bool operator!=(
     const UString &rhs
 );
 
+bool operator<(
+    const UString &lhs,
+    const UString &rhs
+);
+
 bool operator==(
     const UString &lhs,
     const char    *rhs
@@ -96,8 +120,50 @@ bool operator!=(
     const char    *rhs
 );
 
-std::ostream &operator<<(std::ostream &os, const UString &obj);
+std::ostream &operator<<(
+    std::ostream  &os,
+    const UString &obj
+);
 
 } // namespace wayround_i2p::ccutils::unicode
+
+/*
+
+template <>
+struct std::formatter<wayround_i2p::ccutils::unicode::UString, char>
+{
+    template <class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext &ctx)
+    {
+        auto it = ctx.begin();
+
+        if (it == ctx.end())
+        {
+            return it;
+        }
+
+        if (it != ctx.end() && *it != '}')
+        {
+            throw std::format_error("Invalid format args for UString.");
+        }
+
+        return it;
+    }
+
+    template <class FmtContext>
+    FmtContext::iterator format(
+        wayround_i2p::ccutils::unicode::UString s,
+        FmtContext                             &ctx
+    ) const
+    {
+        std::ostringstream out;
+
+        out << s; // .string_utf8().c_str();
+
+        return std::ranges::copy(std::move(out).str(), ctx.out()).out;
+    }
+};
+
+*/
 
 #endif

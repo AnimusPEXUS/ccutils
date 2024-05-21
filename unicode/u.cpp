@@ -76,7 +76,12 @@ size_t UString::length()
     return this->data.length();
 }
 
-std::string UString::string_utf8()
+size_t UString::size()
+{
+    return length();
+}
+
+std::string UString::string_utf8() const
 {
     std::string ret;
     ret = data.toUTF8String(ret);
@@ -99,6 +104,14 @@ bool operator!=(
     return !(lhs == rhs);
 };
 
+bool operator<(
+    const UString &lhs,
+    const UString &rhs
+)
+{
+    return lhs.data < rhs.data;
+}
+
 bool operator==(
     const UString &lhs,
     const char    *rhs
@@ -115,7 +128,10 @@ bool operator!=(
     return !(lhs == rhs);
 };
 
-std::ostream &operator<<(std::ostream &os, const UString &obj)
+std::ostream &operator<<(
+    std::ostream  &os,
+    const UString &obj
+)
 {
     os << obj.data;
     return os;

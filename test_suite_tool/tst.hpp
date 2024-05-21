@@ -12,6 +12,11 @@
 
 #include <experimental/scope>
 
+#include <wayround_i2p/ccutils/unicode/u.hpp>
+
+// todo: usage of .string_utf8() everywhere in std::format() is disgusting
+//       fix this
+
 namespace wayround_i2p::ccutils::tst
 {
 
@@ -28,7 +33,8 @@ enum LoggerMSGType : unsigned char
     UnexpectedSuccess
 };
 
-std::string icon_by_type(LoggerMSGType);
+wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType);
+wayround_i2p::ccutils::unicode::UString timestamp();
 
 struct TSTInfo;
 
@@ -39,7 +45,7 @@ struct TSTFuncOpts
     // iitm - ingroup_inter_test_memory
     std::map<std::string, std::any> &iitm;
 
-    void Log(LoggerMSGType, std::string);
+    void Log(LoggerMSGType, wayround_i2p::ccutils::unicode::UString);
 };
 
 struct TSTFuncResult
@@ -51,10 +57,10 @@ using TST_TEST_FUNCTION = std::function<TSTFuncResult(TSTFuncOpts &)>;
 
 struct TSTInfo
 {
-    std::string group_name;
-    std::string test_name;
-    std::string description_short;
-    std::string description;
+    wayround_i2p::ccutils::unicode::UString group_name;
+    wayround_i2p::ccutils::unicode::UString test_name;
+    wayround_i2p::ccutils::unicode::UString description_short;
+    wayround_i2p::ccutils::unicode::UString description;
 
     bool expected_failure = false;
 
@@ -63,21 +69,21 @@ struct TSTInfo
 
 struct GroupsMapItem
 {
-    std::vector<std::string>         test_order;
-    std::map<std::string, TSTInfo &> tests;
+    std::vector<wayround_i2p::ccutils::unicode::UString>         test_order;
+    std::map<wayround_i2p::ccutils::unicode::UString, TSTInfo &> tests;
 };
 
 struct run_tests_Parameters
 {
-    std::string                          title = "(not set)";
-    std::string                          description;
-    std::string                          uri;
-    std::string                          version;
-    std::string                          mod_date;
-    std::vector<std::string>             group_order;
-    std::map<std::string, GroupsMapItem> groups;
+    wayround_i2p::ccutils::unicode::UString                          title = "(not set)";
+    wayround_i2p::ccutils::unicode::UString                          description;
+    wayround_i2p::ccutils::unicode::UString                          uri;
+    wayround_i2p::ccutils::unicode::UString                          version;
+    wayround_i2p::ccutils::unicode::UString                          mod_date;
+    std::vector<wayround_i2p::ccutils::unicode::UString>             group_order;
+    std::map<wayround_i2p::ccutils::unicode::UString, GroupsMapItem> groups;
 
-    void Log(LoggerMSGType, std::string);
+    void Log(LoggerMSGType, wayround_i2p::ccutils::unicode::UString);
     int  AddTest(TSTInfo &info);
 };
 

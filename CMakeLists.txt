@@ -156,6 +156,7 @@ create_ccutils_component(
   tst
 
   LIBS_PUB
+  ccutils_unicode
 )
 
 

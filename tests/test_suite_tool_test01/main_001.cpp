@@ -14,9 +14,9 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_001(
     };
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_001i = {
+wayround_i2p::ccutils::tst::TSTInfo main_001_i = {
     .group_name        = "main",
-    .test_name         = "main_001i",
+    .test_name         = "001",
     .description_short = "sample test description",
     .description       = "long test description",
     .expected_failure  = true,
