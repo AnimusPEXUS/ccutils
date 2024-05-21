@@ -14,9 +14,6 @@
 
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
-// todo: usage of .string_utf8() everywhere in std::format() is disgusting
-//       fix this
-
 namespace wayround_i2p::ccutils::tst
 {
 

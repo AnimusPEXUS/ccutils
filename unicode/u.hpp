@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -85,7 +86,7 @@ class UString
     );
 
     /*
-    friend std::ostringstream & operator<<(
+    friend std::ostringstream &operator<<(
         std::ostringstream &os,
         const UString      &obj
     );
@@ -125,12 +126,16 @@ std::ostream &operator<<(
     const UString &obj
 );
 
+/*
+std::ostringstream &operator<<(
+    std::ostringstream &os,
+    const UString      &obj
+);*/
+
 } // namespace wayround_i2p::ccutils::unicode
 
-/*
-
 template <>
-struct std::formatter<wayround_i2p::ccutils::unicode::UString, char>
+struct std::formatter<wayround_i2p::ccutils::unicode::UString>
 {
     template <class ParseContext>
     constexpr ParseContext::iterator parse(ParseContext &ctx)
@@ -158,12 +163,10 @@ struct std::formatter<wayround_i2p::ccutils::unicode::UString, char>
     {
         std::ostringstream out;
 
-        out << s; // .string_utf8().c_str();
+        out << s.string_utf8();
 
         return std::ranges::copy(std::move(out).str(), ctx.out()).out;
     }
 };
-
-*/
 
 #endif

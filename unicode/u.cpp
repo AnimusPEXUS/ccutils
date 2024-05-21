@@ -59,18 +59,6 @@ UString &UString::operator+=(UString &&other)
     return *this;
 }
 
-UString::operator std::string()
-{
-    return this->string_utf8();
-}
-
-/*
-UString::operator const char *()
-{
-    return this->string_utf8().c_str();
-}
-*/
-
 size_t UString::length()
 {
     return this->data.length();
@@ -95,6 +83,18 @@ bool operator==(
 {
     return lhs.data == rhs.data;
 };
+
+UString::operator std::string()
+{
+    return this->string_utf8();
+}
+
+/*
+UString::operator const char *()
+{
+    return this->string_utf8().c_str();
+}
+*/
 
 bool operator!=(
     const UString &lhs,
@@ -136,5 +136,21 @@ std::ostream &operator<<(
     os << obj.data;
     return os;
 }
+
+/*
+// todo: this does not work. fix this
+// todo: create separate test for this
+// testname: xxx_yyy ?
+std::ostringstream &operator<<(
+    std::ostringstream &os,
+    const UString      &obj
+)
+{
+    os.str() = std::string(obj.string_utf8());
+    // os << obj.string_utf8();
+    // os << obj.string_utf8();
+    return os;
+}
+*/
 
 } // namespace wayround_i2p::ccutils::unicode
