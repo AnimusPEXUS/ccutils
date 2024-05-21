@@ -4,7 +4,7 @@
 
 ## About
 
-Test Suite Tool - is tool for creating test suite for C++ code.
+Test Suite Tool - is tool for creating test suites for C++ code.
 
 ## How to Use
 
@@ -17,7 +17,7 @@ Test Suite Tool - is tool for creating test suite for C++ code.
 ## Groups {#groups}
 
 Tests are separated by groups. You place test in some group by assigning
-name of group to group_name field of test's TSTInfo struct.
+name of group to `group_name` field of test's `TSTInfo` struct.
 
 Groups are used for visual separation of tests.
 
@@ -37,22 +37,24 @@ Here we see **t.cpp**, which contains `main()` function for test suite and some
 `t.cpp` `#include`s those `main_xxx.cpp` files, so tests become 
 available before `main()` function declaration.
 
-Order of main_xxx.cpp files inclusion is not important. also main_xxx.cpp files
-can be separated in separate dirs if needed.
+Order of `main_xxx.cpp` files inclusion is not important. also `main_xxx.cpp` 
+files can be separated in separate dirs if needed 
+(maybe if there will be a huge amount of them).
 
-Also note 'main' part in main_xxx.cpp file names is just for obviousity of 
+Also note 'main' part in `main_xxx.cpp` file names is just for obviousity of 
 their belonging to 'main' tests [group](#groups).
 
-In main(), you create wayround_i2p::ccutils::tst::run_tests_Parameters 
+Inside of `main()`, you create `wayround_i2p::ccutils::tst::run_tests_Parameters` 
 structure as you like and add tests into it.
-To add tests you can:
+To add tests into `wayround_i2p::ccutils::tst::run_tests_Parameters `
+structure you can:
 
 - manually construct values for `group_order` and `groups` 
 fields
-- use `AddTest()` function shortcut, whci automatically creates groups and 
+- use `AddTest()` function shortcut, which automatically creates groups and 
   ordering lists. <span style="color:maroon;">note:</span> order or callings to 
- `AddTest()` is important, as this will influence order of groups in tests in 
- them. ofcourse, ordering of groups and tests can be redefined, by redefining
+ `AddTest()` is important, as this will influence order of groups and tests in 
+ them. Of-course, ordering of groups and tests can be redefined, by redefining
  corresponding fields under `groups` field's value.
 
 ### More Examples
