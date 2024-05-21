@@ -34,8 +34,10 @@ struct TSTInfo;
 
 struct TSTFuncOpts
 {
-    TSTInfo                        &func_info;
-    std::map<std::string, std::any> ingroup_inter_test_memory;
+    TSTInfo &func_info;
+
+    // iitm - ingroup_inter_test_memory
+    std::map<std::string, std::any> &iitm;
 
     void Log(LoggerMSGType, std::string);
 };

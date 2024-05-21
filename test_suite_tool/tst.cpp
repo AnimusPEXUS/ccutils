@@ -49,6 +49,11 @@ std::string timestamp()
     return std::format("{0:%F}T{0:%T}z", t);
 }
 
+/*
+    TSTFuncOpts() {}
+    ~TSTFuncOpts() {};
+*/
+
 void TSTFuncOpts::Log(LoggerMSGType t, std::string msg)
 {
     std::cout << std::format(
@@ -266,7 +271,7 @@ int run_tests(run_tests_Parameters &rtp)
         {
             GroupsMapItem &group = std::get<1>(*group_itr);
 
-            std::map<std::string, std::any> ingroup_inter_test_memory = {};
+            std::map<std::string, std::any> iitm = {};
 
             rtp.Log(
                 Status,
@@ -310,9 +315,10 @@ int run_tests(run_tests_Parameters &rtp)
 
                     TSTInfo &x = std::get<1>(*test_itr);
 
-                    TSTFuncOpts opts(x);
-                    opts.func_info                 = x;
-                    opts.ingroup_inter_test_memory = ingroup_inter_test_memory;
+                    TSTFuncOpts opts{
+                        .func_info = x,
+                        .iitm      = iitm
+                    };
 
                     total_count++;
 

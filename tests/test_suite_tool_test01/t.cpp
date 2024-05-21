@@ -15,7 +15,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult test_001(
         "setting iim[\"x\"] to 123.."
     );
 
-    opts.ingroup_inter_test_memory["x"] = 123;
+    opts.iitm["x"] = 123;
 
     return {
         true
@@ -39,7 +39,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult test_002(
         wayround_i2p::ccutils::tst::Info,
         std::format(
             "getting iim[\"x\"]..: {}",
-            opts.ingroup_inter_test_memory["x"].type().name()
+            std::any_cast<int>(opts.iitm["x"])
         )
     );
 
