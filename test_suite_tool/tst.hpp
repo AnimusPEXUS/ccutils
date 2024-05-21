@@ -63,8 +63,8 @@ struct TSTInfo
 
 struct GroupsMapItem
 {
-    std::vector<std::string>       test_order;
-    std::map<std::string, TSTInfo> tests;
+    std::vector<std::string>         test_order;
+    std::map<std::string, TSTInfo &> tests;
 };
 
 struct run_tests_Parameters
@@ -78,7 +78,7 @@ struct run_tests_Parameters
     std::map<std::string, GroupsMapItem> groups;
 
     void Log(LoggerMSGType, std::string);
-    int  AddTest(TSTInfo info);
+    int  AddTest(TSTInfo &info);
 };
 
 int run_tests(int argc, char **args, run_tests_Parameters &tl);

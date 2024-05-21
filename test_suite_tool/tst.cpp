@@ -82,7 +82,7 @@ void run_tests_Parameters::Log(
 }
 
 int run_tests_Parameters::AddTest(
-    TSTInfo info
+    TSTInfo &info
 )
 {
     if (std::find(
@@ -114,7 +114,7 @@ int run_tests_Parameters::AddTest(
 
     if (grp.tests.find(info.test_name) == grp.tests.end())
     {
-        grp.tests[info.test_name] = info;
+        grp.tests.insert({info.test_name, info});
     }
     else
     {
