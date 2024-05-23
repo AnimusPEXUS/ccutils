@@ -4,5 +4,3 @@
 *.o
 *.so
 *~
-/tests/akigo_test01/t_net_unix_client_go
-/tests/akigo_test01/t_net_unix_server_go
