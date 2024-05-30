@@ -148,7 +148,7 @@ void print_head(const run_tests_Parameters &tlo)
 
     for_string = wayround_i2p::ccutils::unicode::UString("  ") + for_string;
 
-    for (auto i = 0; i != for_string.size() + 2; i++)
+    for (auto i = 0; i != for_string.length() + 2; i++)
     {
         for_string_line += "-";
     }

@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240516_194621_134382
-#define WAYROUND_I2P_20240516_194621_134382
+#ifndef WAYROUND_I2P_20240527_064240_395562
+#define WAYROUND_I2P_20240527_064240_395562
 
 #include <cstdint>
 #include <iostream>
@@ -23,32 +23,52 @@ using byte_vector = std::vector<std::uint8_t>;
 class error;
 using error_ptr = std::shared_ptr<error>;
 
-class UChar
+// class UString;
+
+struct UChar
 {
   public:
-    UChar();
+    UChar(std::int32_t val);
     ~UChar();
 
+    friend class UString;
+
   private:
-    UChar32 chr;
+    const UChar32 chr;
 };
 
 class UString
 {
+    // todo: investigate wiser resource usage
+    // todo: use `constexpr` in constructors?
+
   public:
     UString();
 
-    // todo: make wise copy constructor
+    UString(
+        const char *val,
+        std::string encoding = "utf-8"
+    );
 
-    UString(const char *val, std::string encoding = "utf-8");
-    UString(std::string val, std::string encoding = "utf-8");
+    UString(
+        const std::string &val,
+        std::string        encoding = "utf-8"
+    );
+
+    UString(
+        const std::vector<UChar> &val
+    );
 
     ~UString();
 
     std::tuple<byte_vector, error_ptr> encode(std::string encoding = "utf-8");
 
-    size_t length();
-    size_t size();
+    size_t length() const;
+    // size_t size() const;
+
+    // note: result will be shorter than `length` if
+    //       `length` going outside of string
+    UString substr(size_t pos, size_t length) const;
 
     std::string string_utf8() const;
 

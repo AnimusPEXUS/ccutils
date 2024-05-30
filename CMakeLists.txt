@@ -175,6 +175,22 @@ create_ccutils_component(
 )
 
 create_ccutils_component(
+  TARGETNAME ccutils_regexp
+  SUBDIR regexp
+
+  SOURCES
+  regexp
+
+  HEADERS
+  regexp
+
+  LIBS_PUB
+  ccutils_unicode
+  ccutils_error
+)
+
+
+create_ccutils_component(
   TARGETNAME ccutils_unicode
   SUBDIR unicode
 

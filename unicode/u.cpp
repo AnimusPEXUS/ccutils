@@ -4,16 +4,28 @@
 namespace wayround_i2p::ccutils::unicode
 {
 
-UString::UString()
+UChar::UChar(std::int32_t val) :
+    chr(val)
 {
-    data = "";
+}
+
+UChar::~UChar()
+{
+}
+
+UString::UString() :
+    data("")
+{
 }
 
 UString::~UString()
 {
 }
 
-UString::UString(const char *val, std::string encoding) :
+UString::UString(
+    const char *val,
+    std::string encoding
+) :
     UString()
 {
     if (encoding == "utf-8")
@@ -25,7 +37,10 @@ UString::UString(const char *val, std::string encoding) :
     throw wayround_i2p::ccutils::errors::New("invalid 'encoding'");
 }
 
-UString::UString(std::string val, std::string encoding) :
+UString::UString(
+    const std::string &val,
+    std::string        encoding
+) :
     UString()
 {
     if (encoding == "utf-8")
@@ -35,6 +50,23 @@ UString::UString(std::string val, std::string encoding) :
     }
 
     throw wayround_i2p::ccutils::errors::New("invalid 'encoding'");
+}
+
+UString::UString(
+    const std::vector<UChar> &val
+) :
+    UString()
+{
+    auto vs = val.size();
+
+    std::vector<int32_t> vec(vs);
+    for (size_t i = 0; i != vs; i++)
+    {
+        vec[i] = val[i].chr;
+    }
+    //    data = icu::UnicodeString::fromUTF32(reinterpret_cast<int *>(vec.data()));
+    data = icu::UnicodeString::fromUTF32(vec.data(), vs);
+    return;
 }
 
 UString UString::operator+(UString &other)
@@ -59,20 +91,34 @@ UString &UString::operator+=(UString &&other)
     return *this;
 }
 
-size_t UString::length()
+size_t UString::length() const
 {
     return this->data.length();
 }
 
-size_t UString::size()
+/*
+size_t UString::size() const
 {
     return length();
+} */
+
+UString UString::substr(size_t pos, size_t length) const
+{
+    UString x;
+    this->data.extract(pos, length, x.data);
+    return x;
 }
 
 std::string UString::string_utf8() const
 {
     std::string ret;
     ret = data.toUTF8String(ret);
+    return ret;
+}
+
+UChar UString::operator[](std::int32_t offset)
+{
+    UChar ret(this->data.char32At(offset));
     return ret;
 }
 
