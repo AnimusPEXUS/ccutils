@@ -91,7 +91,7 @@ const Result_shared match(
                 }
                 case 1:
                 {
-                    if (substr == UString(std::vector<UChar>{0x1a}))
+                    if (substr == std::vector<UChar>{0x0a})
                     {
                         ret->matched   = true;
                         ret->match_end = ret->match_start + 1;
