@@ -16,6 +16,7 @@ target_link_libraries(
     ccutils_regexp_test01
     PUBLIC
     ccutils_unicode
+    ccutils_regexp
     ccutils_test_suite_tool
     )
 

@@ -4,6 +4,11 @@
 namespace wayround_i2p::ccutils::unicode
 {
 
+UChar::UChar() :
+    chr(0)
+{
+}
+
 UChar::UChar(std::int32_t val) :
     chr(val)
 {
@@ -13,12 +18,18 @@ UChar::~UChar()
 {
 }
 
-UString::UString() :
-    data("")
+std::int32_t UChar::as_int32() const
 {
+    return chr;
 }
 
-UString::~UString()
+UString UChar::repr_as_text()
+{
+    return std::format(R"++(\x{:#04x})++", chr);
+}
+
+UString::UString() :
+    data("")
 {
 }
 
@@ -62,33 +73,15 @@ UString::UString(
     std::vector<int32_t> vec(vs);
     for (size_t i = 0; i != vs; i++)
     {
-        vec[i] = val[i].chr;
+        vec[i] = val[i].as_int32();
     }
     //    data = icu::UnicodeString::fromUTF32(reinterpret_cast<int *>(vec.data()));
     data = icu::UnicodeString::fromUTF32(vec.data(), vs);
     return;
 }
 
-UString UString::operator+(UString &other)
+UString::~UString()
 {
-    auto x = data.append(other.data);
-
-    auto z = UString();
-    z.data = x;
-
-    return z;
-}
-
-UString &UString::operator+=(UString &other)
-{
-    data = data.append(other.data);
-    return *this;
-}
-
-UString &UString::operator+=(UString &&other)
-{
-    data = data.append(other.data);
-    return *this;
 }
 
 size_t UString::length() const
@@ -116,10 +109,72 @@ std::string UString::string_utf8() const
     return ret;
 }
 
+std::vector<UChar> UString::vector_UChar() const
+{
+    auto               tl = this->length();
+    std::vector<UChar> ret(tl);
+    for (size_t i = 0; i != tl; i++)
+    {
+        // (reinterpret_cast<UChar *>(ret.data()))[i] = UChar(data.char32At(i));
+        // ret[i] = UChar(reinterpret_cast<std::int32_t>(data.char32At(i)));
+        ret[i] = UChar(data.char32At(i));
+    }
+    return ret;
+}
+
+UString UString::repr_as_text()
+{
+    std::string ret;
+
+    auto tl = this->length();
+
+    if (tl > 1)
+    {
+        for (size_t i = 0; i != tl - 1; i++)
+        {
+            auto x  = this[i].repr_as_text();
+            ret    += x;
+            ret    += ", ";
+        }
+    }
+
+    ret = "[" + ret + "]";
+
+    return ret;
+}
+
 UChar UString::operator[](std::int32_t offset)
 {
     UChar ret(this->data.char32At(offset));
     return ret;
+}
+
+UString UString::operator+(UString &other)
+{
+    auto x = data.append(other.data);
+
+    auto z = UString();
+    z.data = x;
+
+    return z;
+}
+
+UString &UString::operator+=(UString &other)
+{
+    data = data.append(other.data);
+    return *this;
+}
+
+// todo: is this really functional
+UString &UString::operator+=(UString &&other)
+{
+    data = data.append(other.data);
+    return *this;
+}
+
+UString::operator std::string()
+{
+    return this->string_utf8();
 }
 
 bool operator==(
@@ -129,11 +184,6 @@ bool operator==(
 {
     return lhs.data == rhs.data;
 };
-
-UString::operator std::string()
-{
-    return this->string_utf8();
-}
 
 /*
 UString::operator const char *()

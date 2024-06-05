@@ -146,21 +146,6 @@ function(create_ccutils_component)
 endfunction()
 
 create_ccutils_component(
-  TARGETNAME ccutils_test_suite_tool
-  SUBDIR test_suite_tool
-
-  SOURCES
-  tst
-
-  HEADERS
-  tst
-
-  LIBS_PUB
-  ccutils_unicode
-)
-
-
-create_ccutils_component(
   TARGETNAME ccutils_errors
   SUBDIR errors
 
@@ -173,22 +158,6 @@ create_ccutils_component(
   LIBS_PUB
   ccutils_unicode
 )
-
-create_ccutils_component(
-  TARGETNAME ccutils_regexp
-  SUBDIR regexp
-
-  SOURCES
-  regexp
-
-  HEADERS
-  regexp
-
-  LIBS_PUB
-  ccutils_unicode
-  ccutils_error
-)
-
 
 create_ccutils_component(
   TARGETNAME ccutils_unicode
@@ -205,6 +174,7 @@ create_ccutils_component(
   ICU::i18n
   ICU::io
   ccutils_errors
+  ccutils_repr
 
   INC_DIRS_PUB
   ICU::uc
@@ -212,6 +182,58 @@ create_ccutils_component(
   ICU::io
   ${ccutils_errors_INCLUDE_DIRS}
 )
+
+
+
+create_ccutils_component(
+  TARGETNAME ccutils_repr
+  SUBDIR repr
+
+  SOURCES
+  repr
+
+  HEADERS
+  repr
+
+  LIBS_PUB
+  ccutils_unicode
+  ccutils_errors
+)
+
+
+create_ccutils_component(
+  TARGETNAME ccutils_regexp
+  SUBDIR regexp
+
+  SOURCES
+  regexp
+
+  HEADERS
+  regexp
+
+  LIBS_PUB
+  ccutils_unicode
+  ccutils_errors
+)
+
+
+
+create_ccutils_component(
+  TARGETNAME ccutils_test_suite_tool
+  SUBDIR test_suite_tool
+
+  SOURCES
+  tst
+
+  HEADERS
+  tst
+
+  LIBS_PUB
+  ccutils_unicode
+)
+
+
+
 
 create_ccutils_component(
   TARGETNAME ccutils_worker01

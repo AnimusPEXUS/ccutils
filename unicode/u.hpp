@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240527_064240_395562
-#define WAYROUND_I2P_20240527_064240_395562
+#ifndef WAYROUND_I2P_20240601_083133_756609
+#define WAYROUND_I2P_20240601_083133_756609
 
 #include <cstdint>
 #include <iostream>
@@ -14,7 +14,12 @@
 #include <unicode/ustream.h>
 #include <unicode/utypes.h>
 
-// #include <wayround_i2p/ccutils/errors/e.hpp>
+#include <wayround_i2p/ccutils/repr/repr.hpp>
+
+namespace wayround_i2p::ccutils::repr
+{
+class RepresentableAsText;
+}
 
 namespace wayround_i2p::ccutils::unicode
 {
@@ -25,16 +30,21 @@ using error_ptr = std::shared_ptr<error>;
 
 // class UString;
 
-struct UChar
+struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
   public:
+    UChar();
     UChar(std::int32_t val);
     ~UChar();
 
-    friend class UString;
+    std::int32_t as_int32() const;
+
+    UString repr_as_text();
+
+    // friend class UString;
 
   private:
-    const UChar32 chr;
+    UChar32 chr; // todo: can't make this const?
 };
 
 class UString
@@ -64,6 +74,8 @@ class UString
     std::tuple<byte_vector, error_ptr> encode(std::string encoding = "utf-8");
 
     size_t length() const;
+
+    // todo: return size in bytes
     // size_t size() const;
 
     // note: result will be shorter than `length` if
@@ -72,16 +84,18 @@ class UString
 
     std::string string_utf8() const;
 
+    std::vector<UChar> vector_UChar() const;
+
+    UString repr_as_text();
+
     UChar operator[](std::int32_t offset);
 
     UString operator+(UString &other);
-    // UString operator+(std::string &other);
 
     UString &operator+=(UString &other);
     UString &operator+=(UString &&other);
 
     operator std::string();
-    // operator const char *();
 
     friend bool operator==(
         const UString &lhs,
@@ -104,13 +118,6 @@ class UString
         const UString
             &obj
     );
-
-    /*
-    friend std::ostringstream &operator<<(
-        std::ostringstream &os,
-        const UString      &obj
-    );
-*/
 
   private:
     icu::UnicodeString data;

@@ -6,5 +6,6 @@ then
     exit 0
 fi
 
+#cd ./build && cmake "$@"
 cmake --build ./build
 

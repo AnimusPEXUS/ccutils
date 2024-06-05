@@ -323,7 +323,13 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
 
                     total_count++;
 
-                    opts.Log(Status, std::format("starting"));
+                    opts.Log(
+                        Status,
+                        std::format(
+                            "starting: {}",
+                            x.description_short
+                        )
+                    );
 
                     if (!x.func)
                     {
