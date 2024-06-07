@@ -15,25 +15,25 @@ wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
             break;
         case Text:
         case Status:
-            icon = "...";
+            icon = "   ";
             break;
         case Info:
-            icon = "-i-";
+            icon = " i ";
             break;
         case Warning:
-            icon = "-!-";
+            icon = " ! ";
             break;
         case Error:
-            icon = "-E-";
+            icon = " e ";
             break;
         case Failure:
-            icon = "!F!";
+            icon = " f ";
             break;
         case Success:
-            icon = "+s+";
+            icon = " S ";
             break;
         case ExpectedFailure:
-            icon = "-f-";
+            icon = " / ";
             break;
         case UnexpectedSuccess:
             icon = "O_O";
@@ -350,12 +350,12 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                     {
                         if (x.expected_failure)
                         {
-                            opts.Log(UnexpectedSuccess, "unexpected success B-)");
+                            opts.Log(UnexpectedSuccess, "Test Unexpectedly Succeeded");
                             unexpected_success_list.push_back(&x);
                         }
                         else
                         {
-                            opts.Log(Success, "Success :-)");
+                            opts.Log(Success, "Test Succeeded");
                             success_list.push_back(&x);
                         }
                     }
@@ -363,12 +363,12 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                     {
                         if (x.expected_failure)
                         {
-                            opts.Log(ExpectedFailure, "as expected ... :-/");
+                            opts.Log(ExpectedFailure, "Test Expectedly Failed");
                             expected_failure_list.push_back(&x);
                         }
                         else
                         {
-                            opts.Log(Failure, "failed :-(");
+                            opts.Log(Failure, "Test Failed");
                             failure_list.push_back(&x);
                         }
                         rtp.Log(Status, "");

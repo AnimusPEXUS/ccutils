@@ -3,6 +3,8 @@
 
 #include <deque>
 
+#include <experimental/scope>
+
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
 namespace wayround_i2p::ccutils::regexp

@@ -28,6 +28,16 @@ const Result_shared match(
 
     auto ret = Result::create();
 
+    auto ex01 = std::experimental::scope_exit(
+        [&ret]()
+        {
+            if (!ret->matched)
+            {
+                ret->match_end = ret->match_start;
+            }
+        }
+    );
+
     ret->original_subject      = subject;
     ret->corresponding_pattern = pattern;
     ret->match_start           = start_at;
@@ -105,7 +115,8 @@ const Result_shared match(
                 }
                 case 2:
                 {
-                    if (substr == std::vector<UChar>{0x0d, 0x0a})
+                    if (substr == std::vector<UChar>{0x0d, 0x0a}
+                        || substr == std::vector<UChar>{0x0a, 0x0d})
                     {
                         ret->matched   = true;
                         ret->match_end = ret->match_start + 2;
@@ -113,8 +124,17 @@ const Result_shared match(
                     }
                     else
                     {
-                        ret->matched = false;
-                        return ret;
+                        if (substr[0] == 0x0a)
+                        {
+                            ret->matched   = true;
+                            ret->match_end = ret->match_start + 1;
+                            return ret;
+                        }
+                        else
+                        {
+                            ret->matched = false;
+                            return ret;
+                        }
                     }
                 }
             }

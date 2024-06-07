@@ -1,14 +1,35 @@
+#include <experimental/scope>
+
 #include <wayround_i2p/ccutils/regexp/regexp.hpp>
 
 wayround_i2p::ccutils::tst::TSTFuncResult main_001(
     const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
 )
 {
+    opts.Log(
+        wayround_i2p::ccutils::tst::Status,
+        "setting test subject to ingroup memory"
+    );
 
     opts.iitm["test_subject_001"] = wayround_i2p::ccutils::unicode::UString(
         "test subject for testing regular expressions.\n\n"
         "it also contains some separate lines,\n"
         "which is cool for newline detection"
+    );
+
+    auto t00 = wayround_i2p::ccutils::unicode::UString(
+        "-----( cut line )-----"
+    );
+
+    opts.Log(
+        wayround_i2p::ccutils::tst::Status,
+        std::format(
+            "    test subject is:\n{1:}\n{0:}\n{1:}",
+            std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+                opts.iitm["test_subject_001"]
+            ),
+            t00
+        )
     );
 
     return {
@@ -28,17 +49,87 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
 {
     int failed_count = 0;
 
-    for (auto &subj01 : std::vector<std::tuple<
-             std::string, // test subject
-             bool         // failure is good?
-             >>{
-             {R"xx(\n)xx",   false},
-             {R"xx(\r\n)xx", false},
-             {R"xx(\n\r)xx", true },
-             {R"xx(\r)xx",   true },
-             {R"xx()xx",     true },
-             {R"xx(  )xx",   true },
-    })
+    for (
+        auto &subj01 :
+        std::vector<
+            std::tuple<
+                std::string,  // test subject
+                bool,         // failure is good?
+                std::function<
+                    std::tuple<
+                        bool, // return true if not error
+                        std::string>(
+                        std::string subj,
+                        size_t      end
+                    )> // match_end check_cb
+                >>{
+            {"\n",
+             false,
+             [](
+                 std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 1, "must be 1"); }
+            },
+
+            {"\r\n",
+             false,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 2, "must be 2"); }
+            },
+            {"\n\r",
+             false,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 2, "must be 2"); }
+            },
+            {"\r",
+             true,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 0, "must be 0"); }
+            },
+            {"\na",
+             false,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 1, "must be 1"); }
+            },
+            {"\nb",
+             false,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 1, "must be 1"); }
+            },
+            {"\n12345",
+             false,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 1, "must be 1"); }
+            },
+            {"",
+             true,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 0, "must be 0"); }
+            },
+            {"  ",
+             true,
+             [](std::string subj,
+             size_t      end
+             ) -> std::tuple<bool, std::string>
+             { return std::tuple(end == 0, "must be 0"); }
+            },
+    }
+    )
     {
 
         auto p = wayround_i2p::ccutils::regexp::Pattern::create();
@@ -48,12 +139,43 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
         auto ts   = std::get<0>(subj01);
         auto ts_u = wayround_i2p::ccutils::unicode::UString(ts);
 
+        auto missmatch_is_ok = std::get<1>(subj01);
+        auto subj_check_cb   = std::get<2>(subj01);
+
         opts.Log(
             wayround_i2p::ccutils::tst::Status,
-            std::format("testing subject is: {}", ts)
+            std::format("testing subject is: {}", ts_u.repr_as_text())
+        );
+
+        auto ex01 = std::experimental::scope_exit(
+            [&opts]()
+            {
+                opts.Log(
+                    wayround_i2p::ccutils::tst::Status,
+                    ""
+                );
+            }
+        );
+
+        opts.Log(
+            wayround_i2p::ccutils::tst::Status,
+            std::format("  missmatch is ok?: {}", missmatch_is_ok)
         );
 
         auto res = wayround_i2p::ccutils::regexp::match(p, ts_u);
+
+        opts.Log(
+            wayround_i2p::ccutils::tst::Status,
+            std::format("   res->matched: {}", res->matched)
+        );
+        opts.Log(
+            wayround_i2p::ccutils::tst::Status,
+            std::format("   res->match_start: {}", res->match_start)
+        );
+        opts.Log(
+            wayround_i2p::ccutils::tst::Status,
+            std::format("   res->match_end: {}", res->match_end)
+        );
 
         if (!res->matched)
         {
@@ -65,29 +187,35 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
         {
             opts.Log(
                 wayround_i2p::ccutils::tst::Failure,
-                std::format("invalid match_start (must be 0): {}", res->match_start)
-            );
-            goto fail_exit;
-        }
-
-        if (res->match_end != 1)
-        {
-            opts.Log(
-                wayround_i2p::ccutils::tst::Failure,
-                std::format("invalid match_end (must be 1): {}", res->match_end)
+                std::format(
+                    "invalid match_start (must be 0): {}",
+                    res->match_start
+                )
             );
             goto fail_exit;
         }
 
         {
-            opts.Log(
-                wayround_i2p::ccutils::tst::Status,
-                "  succeeded"
-            );
+            auto res2 = subj_check_cb(ts, res->match_end);
 
+            if (!std::get<0>(res2))
+            {
+                opts.Log(
+                    wayround_i2p::ccutils::tst::Failure,
+                    std::format(
+                        "invalid match_end ({}): {}",
+                        std::get<1>(res2),
+                        res->match_end
+                    )
+                );
+                goto fail_exit;
+            }
+        }
+
+        {
             opts.Log(
                 wayround_i2p::ccutils::tst::Success,
-                "  good"
+                "  ok"
             );
 
             continue;
@@ -97,7 +225,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
             {
                 opts.Log(
                     wayround_i2p::ccutils::tst::Failure,
-                    "  failed"
+                    "  fail"
                 );
                 failed_count++;
             }

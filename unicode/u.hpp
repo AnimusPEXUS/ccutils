@@ -47,7 +47,7 @@ struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
     UChar32 chr; // todo: can't make this const?
 };
 
-class UString
+class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     // todo: investigate wiser resource usage
     // todo: use `constexpr` in constructors?
@@ -133,6 +133,16 @@ bool operator!=(
     const UString &rhs
 );
 
+bool operator==(
+    const UChar &lhs,
+    const UChar &rhs
+);
+
+bool operator!=(
+    const UChar &lhs,
+    const UChar &rhs
+);
+
 bool operator<(
     const UString &lhs,
     const UString &rhs
@@ -151,6 +161,11 @@ bool operator!=(
 std::ostream &operator<<(
     std::ostream  &os,
     const UString &obj
+);
+
+std::ostream &operator<<(
+    std::ostream &os,
+    const UChar  &obj
 );
 
 /*
@@ -176,7 +191,7 @@ struct std::formatter<wayround_i2p::ccutils::unicode::UString>
 
         if (it != ctx.end() && *it != '}')
         {
-            throw std::format_error("Invalid format args for UString.");
+            throw std::format_error("Invalid format args for UString");
         }
 
         return it;
@@ -189,6 +204,45 @@ struct std::formatter<wayround_i2p::ccutils::unicode::UString>
     ) const
     {
         std::ostringstream out;
+
+        out << s.string_utf8();
+
+        return std::ranges::copy(std::move(out).str(), ctx.out()).out;
+    }
+};
+
+template <>
+struct std::formatter<wayround_i2p::ccutils::unicode::UChar>
+{
+    template <class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext &ctx)
+    {
+        auto it = ctx.begin();
+
+        if (it == ctx.end())
+        {
+            return it;
+        }
+
+        if (it != ctx.end() && *it != '}')
+        {
+            throw std::format_error("Invalid format args for UChar");
+        }
+
+        return it;
+    }
+
+    template <class FmtContext>
+    FmtContext::iterator format(
+        wayround_i2p::ccutils::unicode::UChar c,
+        FmtContext                           &ctx
+    ) const
+    {
+        std::ostringstream out;
+
+        std::vector<wayround_i2p::ccutils::unicode::UChar> v{c};
+
+        wayround_i2p::ccutils::unicode::UString s(v);
 
         out << s.string_utf8();
 

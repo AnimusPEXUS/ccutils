@@ -25,7 +25,7 @@ std::int32_t UChar::as_int32() const
 
 UString UChar::repr_as_text()
 {
-    return std::format(R"++(\x{:#04x})++", chr);
+    return std::format(R"++({:#x})++", chr);
 }
 
 UString::UString() :
@@ -132,10 +132,15 @@ UString UString::repr_as_text()
     {
         for (size_t i = 0; i != tl - 1; i++)
         {
-            auto x  = this[i].repr_as_text();
-            ret    += x;
-            ret    += ", ";
+
+            ret += (this->operator[](i)).repr_as_text();
+            ret += ", ";
         }
+    }
+
+    if (tl > 0)
+    {
+        ret += (this->operator[](tl - 1)).repr_as_text();
     }
 
     ret = "[" + ret + "]";
@@ -185,16 +190,25 @@ bool operator==(
     return lhs.data == rhs.data;
 };
 
-/*
-UString::operator const char *()
-{
-    return this->string_utf8().c_str();
-}
-*/
-
 bool operator!=(
     const UString &lhs,
     const UString &rhs
+)
+{
+    return !(lhs == rhs);
+};
+
+bool operator==(
+    const UChar &lhs,
+    const UChar &rhs
+)
+{
+    return lhs.as_int32() == rhs.as_int32();
+};
+
+bool operator!=(
+    const UChar &lhs,
+    const UChar &rhs
 )
 {
     return !(lhs == rhs);
@@ -230,6 +244,15 @@ std::ostream &operator<<(
 )
 {
     os << obj.data;
+    return os;
+}
+
+std::ostream &operator<<(
+    std::ostream &os,
+    const UChar  &obj
+)
+{
+    os << std::format("{}", obj);
     return os;
 }
 
