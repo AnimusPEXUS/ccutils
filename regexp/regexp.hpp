@@ -1,10 +1,11 @@
 #ifndef WAYROUND_I2P_20240601_083133_764006
 #define WAYROUND_I2P_20240601_083133_764006
 
-#include <deque>
+#include <vector>
 
 #include <experimental/scope>
 
+#include <wayround_i2p/ccutils/errors/e.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
 namespace wayround_i2p::ccutils::regexp
@@ -60,7 +61,7 @@ struct Pattern;
 
 using Pattern_shared = std::shared_ptr<Pattern>;
 
-using Pattern_shared_sequence = std::deque<std::shared_ptr<Pattern>>;
+using Pattern_shared_sequence = std::vector<std::shared_ptr<Pattern>>;
 
 struct Pattern
 {
@@ -95,10 +96,12 @@ struct Result;
 
 using Result_shared = std::shared_ptr<Result>;
 
-using Result_shared_sequence = std::deque<std::shared_ptr<Result>>;
+using Result_shared_sequence = std::vector<std::shared_ptr<Result>>;
 
 struct Result
 {
+    wayround_i2p::ccutils::errors::error_ptr error;
+
     UString original_subject;
 
     bool matched;
@@ -122,25 +125,38 @@ struct Result
     std::weak_ptr<Result> own_ptr;
 };
 
+std::tuple<
+    bool,  // true = yes
+    size_t // length of split (for one of "\r\n", "\n", "\n\r")
+    >
+    isLineSplit(
+        const UString &subject,
+        std::size_t    start_at = 0
+    );
+
 // todo: add cancel/abort/limit mesures to functions
 
 const Result_shared match(
     const Pattern_shared pattern,
-    const UString        subject,
-    const std::size_t    start_at = 0
+    const UString       &subject,
+    std::size_t          start_at = 0
 );
 
 const Result_shared search(
     const Pattern_shared pattern,
-    const UString        subject,
-    const std::size_t    start_at = 0
+    const UString       &subject,
+    std::size_t          start_at = 0,
+    bool                 backward = false
 );
 
-const Result_shared_sequence findAll(
-    const Pattern_shared pattern,
-    const UString        subject,
-    const std::size_t    start_at = 0
-);
+const std::tuple<
+    const Result_shared_sequence,
+    wayround_i2p::ccutils::errors::error_ptr>
+    findAll(
+        const Pattern_shared pattern,
+        const UString       &subject,
+        std::size_t          start_at = 0
+    );
 
 } // namespace wayround_i2p::ccutils::regexp
 

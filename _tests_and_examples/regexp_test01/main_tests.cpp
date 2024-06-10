@@ -8,7 +8,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_001(
 {
     opts.Log(
         wayround_i2p::ccutils::tst::Status,
-        "setting test subject to ingroup memory"
+        "setting test subjects to ingroup memory"
     );
 
     opts.iitm["test_subject_001"] = wayround_i2p::ccutils::unicode::UString(
@@ -247,6 +247,150 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
 wayround_i2p::ccutils::tst::TSTInfo main_002_i = {
     .group_name        = "main",
     .test_name         = "002",
-    .description_short = "testing PatternType::LineSplit",
+    .description_short = "testing PatternType::LineSplit match",
     .func              = main_002
+};
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_003(
+    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+)
+{
+    auto p = wayround_i2p::ccutils::regexp::Pattern::create();
+
+    p->pattern_type = wayround_i2p::ccutils::regexp::PatternType::LineSplit;
+
+    auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+        opts.iitm["test_subject_001"]
+    );
+
+    auto res = wayround_i2p::ccutils::regexp::findAll(p, ts);
+
+    opts.Log(
+        wayround_i2p::ccutils::tst::Status,
+        "indexes of line splists in test_subject_001"
+    );
+
+    auto res_err = std::get<1>(res);
+
+    if (res_err)
+    {
+        opts.Log(
+            wayround_i2p::ccutils::tst::Failure,
+            res_err->Error()
+        );
+        return {false};
+    }
+
+    for (auto &i : std::get<0>(res))
+    {
+        opts.Log(
+            wayround_i2p::ccutils::tst::Status,
+            std::format("  {}:{}", i->match_start, i->match_end)
+        );
+    }
+
+    return {true};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_003_i = {
+    .group_name        = "main",
+    .test_name         = "003",
+    .description_short = "testing PatternType::LineSplit findAll",
+    .func              = main_003
+};
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_004(
+    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+)
+{
+    auto p = wayround_i2p::ccutils::regexp::Pattern::create();
+
+    p->pattern_type = wayround_i2p::ccutils::regexp::PatternType::LineStart;
+
+    auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+        opts.iitm["test_subject_001"]
+    );
+
+    auto res = wayround_i2p::ccutils::regexp::findAll(p, ts);
+
+    opts.Log(
+        wayround_i2p::ccutils::tst::Status,
+        "indexes of line starts in test_subject_001"
+    );
+
+    auto res_err = std::get<1>(res);
+
+    if (res_err)
+    {
+        opts.Log(
+            wayround_i2p::ccutils::tst::Failure,
+            res_err->Error()
+        );
+        return {false};
+    }
+
+    for (auto &i : std::get<0>(res))
+    {
+        opts.Log(
+            wayround_i2p::ccutils::tst::Status,
+            std::format("  {}:{}", i->match_start, i->match_end)
+        );
+    }
+
+    return {true};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_004_i = {
+    .group_name        = "main",
+    .test_name         = "004",
+    .description_short = "testing PatternType::LineStart findAll",
+    .func              = main_004
+};
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_005(
+    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+)
+{
+    auto p = wayround_i2p::ccutils::regexp::Pattern::create();
+
+    p->pattern_type = wayround_i2p::ccutils::regexp::PatternType::LineEnd;
+
+    auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+        opts.iitm["test_subject_001"]
+    );
+
+    auto res = wayround_i2p::ccutils::regexp::findAll(p, ts);
+
+    opts.Log(
+        wayround_i2p::ccutils::tst::Status,
+        "indexes of line ends in test_subject_001"
+    );
+
+    auto res_err = std::get<1>(res);
+
+    if (res_err)
+    {
+        opts.Log(
+            wayround_i2p::ccutils::tst::Failure,
+            res_err->Error()
+        );
+        return {false};
+    }
+
+    for (auto &i : std::get<0>(res))
+    {
+        opts.Log(
+            wayround_i2p::ccutils::tst::Status,
+            std::format("  {}:{}", i->match_start, i->match_end)
+        );
+    }
+
+    return {true};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_005_i = {
+    .group_name        = "main",
+    .test_name         = "005",
+    .description_short = "testing PatternType::LineEnd findAll",
+    .func              = main_005
 };
