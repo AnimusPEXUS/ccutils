@@ -1,6 +1,7 @@
 #ifndef WAYROUND_I2P_20240601_083133_764006
 #define WAYROUND_I2P_20240601_083133_764006
 
+#include <cassert>
 #include <vector>
 
 #include <experimental/scope>
@@ -11,8 +12,9 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
-using UChar   = wayround_i2p::ccutils::unicode::UChar;
-using UString = wayround_i2p::ccutils::unicode::UString;
+using UChar     = wayround_i2p::ccutils::unicode::UChar;
+using UString   = wayround_i2p::ccutils::unicode::UString;
+using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 
 // wip prototype for UChar (from ccutils/unicode). maybe CharT and/or ICU's UChar
 // will be added later, but doubt this will be necessary.
@@ -30,11 +32,8 @@ enum class PatternType : unsigned char
 
     ExactChar,
     CharRange,
-    CharList,
 
     AnyChar,
-    SpecialLetter,
-    SpecialName,
 
     Not,
 
@@ -46,13 +45,9 @@ enum class PatternRepetitionType : unsigned char
 {
     Invalid,
     Single,
-    NoneOrOne,
-    NoneOrMore,
-    OneOrMore,
-    ExactCount,
-    MinCount,
-    MaxCount,
-    MinMaxCount
+    NoneOrOne,  // ?
+    NoneOrMore, // *
+    OneOrMore   // +
 };
 
 // todo: create precompiled patterns
@@ -80,11 +75,31 @@ struct Pattern
     //   Sequence - 1 or more
     //   OrSequence - 1 or more
     Pattern_shared subpatterns;
-    UString        special; // for SpecialLetter or SpecialName
-    bool           case_sensitive = true;
 
-    PatternRepetitionType pattern_repetition_type;
-    bool                  greedy = false;
+    // for SpecialLetter or SpecialName
+    UString special;
+    bool    case_sensitive = true;
+
+    bool        has_min = false;
+    bool        has_max = false;
+    std::size_t min     = 0;
+    std::size_t max     = 0;
+
+    // greedy = true = match as less as possible
+    bool greedy = false;
+
+    // --vvv-- shortcuts to set min/max fields --vvv--
+
+    error_ptr setRepetitionFromType(
+        PatternRepetitionType pattern_repetition_type
+    );
+
+    void setMinCount(std::size_t val);
+    void setMaxCount(std::size_t val);
+    void setMinMaxCount(std::size_t min, std::size_t max);
+    void setExactCount(std::size_t val);
+
+    // --^^^-- shortcuts to set min/max fields --^^^--
 
     static Pattern_shared create();
 
@@ -100,17 +115,19 @@ using Result_shared_sequence = std::vector<std::shared_ptr<Result>>;
 
 struct Result
 {
-    wayround_i2p::ccutils::errors::error_ptr error;
+    error_ptr error;
 
     UString original_subject;
 
-    bool matched;
+    bool matched = false;
 
-    std::size_t match_start;
+    std::size_t matched_repetitions_count = 0;
+
+    std::size_t match_start = 0;
 
     // excludingly. - meaning what character at pos `match_end` - not part
     // of match
-    std::size_t match_end;
+    std::size_t match_end = 0;
 
     Pattern_shared corresponding_pattern;
 
@@ -136,6 +153,14 @@ std::tuple<
 
 // todo: add cancel/abort/limit mesures to functions
 
+// ignores repetition and greediness settings and does basic match
+const Result_shared match_single(
+    const Pattern_shared pattern,
+    const UString       &subject,
+    std::size_t          start_at = 0
+);
+
+// adds repetition and greediness checks layer above match_single
 const Result_shared match(
     const Pattern_shared pattern,
     const UString       &subject,

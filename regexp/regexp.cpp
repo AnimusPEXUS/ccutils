@@ -8,7 +8,91 @@ Pattern_shared Pattern::create()
 {
     auto ret     = Pattern_shared(new Pattern());
     ret->own_ptr = ret;
+    ret->setRepetitionFromType(PatternRepetitionType::Single);
+    ret->greedy = false;
     return ret;
+}
+
+error_ptr Pattern::setRepetitionFromType(
+    PatternRepetitionType pattern_repetition_type
+)
+{
+    this->has_min = false;
+    this->has_max = false;
+    this->min     = 0;
+    this->max     = 0;
+
+    switch (pattern_repetition_type)
+    {
+        case PatternRepetitionType::Invalid:
+        default:
+            return wayround_i2p::ccutils::errors::New(
+                std::format(
+                    "invalid pattern_repetition_type value. {}:{}",
+                    __FILE__,
+                    __LINE__
+                )
+            );
+        case PatternRepetitionType::Single:
+            this->has_min = true;
+            this->has_max = true;
+            this->min     = 1;
+            this->max     = 1;
+            return nullptr;
+
+        case PatternRepetitionType::NoneOrOne:
+            this->has_min = true;
+            this->has_max = true;
+            // this->min     = 0;
+            this->max     = 1;
+            return nullptr;
+
+        case PatternRepetitionType::NoneOrMore:
+            this->has_min = true;
+            // this->has_max = false;
+            // this->min     = 0;
+            // this->max     = 0;
+            return nullptr;
+
+        case PatternRepetitionType::OneOrMore:
+            this->has_min = true;
+            // this->has_max = false;
+            this->min     = 1;
+            // this->max     = 0;
+            return nullptr;
+    }
+
+    return wayround_i2p::ccutils::errors::New(
+        std::format(
+            "unexpected error. {}:{}",
+            __FILE__,
+            __LINE__
+        )
+    );
+}
+
+void Pattern::setMinCount(std::size_t val)
+{
+    this->has_min = true;
+    this->min     = val;
+}
+
+void Pattern::setMaxCount(std::size_t val)
+{
+    this->has_max = true;
+    this->max     = val;
+}
+
+void Pattern::setMinMaxCount(std::size_t min, std::size_t max)
+{
+    setMinCount(min);
+    setMaxCount(max);
+}
+
+void Pattern::setExactCount(std::size_t val)
+{
+    setMinCount(val);
+    setMaxCount(val);
 }
 
 Result_shared Result::create()
@@ -28,13 +112,14 @@ std::tuple<
 {
     auto pattern          = Pattern::create();
     pattern->pattern_type = PatternType::LineSplit;
+    pattern->setRepetitionFromType(PatternRepetitionType::Single);
 
     auto res = match(pattern, subject, start_at);
 
     return std::tuple(res->matched, res->match_end - res->match_start);
 }
 
-const Result_shared match(
+const Result_shared match_single(
     const Pattern_shared pattern,
     const UString       &subject,
     std::size_t          start_at
@@ -63,7 +148,7 @@ const Result_shared match(
     ret->corresponding_pattern = pattern;
     ret->match_start           = start_at;
 
-    auto subject_length = subject.length();
+    const auto subject_length = subject.length();
 
     if (start_at > subject_length)
     {
@@ -99,6 +184,13 @@ const Result_shared match(
                         __LINE__
                     )
                 );
+
+            return ret;
+        }
+        case PatternType::Invalid:
+        {
+            ret->error
+                = wayround_i2p::ccutils::errors::New("invalid `pattern_type`");
 
             return ret;
         }
@@ -290,6 +382,184 @@ const Result_shared match(
 
             return ret;
         }
+        case PatternType::ExactChar:
+        {
+            if (pattern->values.size() != 1)
+            {
+                ret->error
+                    = wayround_i2p::ccutils::errors::New(
+                        "there must be exactly 1 value inside of pattern->values"
+                    );
+                return ret;
+            }
+
+            auto target_char = pattern->values[0];
+
+            if (start_at == subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+
+            auto subj_char = subject[start_at];
+
+            ret->matched = target_char == subj_char;
+
+            if (ret->matched)
+            {
+                ret->match_end = start_at + 1;
+            }
+
+            return ret;
+        }
+        case PatternType::CharRange:
+        {
+            if (pattern->values.size() != 2)
+            {
+                ret->error
+                    = wayround_i2p::ccutils::errors::New(
+                        "there must be exactly 2 values inside of pattern->values"
+                    );
+                return ret;
+            }
+
+            auto target_char0 = pattern->values[0];
+            auto target_char1 = pattern->values[1];
+
+            if (target_char0 > target_char1)
+            {
+                ret->error
+                    = wayround_i2p::ccutils::errors::New(
+                        "invalid char range specification"
+                    );
+                return ret;
+            }
+
+            if (start_at == subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+
+            auto subj_char = subject[start_at];
+
+            ret->matched = (target_char0 <= subj_char)
+                        && (subj_char < target_char1);
+
+            if (ret->matched)
+            {
+                ret->match_end = start_at + 1;
+            }
+
+            return ret;
+        }
+    }
+
+    return ret;
+}
+
+const Result_shared match(
+    const Pattern_shared pattern,
+    const UString       &subject,
+    std::size_t          start_at
+)
+{
+    Result_shared ret           = nullptr;
+    std::size_t   matched_count = 0;
+
+    auto ex01 = std::experimental::scope_exit(
+        [&ret, &matched_count]()
+        {
+            assert(ret);
+
+            if (ret->error)
+            {
+                ret->matched = false;
+            }
+
+            if (!ret->matched)
+            {
+                ret->match_end = ret->match_start;
+            }
+
+            if (ret->matched)
+            {
+                ret->matched_repetitions_count = matched_count;
+            }
+        }
+    );
+
+    auto has_min = pattern->has_min;
+    auto min     = pattern->min;
+    auto has_max = pattern->has_max;
+    auto max     = pattern->max;
+    auto greedy  = pattern->greedy;
+
+    if (!has_min)
+    {
+        min = 0;
+    }
+
+    if (!has_max)
+    {
+        max = 0;
+    }
+
+    if (has_max && has_min && min > max)
+    {
+        ret        = Result::create();
+        ret->error = wayround_i2p::ccutils::errors::New(
+            "invalid min/max in pattern"
+        );
+        return ret;
+    }
+
+    auto next_start = start_at;
+
+    while (true)
+    {
+        auto res = match_single(pattern, subject, next_start);
+
+        if (!ret)
+        {
+            ret = res;
+        }
+
+        if (res->error)
+        {
+            ret->error = res->error;
+            return ret;
+        }
+
+        if (res->matched)
+        {
+            matched_count++;
+
+            next_start = ret->match_end = res->match_end;
+
+            if (greedy && has_min && matched_count >= min)
+            {
+                return ret;
+            }
+
+            if (has_max && matched_count == max)
+            {
+                return ret;
+            }
+        }
+        else
+        {
+            if (has_min && matched_count < min)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                ret->matched = true;
+                return ret;
+            }
+        }
     }
 
     return ret;
@@ -302,6 +572,8 @@ const Result_shared search(
     bool                 backward
 )
 {
+    // todo: add overlap prevention option?
+
     Result_shared ret = nullptr;
 
     auto ex01 = std::experimental::scope_exit(
@@ -333,7 +605,7 @@ const Result_shared search(
             break;
         }
 
-        auto match_res = match(pattern, subject, i);
+        auto match_res = match_single(pattern, subject, i);
         if (match_res->error)
         {
             ret = match_res;
@@ -368,6 +640,8 @@ const std::tuple<
         std::size_t          start_at
     )
 {
+    // todo: add overlap prevention option?
+
     Result_shared_sequence                   ret;
     wayround_i2p::ccutils::errors::error_ptr ret_err = nullptr;
 

@@ -163,6 +163,14 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
         );
 
         auto res = wayround_i2p::ccutils::regexp::match(p, ts_u);
+        if (res->error)
+        {
+            opts.Log(
+                wayround_i2p::ccutils::tst::Error,
+                std::format("   error: {}", res->error->Error())
+            );
+            goto error_exit;
+        }
 
         opts.Log(
             wayround_i2p::ccutils::tst::Status,
@@ -236,6 +244,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
                     "  successfully failed"
                 );
             }
+            continue;
+        error_exit:
         }
     }
 
@@ -268,6 +278,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
     opts.Log(
         wayround_i2p::ccutils::tst::Status,
         "indexes of line splists in test_subject_001"
+    );
+
+    opts.Log(
+        wayround_i2p::ccutils::tst::ToDo,
+        "check output, make constant, check against constant"
     );
 
     auto res_err = std::get<1>(res);
@@ -318,6 +333,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_004(
         "indexes of line starts in test_subject_001"
     );
 
+    opts.Log(
+        wayround_i2p::ccutils::tst::ToDo,
+        "check output, make constant, check against constant"
+    );
+
     auto res_err = std::get<1>(res);
 
     if (res_err)
@@ -364,6 +384,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_005(
     opts.Log(
         wayround_i2p::ccutils::tst::Status,
         "indexes of line ends in test_subject_001"
+    );
+
+    opts.Log(
+        wayround_i2p::ccutils::tst::ToDo,
+        "check output, make constant, check against constant"
     );
 
     auto res_err = std::get<1>(res);

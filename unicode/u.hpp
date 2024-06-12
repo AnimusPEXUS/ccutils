@@ -30,6 +30,23 @@ using error_ptr = std::shared_ptr<error>;
 
 // class UString;
 
+enum class UCharType : std::uint8_t
+{
+    None,
+    Lower,
+    Upper,
+    Title,
+    Digit,
+    Alpha,
+    Alnum,
+    XDigit,
+    Punct,
+    Graph,
+    Blank,
+    Defined,
+    Space
+};
+
 struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
   public:
@@ -46,6 +63,36 @@ struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
   private:
     UChar32 chr; // todo: can't make this const?
 };
+
+bool operator==(
+    const UChar &lhs,
+    const UChar &rhs
+);
+
+bool operator!=(
+    const UChar &lhs,
+    const UChar &rhs
+);
+
+bool operator>(
+    const UChar &lhs,
+    const UChar &rhs
+);
+
+bool operator<(
+    const UChar &lhs,
+    const UChar &rhs
+);
+
+bool operator>=(
+    const UChar &lhs,
+    const UChar &rhs
+);
+
+bool operator<=(
+    const UChar &lhs,
+    const UChar &rhs
+);
 
 class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
@@ -88,7 +135,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     UString repr_as_text();
 
-    UChar operator[](std::int32_t offset);
+    UChar operator[](std::int32_t offset) const;
 
     UString operator+(UString &other);
 
@@ -131,16 +178,6 @@ bool operator==(
 bool operator!=(
     const UString &lhs,
     const UString &rhs
-);
-
-bool operator==(
-    const UChar &lhs,
-    const UChar &rhs
-);
-
-bool operator!=(
-    const UChar &lhs,
-    const UChar &rhs
 );
 
 bool operator<(

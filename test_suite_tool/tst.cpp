@@ -11,11 +11,13 @@ wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
     switch (t)
     {
         default:
-            icon = "???";
+            icon = " ? ";
             break;
         case Text:
-        case Status:
             icon = "   ";
+            break;
+        case Status:
+            icon = "---";
             break;
         case Info:
             icon = " i ";
@@ -30,13 +32,19 @@ wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
             icon = " f ";
             break;
         case Success:
-            icon = " S ";
+            icon = " s ";
             break;
         case ExpectedFailure:
             icon = " / ";
             break;
         case UnexpectedSuccess:
-            icon = "O_O";
+            icon = " u ";
+            break;
+        case ToDo:
+            icon = " td";
+            break;
+        case FixMe:
+            icon = " fx";
             break;
     }
 
@@ -54,11 +62,31 @@ wayround_i2p::ccutils::unicode::UString timestamp()
     ~TSTFuncOpts() {};
 */
 
+wayround_i2p::ccutils::unicode::UString FixMsg(
+    LoggerMSGType                           t,
+    wayround_i2p::ccutils::unicode::UString msg
+)
+{
+    if (t == ToDo)
+    {
+        msg = wayround_i2p::ccutils::unicode::UString("todo: ") + msg;
+    }
+
+    if (t == FixMe)
+    {
+        msg = wayround_i2p::ccutils::unicode::UString("fixme: ") + msg;
+    }
+    return msg;
+}
+
 void TSTFuncOpts::Log(
     LoggerMSGType                           t,
     wayround_i2p::ccutils::unicode::UString msg
 ) const
 {
+
+    msg = FixMsg(t, msg);
+
     std::cout << std::format(
         "[{}] [{}] [{}:{}] {}",
         icon_by_type(t),
@@ -75,6 +103,8 @@ void run_tests_Parameters::Log(
     wayround_i2p::ccutils::unicode::UString msg
 ) const
 {
+    msg = FixMsg(t, msg);
+
     std::cout << std::format(
         "[{}] [{}] {}",
         icon_by_type(t),

@@ -28,6 +28,54 @@ UString UChar::repr_as_text()
     return std::format(R"++({:#x})++", chr);
 }
 
+bool operator==(
+    const UChar &lhs,
+    const UChar &rhs
+)
+{
+    return lhs.as_int32() == rhs.as_int32();
+};
+
+bool operator!=(
+    const UChar &lhs,
+    const UChar &rhs
+)
+{
+    return !(lhs == rhs);
+};
+
+bool operator>(
+    const UChar &lhs,
+    const UChar &rhs
+)
+{
+    return lhs.as_int32() > rhs.as_int32();
+}
+
+bool operator<(
+    const UChar &lhs,
+    const UChar &rhs
+)
+{
+    return lhs.as_int32() < rhs.as_int32();
+}
+
+bool operator>=(
+    const UChar &lhs,
+    const UChar &rhs
+)
+{
+    return lhs.as_int32() >= rhs.as_int32();
+}
+
+bool operator<=(
+    const UChar &lhs,
+    const UChar &rhs
+)
+{
+    return lhs.as_int32() <= rhs.as_int32();
+}
+
 UString::UString() :
     data("")
 {
@@ -148,7 +196,7 @@ UString UString::repr_as_text()
     return ret;
 }
 
-UChar UString::operator[](std::int32_t offset)
+UChar UString::operator[](std::int32_t offset) const
 {
     UChar ret(this->data.char32At(offset));
     return ret;
@@ -193,22 +241,6 @@ bool operator==(
 bool operator!=(
     const UString &lhs,
     const UString &rhs
-)
-{
-    return !(lhs == rhs);
-};
-
-bool operator==(
-    const UChar &lhs,
-    const UChar &rhs
-)
-{
-    return lhs.as_int32() == rhs.as_int32();
-};
-
-bool operator!=(
-    const UChar &lhs,
-    const UChar &rhs
 )
 {
     return !(lhs == rhs);

@@ -17,6 +17,8 @@
 namespace wayround_i2p::ccutils::tst
 {
 
+// todo: make ref variants for Log functions
+
 enum LoggerMSGType : unsigned char
 {
     Status,
@@ -27,7 +29,9 @@ enum LoggerMSGType : unsigned char
     Failure,
     ExpectedFailure,
     Success,
-    UnexpectedSuccess
+    UnexpectedSuccess,
+    ToDo,
+    FixMe,
 };
 
 wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType);
