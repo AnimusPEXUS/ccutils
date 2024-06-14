@@ -4,114 +4,29 @@
 namespace wayround_i2p::ccutils::tst
 {
 
-wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
-{
-    wayround_i2p::ccutils::unicode::UString icon;
-
-    switch (t)
-    {
-        default:
-            icon = " ? ";
-            break;
-        case Text:
-            icon = "   ";
-            break;
-        case Status:
-            icon = "---";
-            break;
-        case Info:
-            icon = " i ";
-            break;
-        case Warning:
-            icon = " ! ";
-            break;
-        case Error:
-            icon = " e ";
-            break;
-        case Failure:
-            icon = " f ";
-            break;
-        case Success:
-            icon = " s ";
-            break;
-        case ExpectedFailure:
-            icon = " / ";
-            break;
-        case UnexpectedSuccess:
-            icon = " u ";
-            break;
-        case ToDo:
-            icon = " td";
-            break;
-        case FixMe:
-            icon = " fx";
-            break;
-    }
-
-    return icon;
-}
-
-wayround_i2p::ccutils::unicode::UString timestamp()
-{
-    auto t = std::chrono::utc_clock::now();
-    return std::format("{0:%F}T{0:%T}z", t);
-}
-
 /*
-    TSTFuncOpts() {}
-    ~TSTFuncOpts() {};
-*/
-
-wayround_i2p::ccutils::unicode::UString FixMsg(
-    LoggerMSGType                           t,
-    wayround_i2p::ccutils::unicode::UString msg
-)
-{
-    if (t == ToDo)
-    {
-        msg = wayround_i2p::ccutils::unicode::UString("todo: ") + msg;
-    }
-
-    if (t == FixMe)
-    {
-        msg = wayround_i2p::ccutils::unicode::UString("fixme: ") + msg;
-    }
-    return msg;
-}
-
 void TSTFuncOpts::Log(
-    LoggerMSGType                           t,
-    wayround_i2p::ccutils::unicode::UString msg
+    wayround_i2p::ccutils::logger::LoggerMSGType t,
+    wayround_i2p::ccutils::unicode::UString      msg
 ) const
 {
-
-    msg = FixMsg(t, msg);
-
-    std::cout << std::format(
-        "[{}] [{}] [{}:{}] {}",
-        icon_by_type(t),
-        timestamp(),
-        this->func_info.group_name,
-        this->func_info.test_name,
-        msg
-    )
-              << std::endl;
-}
+    this->logger->Log(
+        t,
+        std::format(
+            "[{}:{}] {}",
+            this->func_info.group_name,
+            this->func_info.test_name,
+            msg
+        )
+    );
+} */
 
 void run_tests_Parameters::Log(
-    LoggerMSGType                           t,
-    wayround_i2p::ccutils::unicode::UString msg
+    wayround_i2p::ccutils::logger::LoggerMSGType t,
+    wayround_i2p::ccutils::unicode::UString      msg
 ) const
 {
-    msg = FixMsg(t, msg);
-
-    std::cout << std::format(
-        "[{}] [{}] {}",
-        icon_by_type(t),
-        timestamp(),
-        msg
-    )
-              << std::endl;
+    this->logger->Log(t, msg);
 }
 
 int run_tests_Parameters::AddTest(
@@ -266,14 +181,14 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
     print_head(rtp);
 
     rtp.Log(
-        Status,
+        wayround_i2p::ccutils::logger::Status,
         std::format(
             "{} test group(s) provided",
             rtp.group_order.size()
         )
     );
 
-    rtp.Log(Status, "");
+    rtp.Log(wayround_i2p::ccutils::logger::Status, "");
 
     for (auto &group_name : rtp.group_order)
     {
@@ -281,11 +196,14 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
         auto se03 = std::experimental::scope_exit(
             [&]()
             {
-                rtp.Log(Status, "");
+                rtp.Log(wayround_i2p::ccutils::logger::Status, "");
             }
         );
 
-        rtp.Log(Status, std::format("next group is: {}", group_name));
+        rtp.Log(
+            wayround_i2p::ccutils::logger::Status,
+            std::format("next group is: {}", group_name)
+        );
 
         if (
             auto group_itr = rtp.groups.find(
@@ -294,7 +212,10 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
             group_itr == std::end(rtp.groups)
         )
         {
-            rtp.Log(Error, std::format("'{}' not in groups", group_name));
+            rtp.Log(
+                wayround_i2p::ccutils::logger::Error,
+                std::format("'{}' not in groups", group_name)
+            );
             ret = 1;
             return ret;
         }
@@ -305,7 +226,7 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
             std::map<std::string, std::any> iitm = {};
 
             rtp.Log(
-                Status,
+                wayround_i2p::ccutils::logger::Status,
                 std::format(
                     "group {} contains {} test(s)",
                     group_name,
@@ -313,7 +234,7 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                 )
             );
 
-            rtp.Log(Status, "");
+            rtp.Log(wayround_i2p::ccutils::logger::Status, "");
 
             for (auto &test_name : group.test_order)
             {
@@ -321,7 +242,7 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                 auto se02 = std::experimental::scope_exit(
                     [&]()
                     {
-                        rtp.Log(Status, "");
+                        rtp.Log(wayround_i2p::ccutils::logger::Status, "");
                     }
                 );
 
@@ -331,7 +252,7 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                     test_itr == std::end(group.tests))
                 {
                     rtp.Log(
-                        Error,
+                        wayround_i2p::ccutils::logger::Error,
                         std::format(
                             "'{}' not in tests of group {}",
                             test_name,
@@ -346,15 +267,27 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
 
                     const TSTInfo &x = std::get<1>(*test_itr);
 
-                    TSTFuncOpts opts{
-                        .func_info = x,
-                        .iitm      = iitm
+                    LOGGER_CB_FUNCTION_TYPE cb_log_function_for_test =
+                        [&rtp, &x](
+                            wayround_i2p::ccutils::logger::LoggerMSGType t,
+                            wayround_i2p::ccutils::unicode::UString      msg
+                        ) -> void
+                    {
+                        rtp.logger->Log(
+                            t,
+                            std::format(
+                                "[{}:{}] {}",
+                                x.group_name,
+                                x.test_name,
+                                msg
+                            )
+                        );
                     };
 
                     total_count++;
 
-                    opts.Log(
-                        Status,
+                    cb_log_function_for_test(
+                        wayround_i2p::ccutils::logger::Status,
                         std::format(
                             "starting: {}",
                             x.description_short
@@ -364,7 +297,7 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                     if (!x.func)
                     {
                         rtp.Log(
-                            Error,
+                            wayround_i2p::ccutils::logger::Error,
                             std::format(
                                 "function not defined in '{}:{}'",
                                 test_name,
@@ -375,17 +308,23 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                         return ret;
                     }
 
-                    auto res = x.func(opts);
+                    auto res = x.func(x, iitm, cb_log_function_for_test);
                     if (res.test_success)
                     {
                         if (x.expected_failure)
                         {
-                            opts.Log(UnexpectedSuccess, "Test Unexpectedly Succeeded");
+                            cb_log_function_for_test(
+                                wayround_i2p::ccutils::logger::UnexpectedSuccess,
+                                "Test Unexpectedly Succeeded"
+                            );
                             unexpected_success_list.push_back(&x);
                         }
                         else
                         {
-                            opts.Log(Success, "Test Succeeded");
+                            cb_log_function_for_test(
+                                wayround_i2p::ccutils::logger::Success,
+                                "Test Succeeded"
+                            );
                             success_list.push_back(&x);
                         }
                     }
@@ -393,15 +332,24 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                     {
                         if (x.expected_failure)
                         {
-                            opts.Log(ExpectedFailure, "Test Expectedly Failed");
+                            cb_log_function_for_test(
+                                wayround_i2p::ccutils::logger::ExpectedFailure,
+                                "Test Expectedly Failed"
+                            );
                             expected_failure_list.push_back(&x);
                         }
                         else
                         {
-                            opts.Log(Failure, "Test Failed");
+                            cb_log_function_for_test(
+                                wayround_i2p::ccutils::logger::Failure,
+                                "Test Failed"
+                            );
                             failure_list.push_back(&x);
                         }
-                        rtp.Log(Status, "");
+                        rtp.Log(
+                            wayround_i2p::ccutils::logger::Status,
+                            ""
+                        );
                     }
                 }
             }
@@ -410,12 +358,17 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
 
     if (failure_list.size() == 0)
     {
-        rtp.Log(Success, "all tests ok");
+        rtp.Log(
+            wayround_i2p::ccutils::logger::Success,
+            "all tests ok"
+        );
         ret = 0;
     }
     else
     {
-        rtp.Log(Failure, "errors found");
+        rtp.Log(
+            wayround_i2p::ccutils::logger::Failure, "errors found"
+        );
         ret = 5;
     }
     return ret;

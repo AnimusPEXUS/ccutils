@@ -4,10 +4,11 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
-Pattern_shared Pattern::create()
+Pattern_shared Pattern::create(PatternType type)
 {
-    auto ret     = Pattern_shared(new Pattern());
-    ret->own_ptr = ret;
+    auto ret          = Pattern_shared(new Pattern());
+    ret->own_ptr      = ret;
+    ret->pattern_type = type;
     ret->setRepetitionFromType(PatternRepetitionType::Single);
     ret->greedy = false;
     return ret;
@@ -110,8 +111,7 @@ std::tuple<
         std::size_t    start_at
     )
 {
-    auto pattern          = Pattern::create();
-    pattern->pattern_type = PatternType::LineSplit;
+    auto pattern = Pattern::create(PatternType::LineSplit);
     pattern->setRepetitionFromType(PatternRepetitionType::Single);
 
     auto res = match(pattern, subject, start_at);
@@ -164,7 +164,11 @@ const Result_shared match_single(
     {
         ret->error
             = wayround_i2p::ccutils::errors::New(
-                "invalid `pattern_type`"
+                std::format(
+                    "invalid `pattern_type` {}:{}",
+                    __FILE__,
+                    __LINE__
+                )
             );
 
         return ret;
@@ -190,7 +194,13 @@ const Result_shared match_single(
         case PatternType::Invalid:
         {
             ret->error
-                = wayround_i2p::ccutils::errors::New("invalid `pattern_type`");
+                = wayround_i2p::ccutils::errors::New(
+                    std::format(
+                        "invalid `pattern_type` {}:{}",
+                        __FILE__,
+                        __LINE__
+                    )
+                );
 
             return ret;
         }

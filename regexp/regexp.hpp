@@ -101,7 +101,7 @@ struct Pattern
 
     // --^^^-- shortcuts to set min/max fields --^^^--
 
-    static Pattern_shared create();
+    static Pattern_shared create(PatternType type);
 
   private:
     std::weak_ptr<Pattern> own_ptr;

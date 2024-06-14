@@ -1,32 +1,41 @@
 #include <experimental/scope>
 
+#include <wayround_i2p/ccutils/logger/logger.hpp>
 #include <wayround_i2p/ccutils/regexp/regexp.hpp>
 
 wayround_i2p::ccutils::tst::TSTFuncResult main_001(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo                &func_info,
+    std::map<std::string, std::any>                          &iitm,
+    const wayround_i2p::ccutils::tst::LOGGER_CB_FUNCTION_TYPE logger
 )
 {
-    opts.Log(
-        wayround_i2p::ccutils::tst::Status,
+    logger(
+        wayround_i2p::ccutils::logger::Status,
         "setting test subjects to ingroup memory"
     );
 
-    opts.iitm["test_subject_001"] = wayround_i2p::ccutils::unicode::UString(
+    iitm["test_subject_001"] = wayround_i2p::ccutils::unicode::UString(
         "test subject for testing regular expressions.\n\n"
         "it also contains some separate lines,\n"
         "which is cool for newline detection"
     );
 
-    auto t00 = wayround_i2p::ccutils::unicode::UString(
-        "-----( cut line )-----"
+    iitm["test_subject_002"] = "// todo: move here from match/search/findAll test below";
+
+    iitm["test_subject_003"] = wayround_i2p::ccutils::unicode::UString(
+        "aaaaaaaaaa"
     );
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::Status,
+    auto t00 = wayround_i2p::ccutils::unicode::UString(
+        "-----( cut here )-----"
+    );
+
+    logger(
+        wayround_i2p::ccutils::logger::Status,
         std::format(
             "    test subject is:\n{1:}\n{0:}\n{1:}",
             std::any_cast<wayround_i2p::ccutils::unicode::UString>(
-                opts.iitm["test_subject_001"]
+                iitm["test_subject_001"]
             ),
             t00
         )
@@ -43,8 +52,12 @@ wayround_i2p::ccutils::tst::TSTInfo main_001_i = {
     .func       = main_001
 };
 
+// -------------------------------------------------
+
 wayround_i2p::ccutils::tst::TSTFuncResult main_002(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo                &func_info,
+    std::map<std::string, std::any>                          &iitm,
+    const wayround_i2p::ccutils::tst::LOGGER_CB_FUNCTION_TYPE logger
 )
 {
     int failed_count = 0;
@@ -132,9 +145,9 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
     )
     {
 
-        auto p = wayround_i2p::ccutils::regexp::Pattern::create();
-
-        p->pattern_type = wayround_i2p::ccutils::regexp::PatternType::LineSplit;
+        auto p = wayround_i2p::ccutils::regexp::Pattern::create(
+            wayround_i2p::ccutils::regexp::PatternType::LineSplit
+        );
 
         auto ts   = std::get<0>(subj01);
         auto ts_u = wayround_i2p::ccutils::unicode::UString(ts);
@@ -142,59 +155,59 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
         auto missmatch_is_ok = std::get<1>(subj01);
         auto subj_check_cb   = std::get<2>(subj01);
 
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("testing subject is: {}", ts_u.repr_as_text())
         );
 
         auto ex01 = std::experimental::scope_exit(
-            [&opts]()
+            [&logger]()
             {
-                opts.Log(
-                    wayround_i2p::ccutils::tst::Status,
+                logger(
+                    wayround_i2p::ccutils::logger::Status,
                     ""
                 );
             }
         );
 
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("  missmatch is ok?: {}", missmatch_is_ok)
         );
 
         auto res = wayround_i2p::ccutils::regexp::match(p, ts_u);
         if (res->error)
         {
-            opts.Log(
-                wayround_i2p::ccutils::tst::Error,
+            logger(
+                wayround_i2p::ccutils::logger::Error,
                 std::format("   error: {}", res->error->Error())
             );
             goto error_exit;
         }
 
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("   res->matched: {}", res->matched)
         );
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("   res->match_start: {}", res->match_start)
         );
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("   res->match_end: {}", res->match_end)
         );
 
         if (!res->matched)
         {
-            opts.Log(wayround_i2p::ccutils::tst::Failure, "missmatched");
+            logger(wayround_i2p::ccutils::logger::Failure, "missmatched");
             goto fail_exit;
         }
 
         if (res->match_start != 0)
         {
-            opts.Log(
-                wayround_i2p::ccutils::tst::Failure,
+            logger(
+                wayround_i2p::ccutils::logger::Failure,
                 std::format(
                     "invalid match_start (must be 0): {}",
                     res->match_start
@@ -208,8 +221,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
 
             if (!std::get<0>(res2))
             {
-                opts.Log(
-                    wayround_i2p::ccutils::tst::Failure,
+                logger(
+                    wayround_i2p::ccutils::logger::Failure,
                     std::format(
                         "invalid match_end ({}): {}",
                         std::get<1>(res2),
@@ -221,8 +234,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
         }
 
         {
-            opts.Log(
-                wayround_i2p::ccutils::tst::Success,
+            logger(
+                wayround_i2p::ccutils::logger::Success,
                 "  ok"
             );
 
@@ -231,16 +244,16 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
         fail_exit:
             if (std::get<1>(subj01) != true)
             {
-                opts.Log(
-                    wayround_i2p::ccutils::tst::Failure,
+                logger(
+                    wayround_i2p::ccutils::logger::Failure,
                     "  fail"
                 );
                 failed_count++;
             }
             else
             {
-                opts.Log(
-                    wayround_i2p::ccutils::tst::Success,
+                logger(
+                    wayround_i2p::ccutils::logger::Success,
                     "  successfully failed"
                 );
             }
@@ -261,27 +274,31 @@ wayround_i2p::ccutils::tst::TSTInfo main_002_i = {
     .func              = main_002
 };
 
+// -------------------------------------------------
+
 wayround_i2p::ccutils::tst::TSTFuncResult main_003(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo                &func_info,
+    std::map<std::string, std::any>                          &iitm,
+    const wayround_i2p::ccutils::tst::LOGGER_CB_FUNCTION_TYPE logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::create();
-
-    p->pattern_type = wayround_i2p::ccutils::regexp::PatternType::LineSplit;
+    auto p = wayround_i2p::ccutils::regexp::Pattern::create(
+        wayround_i2p::ccutils::regexp::PatternType::LineSplit
+    );
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
-        opts.iitm["test_subject_001"]
+        iitm["test_subject_001"]
     );
 
     auto res = wayround_i2p::ccutils::regexp::findAll(p, ts);
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::Status,
+    logger(
+        wayround_i2p::ccutils::logger::Status,
         "indexes of line splists in test_subject_001"
     );
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::ToDo,
+    logger(
+        wayround_i2p::ccutils::logger::ToDo,
         "check output, make constant, check against constant"
     );
 
@@ -289,8 +306,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
 
     if (res_err)
     {
-        opts.Log(
-            wayround_i2p::ccutils::tst::Failure,
+        logger(
+            wayround_i2p::ccutils::logger::Failure,
             res_err->Error()
         );
         return {false};
@@ -298,8 +315,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
 
     for (auto &i : std::get<0>(res))
     {
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("  {}:{}", i->match_start, i->match_end)
         );
     }
@@ -314,27 +331,31 @@ wayround_i2p::ccutils::tst::TSTInfo main_003_i = {
     .func              = main_003
 };
 
+// -------------------------------------------------
+
 wayround_i2p::ccutils::tst::TSTFuncResult main_004(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo                &func_info,
+    std::map<std::string, std::any>                          &iitm,
+    const wayround_i2p::ccutils::tst::LOGGER_CB_FUNCTION_TYPE logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::create();
-
-    p->pattern_type = wayround_i2p::ccutils::regexp::PatternType::LineStart;
+    auto p = wayround_i2p::ccutils::regexp::Pattern::create(
+        wayround_i2p::ccutils::regexp::PatternType::LineStart
+    );
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
-        opts.iitm["test_subject_001"]
+        iitm["test_subject_001"]
     );
 
     auto res = wayround_i2p::ccutils::regexp::findAll(p, ts);
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::Status,
+    logger(
+        wayround_i2p::ccutils::logger::Status,
         "indexes of line starts in test_subject_001"
     );
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::ToDo,
+    logger(
+        wayround_i2p::ccutils::logger::ToDo,
         "check output, make constant, check against constant"
     );
 
@@ -342,8 +363,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_004(
 
     if (res_err)
     {
-        opts.Log(
-            wayround_i2p::ccutils::tst::Failure,
+        logger(
+            wayround_i2p::ccutils::logger::Failure,
             res_err->Error()
         );
         return {false};
@@ -351,8 +372,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_004(
 
     for (auto &i : std::get<0>(res))
     {
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("  {}:{}", i->match_start, i->match_end)
         );
     }
@@ -367,27 +388,31 @@ wayround_i2p::ccutils::tst::TSTInfo main_004_i = {
     .func              = main_004
 };
 
+// -------------------------------------------------
+
 wayround_i2p::ccutils::tst::TSTFuncResult main_005(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo                &func_info,
+    std::map<std::string, std::any>                          &iitm,
+    const wayround_i2p::ccutils::tst::LOGGER_CB_FUNCTION_TYPE logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::create();
-
-    p->pattern_type = wayround_i2p::ccutils::regexp::PatternType::LineEnd;
+    auto p = wayround_i2p::ccutils::regexp::Pattern::create(
+        wayround_i2p::ccutils::regexp::PatternType::LineEnd
+    );
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
-        opts.iitm["test_subject_001"]
+        iitm["test_subject_001"]
     );
 
     auto res = wayround_i2p::ccutils::regexp::findAll(p, ts);
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::Status,
+    logger(
+        wayround_i2p::ccutils::logger::Status,
         "indexes of line ends in test_subject_001"
     );
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::ToDo,
+    logger(
+        wayround_i2p::ccutils::logger::ToDo,
         "check output, make constant, check against constant"
     );
 
@@ -395,8 +420,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_005(
 
     if (res_err)
     {
-        opts.Log(
-            wayround_i2p::ccutils::tst::Failure,
+        logger(
+            wayround_i2p::ccutils::logger::Failure,
             res_err->Error()
         );
         return {false};
@@ -404,8 +429,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_005(
 
     for (auto &i : std::get<0>(res))
     {
-        opts.Log(
-            wayround_i2p::ccutils::tst::Status,
+        logger(
+            wayround_i2p::ccutils::logger::Status,
             std::format("  {}:{}", i->match_start, i->match_end)
         );
     }
@@ -418,4 +443,48 @@ wayround_i2p::ccutils::tst::TSTInfo main_005_i = {
     .test_name         = "005",
     .description_short = "testing PatternType::LineEnd findAll",
     .func              = main_005
+};
+
+// -------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_006(
+    const wayround_i2p::ccutils::tst::TSTInfo                &func_info,
+    std::map<std::string, std::any>                          &iitm,
+    const wayround_i2p::ccutils::tst::LOGGER_CB_FUNCTION_TYPE logger
+)
+{
+    bool ret = false;
+    auto ts  = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+        iitm["test_subject_003"]
+    );
+
+    auto pattern = wayround_i2p::ccutils::regexp::Pattern::create(
+        wayround_i2p::ccutils::regexp::PatternType::ExactChar
+    );
+    pattern->setMinMaxCount(6, 6);
+    pattern->values = {'a'};
+
+    auto res = wayround_i2p::ccutils::regexp::match(pattern, ts);
+
+    if (res->error)
+    {
+        logger(
+            wayround_i2p::ccutils::logger::Error,
+            std::format("error: {}", res->error->Error())
+        );
+    }
+
+    logger(
+        wayround_i2p::ccutils::logger::Status,
+        std::format("matched?: {}", res->matched)
+    );
+
+    return {ret};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_006_i = {
+    .group_name        = "main",
+    .test_name         = "006",
+    .description_short = "repetitions test 01",
+    .func              = main_006
 };
