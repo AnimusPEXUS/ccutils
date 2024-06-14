@@ -34,6 +34,12 @@ enum LoggerMSGType : unsigned char
     FixMe,
 };
 
+using LoggerFunctionCB_T = std::function<
+    void(
+        wayround_i2p::ccutils::logger::LoggerMSGType,
+        wayround_i2p::ccutils::unicode::UString
+    )>;
+
 class LoggerI
 {
   public:

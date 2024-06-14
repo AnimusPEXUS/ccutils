@@ -25,11 +25,7 @@ struct TSTFuncResult
     bool test_success = false;
 };
 
-using LOGGER_CB_FUNCTION_TYPE = std::function<
-    void(
-        wayround_i2p::ccutils::logger::LoggerMSGType,
-        wayround_i2p::ccutils::unicode::UString
-    )>;
+using LOGGER_CB_FUNCTION_TYPE = wayround_i2p::ccutils::logger::LoggerFunctionCB_T;
 
 using TST_TEST_FUNCTION = std::function<TSTFuncResult(
     const TSTInfo                   &func_info,
