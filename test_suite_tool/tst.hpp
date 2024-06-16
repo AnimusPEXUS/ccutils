@@ -25,12 +25,10 @@ struct TSTFuncResult
     bool test_success = false;
 };
 
-using LOGGER_CB_FUNCTION_TYPE = wayround_i2p::ccutils::logger::LoggerFunctionCB_T;
-
 using TST_TEST_FUNCTION = std::function<TSTFuncResult(
-    const TSTInfo                   &func_info,
-    std::map<std::string, std::any> &iitm,
-    LOGGER_CB_FUNCTION_TYPE          logger
+    const TSTInfo                                &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
 )>;
 
 struct TSTInfo
@@ -51,7 +49,7 @@ struct GroupsMapItem
     std::map<wayround_i2p::ccutils::unicode::UString, const TSTInfo &> tests;
 };
 
-struct run_tests_Parameters : public wayround_i2p::ccutils::logger::LoggerI
+struct run_tests_Parameters
 {
     wayround_i2p::ccutils::unicode::UString                          title = "(not set)";
     wayround_i2p::ccutils::unicode::UString                          description;
@@ -63,11 +61,43 @@ struct run_tests_Parameters : public wayround_i2p::ccutils::logger::LoggerI
 
     wayround_i2p::ccutils::logger::LoggerI_shared logger;
 
-    void Log(
-        wayround_i2p::ccutils::logger::LoggerMSGType,
-        wayround_i2p::ccutils::unicode::UString
-    ) const;
     int AddTest(const TSTInfo &info);
+};
+
+class IndividualFunctionLogger : public wayround_i2p::ccutils::logger::LoggerI
+{
+  public:
+    static std::shared_ptr<IndividualFunctionLogger> create(
+        const run_tests_Parameters &params,
+        const TSTInfo              &test_info
+    );
+
+    void Log(
+        wayround_i2p::ccutils::logger::LoggerMSGType   t,
+        const wayround_i2p::ccutils::unicode::UString &msg
+    ) const;
+
+    void Log(
+        wayround_i2p::ccutils::logger::LoggerMSGType               t,
+        const std::deque<wayround_i2p::ccutils::unicode::UString> &msg
+    ) const;
+
+    void LogSplitLines(
+        wayround_i2p::ccutils::logger::LoggerMSGType   t,
+        const wayround_i2p::ccutils::unicode::UString &msg
+    ) const;
+
+    ~IndividualFunctionLogger();
+
+  protected:
+    IndividualFunctionLogger(
+        const run_tests_Parameters &params,
+        const TSTInfo              &test_info
+    );
+
+  private:
+    const run_tests_Parameters &params;
+    const TSTInfo              &test_info;
 };
 
 int run_tests(int argc, char **args, const run_tests_Parameters &tl);

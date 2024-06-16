@@ -153,9 +153,10 @@ UString UString::substr(size_t pos, size_t length) const
     return x;
 }
 
-std::tuple<std::deque<UString>, error_ptr> UString::lines()
+std::deque<UString> &UString::lines(std::deque<UString> &ret) const
 {
-    std::deque<UString> ret;
+    // std::deque<UString> ret;
+    ret.resize(0);
 
     auto pattern = wayround_i2p::ccutils::regexp::create(
         wayround_i2p::ccutils::regexp::PatternType::LineSplit
@@ -170,10 +171,8 @@ std::tuple<std::deque<UString>, error_ptr> UString::lines()
     auto search_res_err        = std::get<1>(search_res);
     auto search_res_deque_size = search_res_deque.size();
 
-    if (search_res_err)
-    {
-        return std::tuple(std::deque<UString>{}, search_res_err);
-    }
+    //	this shouldn't be theoretically happening
+    assert(!search_res_err);
 
     if (search_res_deque_size > 0)
     {
@@ -205,7 +204,7 @@ std::tuple<std::deque<UString>, error_ptr> UString::lines()
         ret.push_back(*this);
     }
 
-    return std::tuple(ret, nullptr);
+    return ret;
 }
 
 std::string UString::string_utf8() const

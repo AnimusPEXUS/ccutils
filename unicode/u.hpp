@@ -1,6 +1,7 @@
 #ifndef WAYROUND_I2P_20240616_100728_801057
 #define WAYROUND_I2P_20240616_100728_801057
 
+#include <cassert>
 #include <cstdint>
 #include <deque>
 #include <iostream>
@@ -153,7 +154,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // split string to lines.
     // result doesn't includes splitting characters
     // (/r, /n and/or they'r combinations)
-    std::tuple<std::deque<UString>, error_ptr> lines();
+    std::deque<UString> &lines(std::deque<UString> &ret) const;
 
     std::string string_utf8() const;
 

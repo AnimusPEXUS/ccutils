@@ -34,18 +34,24 @@ enum LoggerMSGType : unsigned char
     FixMe,
 };
 
-using LoggerFunctionCB_T = std::function<
-    void(
-        wayround_i2p::ccutils::logger::LoggerMSGType,
-        wayround_i2p::ccutils::unicode::UString
-    )>;
-
 class LoggerI
 {
   public:
     virtual void Log(
-        LoggerMSGType                           t,
-        wayround_i2p::ccutils::unicode::UString msg
+        LoggerMSGType                                  t,
+        const wayround_i2p::ccutils::unicode::UString &msg
+    ) const
+        = 0;
+
+    virtual void Log(
+        LoggerMSGType                                              t,
+        const std::deque<wayround_i2p::ccutils::unicode::UString> &msg
+    ) const
+        = 0;
+
+    virtual void LogSplitLines(
+        LoggerMSGType                                  t,
+        const wayround_i2p::ccutils::unicode::UString &msg
     ) const
         = 0;
 };
@@ -58,8 +64,18 @@ class TerminalLogger : public LoggerI
     static std::shared_ptr<TerminalLogger> create();
 
     void Log(
-        LoggerMSGType                           t,
-        wayround_i2p::ccutils::unicode::UString msg
+        LoggerMSGType                                  t,
+        const wayround_i2p::ccutils::unicode::UString &msg
+    ) const;
+
+    void Log(
+        LoggerMSGType                                              t,
+        const std::deque<wayround_i2p::ccutils::unicode::UString> &msgs
+    ) const;
+
+    void LogSplitLines(
+        LoggerMSGType                                  t,
+        const wayround_i2p::ccutils::unicode::UString &msg
     ) const;
 
     ~TerminalLogger();

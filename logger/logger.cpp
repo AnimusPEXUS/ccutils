@@ -57,6 +57,7 @@ wayround_i2p::ccutils::unicode::UString timestamp()
     return std::format("{0:%F}T{0:%T}z", t);
 }
 
+/*
 wayround_i2p::ccutils::unicode::UString FixMsg(
     LoggerMSGType                           t,
     wayround_i2p::ccutils::unicode::UString msg
@@ -73,6 +74,7 @@ wayround_i2p::ccutils::unicode::UString FixMsg(
     }
     return msg;
 }
+*/
 
 std::shared_ptr<TerminalLogger> TerminalLogger::create()
 {
@@ -89,12 +91,13 @@ TerminalLogger::~TerminalLogger()
 }
 
 void TerminalLogger::Log(
-    LoggerMSGType                           t,
-    wayround_i2p::ccutils::unicode::UString msg
+    LoggerMSGType                                  t,
+    const wayround_i2p::ccutils::unicode::UString &msg
 ) const
 {
+    // std::cout << "TerminalLogger::Log()" << std::endl;
 
-    msg = FixMsg(t, msg);
+    // msg = FixMsg(t, msg);
 
     std::cout << std::format(
         "[{}] [{}] {}",
@@ -103,6 +106,35 @@ void TerminalLogger::Log(
         msg
     )
               << std::endl;
+}
+
+void TerminalLogger::Log(
+    LoggerMSGType                                              t,
+    const std::deque<wayround_i2p::ccutils::unicode::UString> &msgs
+) const
+{
+    // std::cout << "TerminalLogger::Log(deque)" << std::endl;
+    for (auto &msg : msgs)
+    {
+        this->Log(t, msg);
+    }
+}
+
+void TerminalLogger::LogSplitLines(
+    LoggerMSGType                                  t,
+    const wayround_i2p::ccutils::unicode::UString &msg
+) const
+{
+    // std::cout << "TerminalLogger::LogSplitLines():" << msg << std::endl;
+    std::deque<wayround_i2p::ccutils::unicode::UString> msgs;
+    msgs = msg.lines(msgs);
+    /*
+    for (auto &i : msgs)
+    {
+        std::cout << "TerminalLogger::LogSplitLines() line: " << i << std::endl;
+    }
+*/
+    this->Log(t, msgs);
 }
 
 } // namespace wayround_i2p::ccutils::logger
