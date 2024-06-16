@@ -174,6 +174,7 @@ create_ccutils_component(
   ICU::i18n
   ICU::io
   ccutils_errors
+  ccutils_regexp
   ccutils_repr
 
   INC_DIRS_PUB
@@ -222,9 +223,11 @@ create_ccutils_component(
 
   SOURCES
   regexp
+  regexp_fds_and_enums
 
   HEADERS
   regexp
+  regexp_fds_and_enums
 
   LIBS_PUB
   ccutils_unicode

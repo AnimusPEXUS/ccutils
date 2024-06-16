@@ -1,7 +1,8 @@
-#ifndef WAYROUND_I2P_20240601_083133_756609
-#define WAYROUND_I2P_20240601_083133_756609
+#ifndef WAYROUND_I2P_20240616_100728_801057
+#define WAYROUND_I2P_20240616_100728_801057
 
 #include <cstdint>
+#include <deque>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -14,6 +15,11 @@
 #include <unicode/ustream.h>
 #include <unicode/utypes.h>
 
+// #include <wayround_i2p/ccutils/errors/e.hpp>
+// #include <wayround_i2p/ccutils/regexp/regexp_enums.hpp>
+#include <wayround_i2p/ccutils/regexp/regexp_fds_and_enums.hpp>
+// #include <wayround_i2p/ccutils/regexp/regexp.hpp>
+
 #include <wayround_i2p/ccutils/repr/repr.hpp>
 
 namespace wayround_i2p::ccutils::repr
@@ -21,12 +27,27 @@ namespace wayround_i2p::ccutils::repr
 class RepresentableAsText;
 }
 
+namespace wayround_i2p::ccutils::regexp
+{
+struct Pattern;
+using Pattern_shared        = std::shared_ptr<Pattern>;
+using Pattern_shared_vector = std::vector<std::shared_ptr<Pattern>>;
+Pattern_shared create(PatternType type);
+} // namespace wayround_i2p::ccutils::regexp
+
+namespace wayround_i2p::ccutils::errors
+{
+
+class error;
+using error_ptr = std::shared_ptr<error>;
+
+} // namespace wayround_i2p::ccutils::errors
+
 namespace wayround_i2p::ccutils::unicode
 {
 using byte_vector = std::vector<std::uint8_t>;
 
-class error;
-using error_ptr = std::shared_ptr<error>;
+using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 
 // class UString;
 
@@ -128,6 +149,11 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // note: result will be shorter than `length` if
     //       `length` going outside of string
     UString substr(size_t pos, size_t length) const;
+
+    // split string to lines.
+    // result doesn't includes splitting characters
+    // (/r, /n and/or they'r combinations)
+    std::tuple<std::deque<UString>, error_ptr> lines();
 
     std::string string_utf8() const;
 

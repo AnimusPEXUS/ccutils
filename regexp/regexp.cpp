@@ -14,6 +14,11 @@ Pattern_shared Pattern::create(PatternType type)
     return ret;
 }
 
+Pattern_shared create(PatternType type)
+{
+    return Pattern::create(type);
+}
+
 error_ptr Pattern::setRepetitionFromType(
     PatternRepetitionType pattern_repetition_type
 )
@@ -642,7 +647,7 @@ const Result_shared search(
 }
 
 const std::tuple<
-    const Result_shared_sequence,
+    const Result_shared_deque,
     wayround_i2p::ccutils::errors::error_ptr>
     findAll(
         const Pattern_shared pattern,
@@ -652,7 +657,7 @@ const std::tuple<
 {
     // todo: add overlap prevention option?
 
-    Result_shared_sequence                   ret;
+    Result_shared_deque                      ret;
     wayround_i2p::ccutils::errors::error_ptr ret_err = nullptr;
 
     auto subject_length = subject.length();
@@ -675,7 +680,7 @@ const std::tuple<
         if (search_res->error)
         {
             ret_err = search_res->error;
-            return std::tuple(Result_shared_sequence{}, ret_err);
+            return std::tuple(Result_shared_deque{}, ret_err);
         }
 
         if (search_res->matched)

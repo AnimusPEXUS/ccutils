@@ -1,5 +1,8 @@
-#include <wayround_i2p/ccutils/errors/e.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
+
+#include <wayround_i2p/ccutils/errors/e.hpp>
+
+#include <wayround_i2p/ccutils/regexp/regexp.hpp>
 
 namespace wayround_i2p::ccutils::unicode
 {
@@ -148,6 +151,61 @@ UString UString::substr(size_t pos, size_t length) const
     UString x;
     this->data.extract(pos, length, x.data);
     return x;
+}
+
+std::tuple<std::deque<UString>, error_ptr> UString::lines()
+{
+    std::deque<UString> ret;
+
+    auto pattern = wayround_i2p::ccutils::regexp::create(
+        wayround_i2p::ccutils::regexp::PatternType::LineSplit
+    );
+
+    auto search_res = wayround_i2p::ccutils::regexp::findAll(
+        pattern,
+        *this
+    );
+
+    auto search_res_deque      = std::get<0>(search_res);
+    auto search_res_err        = std::get<1>(search_res);
+    auto search_res_deque_size = search_res_deque.size();
+
+    if (search_res_err)
+    {
+        return std::tuple(std::deque<UString>{}, search_res_err);
+    }
+
+    if (search_res_deque_size > 0)
+    {
+        std::size_t i_start_index = 0;
+        std::size_t i_end_index   = 0;
+
+        i_start_index = 0;
+        i_end_index   = search_res_deque[0]->match_start;
+        ret.push_back(this->substr(i_start_index, i_end_index - i_start_index));
+
+        if (search_res_deque_size > 1)
+        {
+            for (std::size_t i = 0; i != (search_res_deque_size - 1); i++)
+            {
+                i_start_index = search_res_deque[search_res_deque_size - 1]
+                                    ->match_end;
+                i_end_index = search_res_deque[i]
+                                  ->match_start;
+                ret.push_back(this->substr(i_start_index, i_end_index - i_start_index));
+            }
+        }
+
+        i_start_index = search_res_deque[search_res_deque_size - 1]->match_end;
+        i_end_index   = this->length();
+        ret.push_back(this->substr(i_start_index, i_end_index - i_start_index));
+    }
+    else
+    {
+        ret.push_back(*this);
+    }
+
+    return std::tuple(ret, nullptr);
 }
 
 std::string UString::string_utf8() const

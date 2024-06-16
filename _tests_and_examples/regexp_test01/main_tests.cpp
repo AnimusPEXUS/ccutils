@@ -488,3 +488,38 @@ wayround_i2p::ccutils::tst::TSTInfo main_006_i = {
     .description_short = "repetitions test 01",
     .func              = main_006
 };
+
+// -------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_007(
+    const wayround_i2p::ccutils::tst::TSTInfo                &func_info,
+    std::map<std::string, std::any>                          &iitm,
+    const wayround_i2p::ccutils::tst::LOGGER_CB_FUNCTION_TYPE logger
+)
+{
+    bool ret = false;
+    auto ts  = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+        iitm["test_subject_001"]
+    );
+
+    auto lines       = ts.lines();
+    auto lines_deque = std::get<0>(lines);
+    auto lines_err   = std::get<1>(lines);
+
+    for (auto i = 0; i != lines_deque.size(); i++)
+    {
+        logger(
+            wayround_i2p::ccutils::logger::Status,
+            std::format("{:02d}: {}", i, lines_deque[i])
+        );
+    }
+
+    return {true}; // todo: fix this
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_007_i = {
+    .group_name        = "main",
+    .test_name         = "007",
+    .description_short = "line splitting test 01",
+    .func              = main_007
+};

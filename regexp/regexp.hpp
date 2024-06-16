@@ -1,62 +1,44 @@
-#ifndef WAYROUND_I2P_20240601_083133_764006
-#define WAYROUND_I2P_20240601_083133_764006
+#ifndef WAYROUND_I2P_20240616_100728_818017
+#define WAYROUND_I2P_20240616_100728_818017
 
 #include <cassert>
 #include <vector>
 
 #include <experimental/scope>
 
+#include <wayround_i2p/ccutils/regexp/regexp_fds_and_enums.hpp>
+
 #include <wayround_i2p/ccutils/errors/e.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
+
+/*
+namespace wayround_i2p::ccutils::unicode
+{
+
+struct UChar;
+class UString;
+
+} // namespace wayround_i2p::ccutils::unicode
+*/
+
+/*
+namespace wayround_i2p::ccutils::errors
+{
+
+class error;
+using error_ptr = std::shared_ptr<error>;
+
+} // namespace wayround_i2p::ccutils::errors
+*/
 
 namespace wayround_i2p::ccutils::regexp
 {
 
-using UChar     = wayround_i2p::ccutils::unicode::UChar;
-using UString   = wayround_i2p::ccutils::unicode::UString;
-using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
-
-// wip prototype for UChar (from ccutils/unicode). maybe CharT and/or ICU's UChar
+// this is wip prototype for UChar (from ccutils/unicode).
+// maybe CharT and/or ICU's UChar
 // will be added later, but doubt this will be necessary.
 
-enum class PatternType : unsigned char
-{
-    Invalid,
-
-    TextStart,
-    TextEnd,
-    LineStart,
-    LineEnd,
-
-    LineSplit,
-
-    ExactChar,
-    CharRange,
-
-    AnyChar,
-
-    Not,
-
-    Sequence,
-    OrSequence
-};
-
-enum class PatternRepetitionType : unsigned char
-{
-    Invalid,
-    Single,
-    NoneOrOne,  // ?
-    NoneOrMore, // *
-    OneOrMore   // +
-};
-
 // todo: create precompiled patterns
-
-struct Pattern;
-
-using Pattern_shared = std::shared_ptr<Pattern>;
-
-using Pattern_shared_sequence = std::vector<std::shared_ptr<Pattern>>;
 
 struct Pattern
 {
@@ -77,8 +59,8 @@ struct Pattern
     Pattern_shared subpatterns;
 
     // for SpecialLetter or SpecialName
-    UString special;
-    bool    case_sensitive = true;
+    // UString special;
+    bool case_sensitive = true;
 
     bool        has_min = false;
     bool        has_max = false;
@@ -107,12 +89,6 @@ struct Pattern
     std::weak_ptr<Pattern> own_ptr;
 };
 
-struct Result;
-
-using Result_shared = std::shared_ptr<Result>;
-
-using Result_shared_sequence = std::vector<std::shared_ptr<Result>>;
-
 struct Result
 {
     error_ptr error;
@@ -131,7 +107,7 @@ struct Result
 
     Pattern_shared corresponding_pattern;
 
-    Result_shared_sequence submatches;
+    Result_shared_deque submatches;
 
     UString       getResultString();
     Result_shared getSubmatchByPatternName(UString name);
@@ -173,15 +149,6 @@ const Result_shared search(
     std::size_t          start_at = 0,
     bool                 backward = false
 );
-
-const std::tuple<
-    const Result_shared_sequence,
-    wayround_i2p::ccutils::errors::error_ptr>
-    findAll(
-        const Pattern_shared pattern,
-        const UString       &subject,
-        std::size_t          start_at = 0
-    );
 
 } // namespace wayround_i2p::ccutils::regexp
 
