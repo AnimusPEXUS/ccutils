@@ -149,7 +149,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     // note: result will be shorter than `length` if
     //       `length` going outside of string
-    UString substr(size_t pos, size_t length) const;
+    UString substr(std::size_t pos, std::size_t length) const;
 
     // split string to lines.
     // result doesn't includes splitting characters

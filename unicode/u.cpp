@@ -146,7 +146,7 @@ size_t UString::size() const
     return length();
 } */
 
-UString UString::substr(size_t pos, size_t length) const
+UString UString::substr(std::size_t pos, std::size_t length) const
 {
     UString x;
     this->data.extract(pos, length, x.data);
@@ -181,23 +181,42 @@ std::deque<UString> &UString::lines(std::deque<UString> &ret) const
 
         i_start_index = 0;
         i_end_index   = search_res_deque[0]->match_start;
-        ret.push_back(this->substr(i_start_index, i_end_index - i_start_index));
+        // todo: add this check to testsuite and, probably, remove assert
+        assert(i_start_index <= i_end_index);
+        ret.push_back(
+            this->substr(
+                i_start_index,
+                i_end_index - i_start_index
+            )
+        );
 
         if (search_res_deque_size > 1)
         {
             for (std::size_t i = 0; i != (search_res_deque_size - 1); i++)
             {
-                i_start_index = search_res_deque[search_res_deque_size - 1]
+                i_start_index = search_res_deque[i]
                                     ->match_end;
-                i_end_index = search_res_deque[i]
+                i_end_index = search_res_deque[i + 1]
                                   ->match_start;
-                ret.push_back(this->substr(i_start_index, i_end_index - i_start_index));
+                assert(i_start_index <= i_end_index);
+                ret.push_back(
+                    this->substr(
+                        i_start_index,
+                        i_end_index - i_start_index
+                    )
+                );
             }
         }
 
         i_start_index = search_res_deque[search_res_deque_size - 1]->match_end;
         i_end_index   = this->length();
-        ret.push_back(this->substr(i_start_index, i_end_index - i_start_index));
+        assert(i_start_index <= i_end_index);
+        ret.push_back(
+            this->substr(
+                i_start_index,
+                i_end_index - i_start_index
+            )
+        );
     }
     else
     {

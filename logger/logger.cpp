@@ -95,8 +95,6 @@ void TerminalLogger::Log(
     const wayround_i2p::ccutils::unicode::UString &msg
 ) const
 {
-    // std::cout << "TerminalLogger::Log()" << std::endl;
-
     // msg = FixMsg(t, msg);
 
     std::cout << std::format(
@@ -113,7 +111,6 @@ void TerminalLogger::Log(
     const std::deque<wayround_i2p::ccutils::unicode::UString> &msgs
 ) const
 {
-    // std::cout << "TerminalLogger::Log(deque)" << std::endl;
     for (auto &msg : msgs)
     {
         this->Log(t, msg);
@@ -125,15 +122,8 @@ void TerminalLogger::LogSplitLines(
     const wayround_i2p::ccutils::unicode::UString &msg
 ) const
 {
-    // std::cout << "TerminalLogger::LogSplitLines():" << msg << std::endl;
     std::deque<wayround_i2p::ccutils::unicode::UString> msgs;
     msgs = msg.lines(msgs);
-    /*
-    for (auto &i : msgs)
-    {
-        std::cout << "TerminalLogger::LogSplitLines() line: " << i << std::endl;
-    }
-*/
     this->Log(t, msgs);
 }
 
