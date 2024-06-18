@@ -232,6 +232,7 @@ create_ccutils_component(
   LIBS_PUB
   ccutils_unicode
   ccutils_errors
+  ccutils_repr
 )
 
 

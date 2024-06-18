@@ -4,6 +4,16 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
+UString Pattern::repr_as_text()
+{
+    // todo: does this return copy? use pointers?
+    // todo: todo
+    UString ret = std::format(
+        R"+++(todo)+++"
+    );
+    return ret;
+}
+
 Pattern_shared Pattern::create(PatternType type)
 {
     auto ret          = Pattern_shared(new Pattern());
@@ -99,6 +109,42 @@ void Pattern::setExactCount(std::size_t val)
 {
     setMinCount(val);
     setMaxCount(val);
+}
+
+UString Result::repr_as_text()
+{
+    return repr_as_text({});
+}
+
+UString Result::repr_as_text(const Result_repr_as_text_opts &opts)
+{
+    // todo: use opts
+
+    UString ret = std::format(
+        R"+++(
+wayround_i2p::ccutils::regexp::Result{{
+        error?                    : {}
+        original_sbject           : {}
+        matched?                  : {}
+        matched_repetitions_count : {}
+        match_start               : {}
+        match_end                 : {}
+        corresponding_pattern     : {}
+        submatches                : {}
+}}
+)+++",
+        this->error ? this->error->Error() : "(no error)",
+        opts.original_subject ? this->original_subject : "(disabled)",
+        this->matched,
+        this->matched_repetitions_count,
+        this->match_start,
+        this->match_end,
+        opts.corresponding_pattern ? this->corresponding_pattern->repr_as_text() :
+                                     "(disabled)",
+        opts.submatches ? "(todo)" : "(disabled)"
+    );
+    // todo: does this return copy? use pointers?
+    return ret;
 }
 
 Result_shared Result::create()

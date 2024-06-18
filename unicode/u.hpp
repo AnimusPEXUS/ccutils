@@ -153,7 +153,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     // split string to lines.
     // result doesn't includes splitting characters
-    // (/r, /n and/or they'r combinations)
+    // (/r, /n and/or they'r combinations).
+    // pass existing deque - it will be truncated and new lines will be added
     std::deque<UString> &lines(std::deque<UString> &ret) const;
 
     std::string string_utf8() const;

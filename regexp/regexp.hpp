@@ -11,6 +11,8 @@
 #include <wayround_i2p/ccutils/errors/e.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
+// #include <wayround_i2p/ccutils/repr/repr.hpp>
+
 /*
 namespace wayround_i2p::ccutils::unicode
 {
@@ -40,7 +42,7 @@ namespace wayround_i2p::ccutils::regexp
 
 // todo: create precompiled patterns
 
-struct Pattern
+struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     UString name; // can be used to get submatch by name
 
@@ -83,14 +85,24 @@ struct Pattern
 
     // --^^^-- shortcuts to set min/max fields --^^^--
 
+    UString repr_as_text();
+
     static Pattern_shared create(PatternType type);
 
   private:
     std::weak_ptr<Pattern> own_ptr;
 };
 
-struct Result
+struct Result_repr_as_text_opts
 {
+    bool original_subject      = false;
+    bool corresponding_pattern = false;
+    bool submatches            = false;
+};
+
+struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
+{
+  public:
     error_ptr error;
 
     UString original_subject;
@@ -111,6 +123,9 @@ struct Result
 
     UString       getResultString();
     Result_shared getSubmatchByPatternName(UString name);
+
+    UString repr_as_text();
+    UString repr_as_text(const Result_repr_as_text_opts &opts);
 
     static Result_shared create();
 

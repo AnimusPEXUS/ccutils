@@ -176,6 +176,12 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
         );
 
         auto res = wayround_i2p::ccutils::regexp::match(p, ts_u);
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            res->repr_as_text()
+        );
+
         if (res->error)
         {
             logger->Log(
@@ -465,6 +471,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_006(
     pattern->values = {'a'};
 
     auto res = wayround_i2p::ccutils::regexp::match(pattern, ts);
+
+    logger->LogSplitLines(
+        wayround_i2p::ccutils::logger::Status,
+        res->repr_as_text()
+    );
 
     if (res->error)
     {
