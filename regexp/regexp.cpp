@@ -148,7 +148,7 @@ Pattern_shared Pattern::setRepetitionFromType(PatternRepetitionType pattern_repe
 
 Pattern_shared Pattern::setGreedy(bool value)
 {
-    this->greedy = true;
+    this->greedy = value;
     return Pattern_shared(this->own_ptr);
 }
 

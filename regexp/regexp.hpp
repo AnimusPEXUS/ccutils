@@ -92,7 +92,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Pattern_shared setName(UString value);
     Pattern_shared setRepetitionFromType(PatternRepetitionType pattern_repetition_type);
-    Pattern_shared setGreedy(bool value);
+    Pattern_shared setGreedy(bool value = true);
 
     Pattern_shared setMinCount(std::size_t val);
     Pattern_shared setMaxCount(std::size_t val);
