@@ -14,24 +14,83 @@ UString Pattern::repr_as_text()
     return ret;
 }
 
-Pattern_shared Pattern::create(PatternType type)
+Pattern_shared Pattern::setTextStart()
 {
-    auto ret          = Pattern_shared(new Pattern());
-    ret->own_ptr      = ret;
-    ret->pattern_type = type;
-    ret->setRepetitionFromType(PatternRepetitionType::Single);
-    ret->greedy = false;
-    return ret;
+    this->pattern_type = PatternType::TextStart;
+    return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared create(PatternType type)
+Pattern_shared Pattern::setTextEnd()
 {
-    return Pattern::create(type);
+    this->pattern_type = PatternType::TextEnd;
+    return Pattern_shared(this->own_ptr);
 }
 
-error_ptr Pattern::setRepetitionFromType(
-    PatternRepetitionType pattern_repetition_type
-)
+Pattern_shared Pattern::setLineStart()
+{
+    this->pattern_type = PatternType::LineStart;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setLineEnd()
+{
+    this->pattern_type = PatternType::LineEnd;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setLineSplit()
+{
+    this->pattern_type = PatternType::LineSplit;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setExactChar(UChar chr)
+{
+    this->pattern_type = PatternType::ExactChar;
+    this->values       = {chr};
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharRange(UChar char0, UChar char1)
+{
+    if (!(char1 >= char0))
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "invalid char0/char1 values for Pattern::setCharRange"
+        );
+    }
+    this->pattern_type = PatternType::CharRange;
+    this->values       = {char0, char1};
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setAnyChar()
+{
+    this->pattern_type = PatternType::AnyChar;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setSequence(Pattern_shared_deque seq)
+{
+    this->pattern_type = PatternType::Sequence;
+    this->subpatterns  = seq;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setOrSequence(Pattern_shared_deque seq)
+{
+    this->pattern_type = PatternType::OrSequence;
+    this->subpatterns  = seq;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setName(UString value)
+{
+    this->name = value;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setRepetitionFromType(PatternRepetitionType pattern_repetition_type)
 {
     this->has_min = false;
     this->has_max = false;
@@ -42,7 +101,7 @@ error_ptr Pattern::setRepetitionFromType(
     {
         case PatternRepetitionType::Invalid:
         default:
-            return wayround_i2p::ccutils::errors::New(
+            throw wayround_i2p::ccutils::errors::New(
                 std::format(
                     "invalid pattern_repetition_type value. {}:{}",
                     __FILE__,
@@ -54,31 +113,31 @@ error_ptr Pattern::setRepetitionFromType(
             this->has_max = true;
             this->min     = 1;
             this->max     = 1;
-            return nullptr;
+            return Pattern_shared(this->own_ptr);
 
         case PatternRepetitionType::NoneOrOne:
             this->has_min = true;
             this->has_max = true;
             // this->min     = 0;
             this->max     = 1;
-            return nullptr;
+            return Pattern_shared(this->own_ptr);
 
         case PatternRepetitionType::NoneOrMore:
             this->has_min = true;
             // this->has_max = false;
             // this->min     = 0;
             // this->max     = 0;
-            return nullptr;
+            return Pattern_shared(this->own_ptr);
 
         case PatternRepetitionType::OneOrMore:
             this->has_min = true;
             // this->has_max = false;
             this->min     = 1;
             // this->max     = 0;
-            return nullptr;
+            return Pattern_shared(this->own_ptr);
     }
 
-    return wayround_i2p::ccutils::errors::New(
+    throw wayround_i2p::ccutils::errors::New(
         std::format(
             "unexpected error. {}:{}",
             __FILE__,
@@ -87,28 +146,122 @@ error_ptr Pattern::setRepetitionFromType(
     );
 }
 
-void Pattern::setMinCount(std::size_t val)
+Pattern_shared Pattern::setGreedy(bool value)
+{
+    this->greedy = true;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setMinCount(std::size_t val)
 {
     this->has_min = true;
     this->min     = val;
+    return Pattern_shared(this->own_ptr);
 }
 
-void Pattern::setMaxCount(std::size_t val)
+Pattern_shared Pattern::setMaxCount(std::size_t val)
 {
     this->has_max = true;
     this->max     = val;
+    return Pattern_shared(this->own_ptr);
 }
 
-void Pattern::setMinMaxCount(std::size_t min, std::size_t max)
+Pattern_shared Pattern::setMinMaxCount(std::size_t min, std::size_t max)
 {
     setMinCount(min);
     setMaxCount(max);
+    return Pattern_shared(this->own_ptr);
 }
 
-void Pattern::setExactCount(std::size_t val)
+Pattern_shared Pattern::setExactCount(std::size_t val)
 {
     setMinCount(val);
     setMaxCount(val);
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::TextStart()
+{
+    auto ret = Pattern::create();
+    ret->setTextStart();
+    return ret;
+}
+
+Pattern_shared Pattern::TextEnd()
+{
+    auto ret = Pattern::create();
+    ret->setTextEnd();
+    return ret;
+}
+
+Pattern_shared Pattern::LineStart()
+{
+    auto ret = Pattern::create();
+    ret->setLineStart();
+    return ret;
+}
+
+Pattern_shared Pattern::LineEnd()
+{
+    auto ret = Pattern::create();
+    ret->setLineEnd();
+    return ret;
+}
+
+Pattern_shared Pattern::LineSplit()
+{
+    auto ret = Pattern::create();
+    ret->setLineSplit();
+    return ret;
+}
+
+Pattern_shared Pattern::ExactChar(UChar chr)
+{
+    auto ret = Pattern::create();
+    ret->setExactChar(chr);
+    return ret;
+}
+
+Pattern_shared Pattern::CharRange(UChar char0, UChar char1)
+{
+    auto ret = Pattern::create();
+    ret->setCharRange(char0, char1);
+    return ret;
+}
+
+Pattern_shared Pattern::AnyChar()
+{
+    auto ret = Pattern::create();
+    ret->setAnyChar();
+    return ret;
+}
+
+Pattern_shared Pattern::Sequence(Pattern_shared_deque seq)
+{
+    auto ret = Pattern::create();
+    ret->setSequence(seq);
+    return ret;
+}
+
+Pattern_shared Pattern::OrSequence(Pattern_shared_deque seq)
+{
+    auto ret = Pattern::create();
+    ret->setOrSequence(seq);
+    return ret;
+}
+
+Pattern_shared Pattern::create()
+{
+    auto ret     = Pattern_shared(new Pattern());
+    ret->own_ptr = ret;
+    ret->setRepetitionFromType(PatternRepetitionType::Single);
+    ret->greedy = false;
+    return ret;
+}
+
+Pattern_shared create()
+{
+    return Pattern::create();
 }
 
 UString Result::repr_as_text()
@@ -162,7 +315,7 @@ std::tuple<
         std::size_t    start_at
     )
 {
-    auto pattern = Pattern::create(PatternType::LineSplit);
+    auto pattern = Pattern::LineSplit();
     pattern->setRepetitionFromType(PatternRepetitionType::Single);
 
     auto res = match(pattern, subject, start_at);
@@ -512,6 +665,74 @@ const Result_shared match_single(
                 ret->match_end = start_at + 1;
             }
 
+            return ret;
+        }
+        case PatternType::AnyChar:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = ret->match_start + 1;
+                return ret;
+            }
+        }
+        case PatternType::Sequence:
+        {
+            std::size_t end_tracker = start_at;
+
+            for (auto x : pattern->subpatterns)
+            {
+                auto res = match(x, subject, end_tracker);
+
+                if (res->error)
+                {
+                    ret->error = res->error;
+                    return ret;
+                }
+
+                if (res->matched)
+                {
+                    end_tracker = res->match_end;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+
+            ret->matched   = true;
+            ret->match_end = end_tracker;
+
+            return ret;
+        }
+        case PatternType::OrSequence:
+        {
+            for (auto x : pattern->subpatterns)
+            {
+                auto res = match(x, subject, start_at);
+
+                if (res->error)
+                {
+                    ret->error = res->error;
+                    return ret;
+                }
+
+                if (res->matched)
+                {
+                    ret->matched   = true;
+                    ret->match_end = res->match_end;
+                    return ret;
+                }
+            }
+
+            ret->matched = false;
             return ret;
         }
     }

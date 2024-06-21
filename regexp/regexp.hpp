@@ -58,7 +58,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     //   Not - exactly 1
     //   Sequence - 1 or more
     //   OrSequence - 1 or more
-    Pattern_shared subpatterns;
+    Pattern_shared_deque subpatterns;
 
     // for SpecialLetter or SpecialName
     // UString special;
@@ -72,22 +72,50 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // greedy = true = match as less as possible
     bool greedy = false;
 
-    // --vvv-- shortcuts to set min/max fields --vvv--
-
-    error_ptr setRepetitionFromType(
-        PatternRepetitionType pattern_repetition_type
-    );
-
-    void setMinCount(std::size_t val);
-    void setMaxCount(std::size_t val);
-    void setMinMaxCount(std::size_t min, std::size_t max);
-    void setExactCount(std::size_t val);
-
-    // --^^^-- shortcuts to set min/max fields --^^^--
-
     UString repr_as_text();
 
-    static Pattern_shared create(PatternType type);
+    Pattern_shared setTextStart();
+    Pattern_shared setTextEnd();
+
+    Pattern_shared setLineStart();
+    Pattern_shared setLineEnd();
+
+    Pattern_shared setLineSplit();
+
+    Pattern_shared setExactChar(UChar chr);
+    Pattern_shared setCharRange(UChar char0, UChar char1);
+
+    Pattern_shared setAnyChar();
+
+    Pattern_shared setSequence(Pattern_shared_deque seq);
+    Pattern_shared setOrSequence(Pattern_shared_deque seq);
+
+    Pattern_shared setName(UString value);
+    Pattern_shared setRepetitionFromType(PatternRepetitionType pattern_repetition_type);
+    Pattern_shared setGreedy(bool value);
+
+    Pattern_shared setMinCount(std::size_t val);
+    Pattern_shared setMaxCount(std::size_t val);
+    Pattern_shared setMinMaxCount(std::size_t min, std::size_t max);
+    Pattern_shared setExactCount(std::size_t val);
+
+    static Pattern_shared TextStart();
+    static Pattern_shared TextEnd();
+
+    static Pattern_shared LineStart();
+    static Pattern_shared LineEnd();
+
+    static Pattern_shared LineSplit();
+
+    static Pattern_shared ExactChar(UChar chr);
+    static Pattern_shared CharRange(UChar char0, UChar char1);
+
+    static Pattern_shared AnyChar();
+
+    static Pattern_shared Sequence(Pattern_shared_deque seq);
+    static Pattern_shared OrSequence(Pattern_shared_deque seq);
+
+    static Pattern_shared create();
 
   private:
     std::weak_ptr<Pattern> own_ptr;

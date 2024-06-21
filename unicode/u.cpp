@@ -158,9 +158,13 @@ std::deque<UString> &UString::lines(std::deque<UString> &ret) const
     // std::deque<UString> ret;
     ret.resize(0);
 
-    auto pattern = wayround_i2p::ccutils::regexp::create(
+    auto pattern = wayround_i2p::ccutils::regexp::Pattern::LineSplit();
+
+    /*
+    auto pattern = wayround_i2p::ccutils::regexp::Pattern::LineSplit(
         wayround_i2p::ccutils::regexp::PatternType::LineSplit
     );
+*/
 
     auto search_res = wayround_i2p::ccutils::regexp::findAll(
         pattern,

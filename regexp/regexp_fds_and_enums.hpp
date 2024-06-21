@@ -54,7 +54,7 @@ enum class PatternType : unsigned char
 
     AnyChar,
 
-    Not,
+    // Not,
 
     Sequence,
     OrSequence
@@ -78,7 +78,7 @@ const std::tuple<
         std::size_t          start_at = 0
     );
 
-Pattern_shared create(PatternType type);
+// Pattern_shared create(PatternType type);
 
 } // namespace wayround_i2p::ccutils::regexp
 

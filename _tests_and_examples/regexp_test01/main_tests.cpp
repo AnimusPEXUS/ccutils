@@ -145,9 +145,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
     )
     {
 
-        auto p = wayround_i2p::ccutils::regexp::Pattern::create(
-            wayround_i2p::ccutils::regexp::PatternType::LineSplit
-        );
+        auto p = wayround_i2p::ccutils::regexp::Pattern::LineSplit();
 
         auto ts   = std::get<0>(subj01);
         auto ts_u = wayround_i2p::ccutils::unicode::UString(ts);
@@ -288,9 +286,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::create(
-        wayround_i2p::ccutils::regexp::PatternType::LineSplit
-    );
+    auto p = wayround_i2p::ccutils::regexp::Pattern::LineSplit();
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_001"]
@@ -345,9 +341,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_004(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::create(
-        wayround_i2p::ccutils::regexp::PatternType::LineStart
-    );
+    auto p = wayround_i2p::ccutils::regexp::Pattern::LineStart();
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_001"]
@@ -402,9 +396,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_005(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::create(
-        wayround_i2p::ccutils::regexp::PatternType::LineEnd
-    );
+    auto p = wayround_i2p::ccutils::regexp::Pattern::LineEnd();
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_001"]
@@ -464,11 +456,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_006(
         iitm["test_subject_003"]
     );
 
-    auto pattern = wayround_i2p::ccutils::regexp::Pattern::create(
-        wayround_i2p::ccutils::regexp::PatternType::ExactChar
-    );
+    auto pattern = wayround_i2p::ccutils::regexp::Pattern::ExactChar('a');
     pattern->setMinMaxCount(6, 6);
-    pattern->values = {'a'};
 
     auto res = wayround_i2p::ccutils::regexp::match(pattern, ts);
 

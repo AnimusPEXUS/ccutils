@@ -33,7 +33,7 @@ namespace wayround_i2p::ccutils::regexp
 struct Pattern;
 using Pattern_shared        = std::shared_ptr<Pattern>;
 using Pattern_shared_vector = std::vector<std::shared_ptr<Pattern>>;
-Pattern_shared create(PatternType type);
+Pattern_shared create();
 } // namespace wayround_i2p::ccutils::regexp
 
 namespace wayround_i2p::ccutils::errors
