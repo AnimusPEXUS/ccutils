@@ -21,6 +21,16 @@ UChar::~UChar()
 {
 }
 
+bool UChar::checkType(UCharCategory cat)
+{
+    if (cat == UCharCategory::None)
+    {
+        return true;
+    }
+    // todo: todo
+    return false;
+}
+
 std::int32_t UChar::as_int32() const
 {
     return chr;

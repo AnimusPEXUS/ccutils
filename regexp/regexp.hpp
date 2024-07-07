@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240616_100728_818017
-#define WAYROUND_I2P_20240616_100728_818017
+#ifndef WAYROUND_I2P_20240627_141739_96751
+#define WAYROUND_I2P_20240627_141739_96751
 
 #include <cassert>
 #include <vector>
@@ -91,7 +91,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setOrSequence(Pattern_shared_deque seq);
 
     Pattern_shared setName(UString value);
-    Pattern_shared setRepetitionFromType(PatternRepetitionType pattern_repetition_type);
+    Pattern_shared setRepetition(PatternRepetitionType pattern_repetition_type);
     Pattern_shared setGreedy(bool value = true);
 
     Pattern_shared setMinCount(std::size_t val);

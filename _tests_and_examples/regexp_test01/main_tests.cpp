@@ -553,3 +553,27 @@ wayround_i2p::ccutils::tst::TSTInfo main_007_i = {
     .description_short = "line splitting test 01",
     .func              = main_007
 };
+
+// -------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_008(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    ip_addr_test_text;
+
+    auto pattern
+        = wayround_i2p::ccutils::regexp::Pattern::Sequence(
+            {
+		}
+        );
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_008_i = {
+    .group_name        = "main",
+    .test_name         = "008",
+    .description_short = "ip parsing test",
+    .func              = main_008
+};

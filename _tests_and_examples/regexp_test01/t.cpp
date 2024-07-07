@@ -12,7 +12,7 @@ int main(int argc, char **args)
 
     wayround_i2p::ccutils::tst::run_tests_Parameters params;
 
-    params.title  = "WayRound.I2P ccutils::unicode test suite";
+    params.title  = "WayRound.I2P ccutils::regexp test suite";
     params.uri    = "https://github.com/AnimusPEXUS/ccutils";
     params.logger = logger;
 

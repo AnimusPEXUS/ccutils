@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240616_100728_801057
-#define WAYROUND_I2P_20240616_100728_801057
+#ifndef WAYROUND_I2P_20240627_141739_90533
+#define WAYROUND_I2P_20240627_141739_90533
 
 #include <cassert>
 #include <cstdint>
@@ -52,21 +52,23 @@ using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 
 // class UString;
 
-enum class UCharType : std::uint8_t
+enum class UCharCategory : std::uint32_t
 {
-    None,
-    Lower,
-    Upper,
-    Title,
-    Digit,
-    Alpha,
-    Alnum,
-    XDigit,
-    Punct,
-    Graph,
-    Blank,
-    Defined,
-    Space
+    None       = 0,
+    Unassigned = 0b01,
+    Other      = Unassigned << 1,
+    Upper      = Unassigned << 2,
+    Lower      = Unassigned << 3,
+    Title      = Unassigned << 4,
+    Digit      = Unassigned << 5,
+    Alpha      = Unassigned << 6,
+    Alnum      = Unassigned << 7,
+    XDigit     = Unassigned << 8,
+    Punct      = Unassigned << 9,
+    Graph      = Unassigned << 10,
+    Blank      = Unassigned << 11,
+    Defined    = Unassigned << 12,
+    Space      = Unassigned << 13
 };
 
 struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
@@ -75,6 +77,8 @@ struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
     UChar();
     UChar(std::int32_t val);
     ~UChar();
+
+    bool checkType(UCharCategory cat);
 
     std::int32_t as_int32() const;
 

@@ -25,9 +25,6 @@ endif()
 
 #find_package(Boost REQUIRED COMPONENTS json regex)
 
-find_package(ICU 73.0 COMPONENTS uc i18n io REQUIRED)
-
-#set(ICU_DEBUG ON)
 
 
 function(create_ccutils_component)
@@ -49,9 +46,7 @@ function(create_ccutils_component)
   list(SORT create_ccutils_component_SOURCES)
   list(SORT create_ccutils_component_HEADERS)
 
-
-  message("  processing component: ${create_ccutils_component_TARGETNAME}")
-
+  message("  adding component: ${create_ccutils_component_TARGETNAME}")
 
   add_library(
     ${create_ccutils_component_TARGETNAME}
@@ -65,8 +60,6 @@ function(create_ccutils_component)
       "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}.cpp"
     )
 
-
-
     set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.cpp")
     if (EXISTS ${nfn})
       list(
@@ -75,8 +68,6 @@ function(create_ccutils_component)
 	"${nfn}"
       )
     endif()
-
-
 
   endforeach()
 
@@ -159,29 +150,166 @@ create_ccutils_component(
   ccutils_unicode
 )
 
+
+set(
+  CCUTILS_UNICODE_BACKEND
+  icu
+  CACHE
+  STRING
+  "set to 'icu' or 'ccutils' - select backend used by ccutils_unicode library"
+)
+
+block(SCOPE_FOR VARIABLES)
+  set(CCUTILS_UNICODE_BACKEND_correct OFF)
+  foreach(i IN ITEMS icu ccutils)
+    if ("${i}" STREQUAL "${CCUTILS_UNICODE_BACKEND}")
+      set(CCUTILS_UNICODE_BACKEND_correct ON)
+      break()
+    endif()
+  endforeach()
+  if (NOT CCUTILS_UNICODE_BACKEND_correct)
+    message(FATAL_ERROR "invalid value for CCUTILS_UNICODE_BACKEND")
+  endif()
+endblock()
+
+set(
+  CCUTILS_UNICODE_SOURCES
+  u
+)
+
+set(
+  CCUTILS_UNICODE_HEADERS
+  u
+)
+
+
+set(
+  CCUTILS_UNICODE_LIBS_PUB
+  ccutils_errors
+  ccutils_regexp
+  ccutils_repr
+)
+
+set(
+  CCUTILS_UNICODE_LIBS_PUB
+  ccutils_errors
+  ccutils_regexp
+  ccutils_repr
+)
+
+set(
+  CCUTILS_UNICODE_INC_DIRS_PUB
+  ${ccutils_errors_INCLUDE_DIRS}
+)
+
+if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
+  find_package(ICU 73.0 COMPONENTS uc i18n io REQUIRED)
+  
+  create_ccutils_component(
+    TARGETNAME ccutils_unicode_backend_icu
+    SUBDIR unicode_backend_icu
+
+    SOURCES
+    ccub_icu
+
+    HEADERS
+    ccub_icu
+
+    LIBS_PUB
+    ICU::uc
+    ICU::i18n
+    ICU::io
+    ccutils_errors
+    ccutils_unicode
+
+    INC_DIRS_PUB
+    ICU::uc
+    ICU::i18n
+    ICU::io
+  )
+
+  list(
+    APPEND
+    CCUTILS_UNICODE_SOURCES
+    u_icu
+  )
+  list(
+    APPEND
+    CCUTILS_UNICODE_HEADERS
+    u_icu
+  )
+  list(
+    APPEND
+    CCUTILS_UNICODE_LIBS_PUB
+    unicode_backend_icu
+  )
+  list(
+    APPEND
+    CCUTILS_UNICODE_INC_DIRS_PUB
+  )
+  #set(ICU_DEBUG ON)
+endif()
+
+if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
+
+  create_ccutils_component(
+    TARGETNAME ccutils_unicode_backend_ccutils
+    SUBDIR unicode_backend_ccutils
+
+    SOURCES
+    ccuub_ccutils
+    ccuub_ccutils_generated_types
+    ccuub_ccutils_generated_char_db
+
+    HEADERS
+    ccuub_ccutils
+    ccuub_ccutils_generated_types
+    ccuub_ccutils_generated_char_db
+
+    LIBS_PUB
+    ccutils_errors
+    ccutils_unicode
+
+    INC_DIRS_PUB
+  )
+
+  list(
+    APPEND
+    CCUTILS_UNICODE_SOURCES
+    u_ccutils
+  )
+  list(
+    APPEND
+    CCUTILS_UNICODE_HEADERS
+    u_ccutils
+  )
+  list(
+    APPEND
+    CCUTILS_UNICODE_LIBS_PUB
+    ccutils_unicode_backend_ccutils
+  )
+  list(
+    APPEND
+    CCUTILS_UNICODE_INC_DIRS_PUB
+  )
+endif()
+
+
 create_ccutils_component(
   TARGETNAME ccutils_unicode
   SUBDIR unicode
 
   SOURCES
-  u
+  ${CCUTILS_UNICODE_SOURCES}
 
   HEADERS
-  u
+  ${CCUTILS_UNICODE_HEADERS}
 
   LIBS_PUB
-  ICU::uc
-  ICU::i18n
-  ICU::io
-  ccutils_errors
-  ccutils_regexp
-  ccutils_repr
+  ${CCUTILS_UNICODE_LIBS_PUB}
 
   INC_DIRS_PUB
-  ICU::uc
-  ICU::i18n
-  ICU::io
-  ${ccutils_errors_INCLUDE_DIRS}
+  ${CCUTILS_UNICODE_INC_DIRS_PUB}
 )
 
 
@@ -250,7 +378,7 @@ create_ccutils_component(
   LIBS_PUB
   ccutils_unicode
   ccutils_errors
-  ccutils_logger  
+  ccutils_logger
 )
 
 

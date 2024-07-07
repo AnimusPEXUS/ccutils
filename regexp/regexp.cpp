@@ -90,7 +90,7 @@ Pattern_shared Pattern::setName(UString value)
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setRepetitionFromType(PatternRepetitionType pattern_repetition_type)
+Pattern_shared Pattern::setRepetition(PatternRepetitionType pattern_repetition_type)
 {
     this->has_min = false;
     this->has_max = false;
@@ -254,7 +254,7 @@ Pattern_shared Pattern::create()
 {
     auto ret     = Pattern_shared(new Pattern());
     ret->own_ptr = ret;
-    ret->setRepetitionFromType(PatternRepetitionType::Single);
+    ret->setRepetition(PatternRepetitionType::Single);
     ret->greedy = false;
     return ret;
 }
@@ -316,7 +316,7 @@ std::tuple<
     )
 {
     auto pattern = Pattern::LineSplit();
-    pattern->setRepetitionFromType(PatternRepetitionType::Single);
+    pattern->setRepetition(PatternRepetitionType::Single);
 
     auto res = match(pattern, subject, start_at);
 
