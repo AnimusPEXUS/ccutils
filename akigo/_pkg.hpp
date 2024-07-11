@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240627_141739_93451
-#define WAYROUND_I2P_20240627_141739_93451
+#ifndef WAYROUND_I2P_20240711_143336_985512
+#define WAYROUND_I2P_20240711_143336_985512
 
 #include <wayround_i2p/ccutils/akigo/builtin.hpp>
 #include <wayround_i2p/ccutils/akigo/context.hpp>

@@ -172,6 +172,8 @@ block(SCOPE_FOR VARIABLES)
   endif()
 endblock()
 
+message("CCUTILS_UNICODE_BACKEND is ${CCUTILS_UNICODE_BACKEND}")
+
 set(
   CCUTILS_UNICODE_SOURCES
   u
@@ -181,7 +183,6 @@ set(
   CCUTILS_UNICODE_HEADERS
   u
 )
-
 
 set(
   CCUTILS_UNICODE_LIBS_PUB
@@ -203,17 +204,20 @@ set(
 )
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
+
+  #set(ICU_DEBUG ON)
+
   find_package(ICU 73.0 COMPONENTS uc i18n io REQUIRED)
-  
+
   create_ccutils_component(
     TARGETNAME ccutils_unicode_backend_icu
     SUBDIR unicode_backend_icu
 
     SOURCES
-    ccub_icu
+    u_backend
 
     HEADERS
-    ccub_icu
+    u_backend
 
     LIBS_PUB
     ICU::uc
@@ -231,23 +235,21 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
   list(
     APPEND
     CCUTILS_UNICODE_SOURCES
-    u_icu
   )
   list(
     APPEND
     CCUTILS_UNICODE_HEADERS
-    u_icu
   )
   list(
     APPEND
     CCUTILS_UNICODE_LIBS_PUB
-    unicode_backend_icu
+    ccutils_unicode_backend_icu
   )
   list(
     APPEND
     CCUTILS_UNICODE_INC_DIRS_PUB
   )
-  #set(ICU_DEBUG ON)
+
 endif()
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
@@ -257,12 +259,12 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
     SUBDIR unicode_backend_ccutils
 
     SOURCES
-    ccuub_ccutils
+    u_backend
     ccuub_ccutils_generated_types
     ccuub_ccutils_generated_char_db
 
     HEADERS
-    ccuub_ccutils
+    u_backend
     ccuub_ccutils_generated_types
     ccuub_ccutils_generated_char_db
 
@@ -276,12 +278,10 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
   list(
     APPEND
     CCUTILS_UNICODE_SOURCES
-    u_ccutils
   )
   list(
     APPEND
     CCUTILS_UNICODE_HEADERS
-    u_ccutils
   )
   list(
     APPEND
@@ -312,7 +312,11 @@ create_ccutils_component(
   ${CCUTILS_UNICODE_INC_DIRS_PUB}
 )
 
-
+if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
+  target_compile_options(ccutils_unicode PUBLIC "-DCCUTILS_UNICODE_BACKEND=icu")
+elseif (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
+  target_compile_options(ccutils_unicode PUBLIC "-DCCUTILS_UNICODE_BACKEND=ccutils")
+endif()
 
 create_ccutils_component(
   TARGETNAME ccutils_repr

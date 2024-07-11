@@ -1,3 +1,6 @@
+#include <functional>
+#include <vector>
+
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
 #include <wayround_i2p/ccutils/errors/e.hpp>
@@ -6,16 +9,6 @@
 
 namespace wayround_i2p::ccutils::unicode
 {
-
-UChar::UChar() :
-    chr(0)
-{
-}
-
-UChar::UChar(std::int32_t val) :
-    chr(val)
-{
-}
 
 UChar::~UChar()
 {
@@ -39,6 +32,140 @@ std::int32_t UChar::as_int32() const
 UString UChar::repr_as_text()
 {
     return std::format(R"++({:#x})++", chr);
+}
+
+UString UChar::propertiesText()
+{
+    UString ret;
+
+    using item01 = std::tuple<UString, std::function<bool()>>;
+
+    /*
+        for (auto &i :
+    std::vector<item01>{
+                 item01(
+        "Alpha",
+    [&]()->bool{
+            return this->isAlpha();
+    },
+                 item01(
+    "Lower",
+    [&]()->bool{
+            return this->isLower();
+    },
+             })
+        {
+            if ((std::get<1>(i))())
+            {
+                if (ret == "")
+                {
+            ret += " ";
+                }
+                ret += std::get<0>(i);
+            }
+        }
+    */
+
+    if (this->isAlpha())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isAlpha";
+    }
+
+    if (this->isLower())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isLower";
+    }
+
+    if (this->isUpper())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isUpper";
+    }
+
+    if (this->isPunct())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isPunct";
+    }
+
+    if (this->isDigit())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isDigit";
+    }
+
+    if (this->isXDigit())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isXDigit";
+    }
+
+    if (this->isAlnum())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isAlnum";
+    }
+
+    if (this->isSpace())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isSpace";
+    }
+
+    if (this->isCntrl())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isCntrl";
+    }
+
+    if (this->isGraph())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isGraph";
+    }
+
+    if (this->isPrint())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isPrint";
+    }
+
+    return ret;
 }
 
 bool operator==(
@@ -92,53 +219,6 @@ bool operator<=(
 UString::UString() :
     data("")
 {
-}
-
-UString::UString(
-    const char *val,
-    std::string encoding
-) :
-    UString()
-{
-    if (encoding == "utf-8")
-    {
-        data = icu::UnicodeString::fromUTF8(val);
-        return;
-    }
-
-    throw wayround_i2p::ccutils::errors::New("invalid 'encoding'");
-}
-
-UString::UString(
-    const std::string &val,
-    std::string        encoding
-) :
-    UString()
-{
-    if (encoding == "utf-8")
-    {
-        data = icu::UnicodeString::fromUTF8(val);
-        return;
-    }
-
-    throw wayround_i2p::ccutils::errors::New("invalid 'encoding'");
-}
-
-UString::UString(
-    const std::vector<UChar> &val
-) :
-    UString()
-{
-    auto vs = val.size();
-
-    std::vector<int32_t> vec(vs);
-    for (size_t i = 0; i != vs; i++)
-    {
-        vec[i] = val[i].as_int32();
-    }
-    //    data = icu::UnicodeString::fromUTF32(reinterpret_cast<int *>(vec.data()));
-    data = icu::UnicodeString::fromUTF32(vec.data(), vs);
-    return;
 }
 
 UString::~UString()

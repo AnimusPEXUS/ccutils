@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240627_141739_90533
-#define WAYROUND_I2P_20240627_141739_90533
+#ifndef WAYROUND_I2P_20240711_143336_983802
+#define WAYROUND_I2P_20240711_143336_983802
 
 #include <cassert>
 #include <cstdint>
@@ -10,11 +10,6 @@
 #include <string>
 #include <tuple>
 #include <vector>
-
-#include <unicode/stringpiece.h>
-#include <unicode/unistr.h>
-#include <unicode/ustream.h>
-#include <unicode/utypes.h>
 
 // #include <wayround_i2p/ccutils/errors/e.hpp>
 // #include <wayround_i2p/ccutils/regexp/regexp_enums.hpp>
@@ -44,6 +39,18 @@ using error_ptr = std::shared_ptr<error>;
 
 } // namespace wayround_i2p::ccutils::errors
 
+#ifndef CCUTILS_UNICODE_BACKEND
+    #error "CCUTILS_UNICODE_BACKEND undefined"
+#endif
+
+#if (CCUTILS_UNICODE_BACKEND == icu)
+    #include <wayround_i2p/ccutils/unicode_backend_icu/u_backend.hpp>
+#elif (CCUTILS_UNICODE_BACKEND == ccutils)
+    #include <wayround_i2p/ccutils/unicode_backend_ccutils/u_backend.hpp>
+#else
+    #error "invalid CCUTILS_UNICODE_BACKEND"
+#endif
+
 namespace wayround_i2p::ccutils::unicode
 {
 using byte_vector = std::vector<std::uint8_t>;
@@ -56,22 +63,42 @@ enum class UCharCategory : std::uint32_t
 {
     None       = 0,
     Unassigned = 0b01,
-    Other      = Unassigned << 1,
-    Upper      = Unassigned << 2,
+    Error      = Unassigned << 1,
+    Alpha      = Unassigned << 2,
     Lower      = Unassigned << 3,
-    Title      = Unassigned << 4,
-    Digit      = Unassigned << 5,
-    Alpha      = Unassigned << 6,
-    Alnum      = Unassigned << 7,
-    XDigit     = Unassigned << 8,
-    Punct      = Unassigned << 9,
-    Graph      = Unassigned << 10,
-    Blank      = Unassigned << 11,
-    Defined    = Unassigned << 12,
-    Space      = Unassigned << 13
+    Upper      = Unassigned << 4,
+    Punct      = Unassigned << 5,
+    Digit      = Unassigned << 6,
+    XDigit     = Unassigned << 7,
+    Alnum      = Unassigned << 8,
+    Space      = Unassigned << 9,
+    Blank      = Unassigned << 10,
+    Cntrl      = Unassigned << 11,
+    Graph      = Unassigned << 12,
+    Print      = Unassigned << 13,
 };
 
-struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
+/*
+class UCharPropertiesI
+{
+  public:
+    virtual bool isAlpha()  = 0;
+    virtual bool isLower()  = 0;
+    virtual bool isUpper()  = 0;
+    virtual bool isPunct()  = 0;
+    virtual bool isDigit()  = 0;
+    virtual bool isXDigit() = 0;
+    virtual bool isAlnum()  = 0;
+    virtual bool isSpace()  = 0;
+    virtual bool isBlank()  = 0;
+    virtual bool isCntrl()  = 0;
+    virtual bool isGraph()  = 0;
+    virtual bool isPrint()  = 0;
+};
+*/
+
+class UChar : // public UCharPropertiesI,
+              public wayround_i2p::ccutils::repr::RepresentableAsText
 {
   public:
     UChar();
@@ -84,10 +111,32 @@ struct UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     UString repr_as_text();
 
-    // friend class UString;
+    // todo: todo
+    //    UCharProperties getAllProperties();
+
+    bool isAlpha();
+    bool isLower();
+    bool isUpper();
+    bool isPunct();
+    bool isDigit();
+    bool isXDigit();
+    bool isAlnum();
+    bool isSpace();
+    bool isBlank();
+    bool isCntrl();
+    bool isGraph();
+    bool isPrint();
+
+    UChar toLower();
+    UChar toUpper();
+    UChar toTitle();
+
+    UString propertiesText();
 
   private:
+#if (CCUTILS_UNICODE_BACKEND == icu)
     UChar32 chr; // todo: can't make this const?
+#endif
 };
 
 bool operator==(
@@ -199,7 +248,9 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     );
 
   private:
+#if (CCUTILS_UNICODE_BACKEND == icu)
     icu::UnicodeString data;
+#endif
 };
 
 bool operator==(

@@ -562,13 +562,25 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    ip_addr_test_text;
+    auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+        iitm["test_subject_001"]
+    );
 
-    auto pattern
-        = wayround_i2p::ccutils::regexp::Pattern::Sequence(
-            {
-		}
+    for (
+        int i = 0;
+        i != ts.length();
+        i++
+    )
+    {
+        auto c = ts[i];
+        // std::cout << c << " (" << i << ") : " << c.propertiesText() << std::endl;
+        logger->Log(
+            wayround_i2p::ccutils::logger::Status,
+            std::format("{} ({}) : {}", c, i, c.propertiesText())
         );
+    }
+
+    return {false};
 }
 
 wayround_i2p::ccutils::tst::TSTInfo main_008_i = {

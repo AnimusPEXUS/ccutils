@@ -23,6 +23,7 @@ int main(int argc, char **args)
     params.AddTest(main_005_i);
     params.AddTest(main_006_i);
     params.AddTest(main_007_i);
+    params.AddTest(main_008_i);
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
 }
