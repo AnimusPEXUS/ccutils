@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240711_143336_988563
-#define WAYROUND_I2P_20240711_143336_988563
+#ifndef WAYROUND_I2P_20240718_170059_658327
+#define WAYROUND_I2P_20240718_170059_658327
 
 #include <deque>
 #include <memory>
@@ -54,7 +54,16 @@ enum class PatternType : unsigned char
 
     AnyChar,
 
-    // Not,
+    CharIsAlpha,
+    CharIsLower,
+    CharIsUpper,
+    CharIsPunct,
+    CharIsDigit,
+    CharIsXDigit,
+    CharIsSpace,
+    CharIsBlank,
+
+    Not,
 
     Sequence,
     OrSequence

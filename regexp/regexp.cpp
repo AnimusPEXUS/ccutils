@@ -323,6 +323,7 @@ std::tuple<
     return std::tuple(res->matched, res->match_end - res->match_start);
 }
 
+// todo: this function is too large and complex. maybe it should be splitup
 const Result_shared match_single(
     const Pattern_shared pattern,
     const UString       &subject,
@@ -680,6 +681,190 @@ const Result_shared match_single(
                 ret->match_start = start_at;
                 ret->match_end   = ret->match_start + 1;
                 return ret;
+            }
+        }
+        case PatternType::CharIsAlpha:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isAlpha())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+        }
+        case PatternType::CharIsLower:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isLower())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+        }
+        case PatternType::CharIsUpper:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isUpper())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+        }
+        case PatternType::CharIsPunct:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isPunct())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+        }
+        case PatternType::CharIsDigit:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isDigit())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+        }
+        case PatternType::CharIsXDigit:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isXDigit())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+        }
+        case PatternType::CharIsSpace:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isSpace())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
+            }
+        }
+        case PatternType::CharIsBlank:
+        {
+            if (start_at >= subject_length)
+            {
+                ret->matched = false;
+                return ret;
+            }
+            else
+            {
+                if (subject[start_at].isBlank())
+                {
+                    ret->matched     = true;
+                    ret->match_start = start_at;
+                    ret->match_end   = ret->match_start + 1;
+                    return ret;
+                }
+                else
+                {
+                    ret->matched = false;
+                    return ret;
+                }
             }
         }
         case PatternType::Sequence:

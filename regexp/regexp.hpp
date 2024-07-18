@@ -1,7 +1,8 @@
-#ifndef WAYROUND_I2P_20240711_143336_989141
-#define WAYROUND_I2P_20240711_143336_989141
+#ifndef WAYROUND_I2P_20240718_170059_658721
+#define WAYROUND_I2P_20240718_170059_658721
 
 #include <cassert>
+#include <functional>
 #include <vector>
 
 #include <experimental/scope>
@@ -42,6 +43,14 @@ namespace wayround_i2p::ccutils::regexp
 
 // todo: create precompiled patterns
 
+using CBFunctionToCheckChar01 = std::function<
+    std::tuple<
+        error_ptr,    // return error if error
+        bool          // return true if matched ok
+        >(UChar,      // here you get char to check
+          std::size_t // here you get char offset at subject string
+    )>;
+
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     UString name; // can be used to get submatch by name
@@ -69,7 +78,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     std::size_t min     = 0;
     std::size_t max     = 0;
 
-    // greedy = true = match as less as possible
+    // greedy = true = match as less(!) as possible
     bool greedy = false;
 
     UString repr_as_text();
@@ -86,6 +95,19 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setCharRange(UChar char0, UChar char1);
 
     Pattern_shared setAnyChar();
+
+    Pattern_shared setCharIsAlpha();
+    Pattern_shared setCharIsLower();
+    Pattern_shared setCharIsUpper();
+    Pattern_shared setCharIsPunct();
+    Pattern_shared setCharIsDigit();
+    Pattern_shared setCharIsXDigit();
+    Pattern_shared setCharIsSpace();
+    Pattern_shared setCharIsBlank();
+
+    Pattern_shared setCharCheckByFunction(
+        CBFunctionToCheckChar01
+    );
 
     Pattern_shared setSequence(Pattern_shared_deque seq);
     Pattern_shared setOrSequence(Pattern_shared_deque seq);
@@ -111,6 +133,15 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     static Pattern_shared CharRange(UChar char0, UChar char1);
 
     static Pattern_shared AnyChar();
+
+    static Pattern_shared CharIsAlpha();
+    static Pattern_shared CharIsLower();
+    static Pattern_shared CharIsUpper();
+    static Pattern_shared CharIsPunct();
+    static Pattern_shared CharIsDigit();
+    static Pattern_shared CharIsXDigit();
+    static Pattern_shared CharIsSpace();
+    static Pattern_shared CharIsBlank();
 
     static Pattern_shared Sequence(Pattern_shared_deque seq);
     static Pattern_shared OrSequence(Pattern_shared_deque seq);

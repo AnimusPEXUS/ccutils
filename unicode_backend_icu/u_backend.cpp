@@ -79,10 +79,12 @@ UChar UChar::toLower()
 {
     return u_tolower(this->chr);
 }
+
 UChar UChar::toUpper()
 {
     return u_toupper(this->chr);
 }
+
 UChar UChar::toTitle()
 {
     return u_totitle(this->chr);
