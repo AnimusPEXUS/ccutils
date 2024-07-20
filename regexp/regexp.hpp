@@ -67,7 +67,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     //   Not - exactly 1
     //   Sequence - 1 or more
     //   OrSequence - 1 or more
-    Pattern_shared_deque subpatterns;
+    Pattern_shared_deque_shared subpatterns;
 
     // for SpecialLetter or SpecialName
     // UString special;
@@ -105,12 +105,11 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setCharIsSpace();
     Pattern_shared setCharIsBlank();
 
-    Pattern_shared setCharCheckByFunction(
-        CBFunctionToCheckChar01
-    );
+    Pattern_shared setNot(Pattern_shared subpattern);
 
-    Pattern_shared setSequence(Pattern_shared_deque seq);
-    Pattern_shared setOrSequence(Pattern_shared_deque seq);
+    Pattern_shared setOrGroup(Pattern_shared_deque_shared seq);
+
+    Pattern_shared setSequence(Pattern_shared_deque_shared seq);
 
     Pattern_shared setName(UString value);
     Pattern_shared setRepetition(PatternRepetitionType pattern_repetition_type);
@@ -121,30 +120,33 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setMinMaxCount(std::size_t min, std::size_t max);
     Pattern_shared setExactCount(std::size_t val);
 
-    static Pattern_shared TextStart();
-    static Pattern_shared TextEnd();
+    static Pattern_shared newTextStart();
+    static Pattern_shared newTextEnd();
 
-    static Pattern_shared LineStart();
-    static Pattern_shared LineEnd();
+    static Pattern_shared newLineStart();
+    static Pattern_shared newLineEnd();
 
-    static Pattern_shared LineSplit();
+    static Pattern_shared newLineSplit();
 
-    static Pattern_shared ExactChar(UChar chr);
-    static Pattern_shared CharRange(UChar char0, UChar char1);
+    static Pattern_shared newExactChar(UChar chr);
+    static Pattern_shared newCharRange(UChar char0, UChar char1);
 
-    static Pattern_shared AnyChar();
+    static Pattern_shared newAnyChar();
 
-    static Pattern_shared CharIsAlpha();
-    static Pattern_shared CharIsLower();
-    static Pattern_shared CharIsUpper();
-    static Pattern_shared CharIsPunct();
-    static Pattern_shared CharIsDigit();
-    static Pattern_shared CharIsXDigit();
-    static Pattern_shared CharIsSpace();
-    static Pattern_shared CharIsBlank();
+    static Pattern_shared newCharIsAlpha();
+    static Pattern_shared newCharIsLower();
+    static Pattern_shared newCharIsUpper();
+    static Pattern_shared newCharIsPunct();
+    static Pattern_shared newCharIsDigit();
+    static Pattern_shared newCharIsXDigit();
+    static Pattern_shared newCharIsSpace();
+    static Pattern_shared newCharIsBlank();
 
-    static Pattern_shared Sequence(Pattern_shared_deque seq);
-    static Pattern_shared OrSequence(Pattern_shared_deque seq);
+    static Pattern_shared newNot(Pattern_shared subpattern);
+
+    static Pattern_shared newOrGroup(Pattern_shared_deque_shared seq);
+
+    static Pattern_shared newSequence(Pattern_shared_deque_shared seq);
 
     static Pattern_shared create();
 

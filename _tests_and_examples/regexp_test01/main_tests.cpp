@@ -145,7 +145,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
     )
     {
 
-        auto p = wayround_i2p::ccutils::regexp::Pattern::LineSplit();
+        auto p = wayround_i2p::ccutils::regexp::Pattern::newLineSplit();
 
         auto ts   = std::get<0>(subj01);
         auto ts_u = wayround_i2p::ccutils::unicode::UString(ts);
@@ -286,7 +286,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::LineSplit();
+    auto p = wayround_i2p::ccutils::regexp::Pattern::newLineSplit();
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_001"]
@@ -341,7 +341,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_004(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::LineStart();
+    auto p = wayround_i2p::ccutils::regexp::Pattern::newLineStart();
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_001"]
@@ -396,7 +396,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_005(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    auto p = wayround_i2p::ccutils::regexp::Pattern::LineEnd();
+    auto p = wayround_i2p::ccutils::regexp::Pattern::newLineEnd();
 
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_001"]
@@ -456,7 +456,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_006(
         iitm["test_subject_003"]
     );
 
-    auto pattern = wayround_i2p::ccutils::regexp::Pattern::ExactChar('a');
+    auto pattern = wayround_i2p::ccutils::regexp::Pattern::newExactChar('a');
     pattern->setMinMaxCount(6, 6);
 
     auto res = wayround_i2p::ccutils::regexp::match(pattern, ts);
@@ -562,6 +562,27 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
+    // auto pattern = wayround_i2p::regexp::Pattern
+
+    return {false};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_008_i = {
+    .group_name        = "main",
+    .test_name         = "008",
+    .description_short = "ip parsing test #0",
+    .func              = main_008
+};
+
+// -------------------------------------------------
+
+/*
+wayround_i2p::ccutils::tst::TSTFuncResult main_009(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
     auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_001"]
     );
@@ -583,9 +604,10 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
     return {false};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_008_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_008_9 = {
     .group_name        = "main",
-    .test_name         = "008",
+    .test_name         = "009",
     .description_short = "ip parsing test",
-    .func              = main_008
+    .func              = main_009
 };
+*/

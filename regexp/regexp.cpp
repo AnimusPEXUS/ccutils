@@ -70,16 +70,26 @@ Pattern_shared Pattern::setAnyChar()
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setSequence(Pattern_shared_deque seq)
+//////////////////// placeholder
+
+Pattern_shared Pattern::setNot(Pattern_shared subpattern)
+{
+    this->pattern_type = PatternType::Not;
+    this->subpatterns  = Pattern_shared_deque_shared(new Pattern_shared_deque());
+    this->subpatterns->push_back(subpattern);
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setSequence(Pattern_shared_deque_shared seq)
 {
     this->pattern_type = PatternType::Sequence;
     this->subpatterns  = seq;
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setOrSequence(Pattern_shared_deque seq)
+Pattern_shared Pattern::setOrGroup(Pattern_shared_deque_shared seq)
 {
-    this->pattern_type = PatternType::OrSequence;
+    this->pattern_type = PatternType::OrGroup;
     this->subpatterns  = seq;
     return Pattern_shared(this->own_ptr);
 }
@@ -180,73 +190,73 @@ Pattern_shared Pattern::setExactCount(std::size_t val)
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::TextStart()
+Pattern_shared Pattern::newTextStart()
 {
     auto ret = Pattern::create();
     ret->setTextStart();
     return ret;
 }
 
-Pattern_shared Pattern::TextEnd()
+Pattern_shared Pattern::newTextEnd()
 {
     auto ret = Pattern::create();
     ret->setTextEnd();
     return ret;
 }
 
-Pattern_shared Pattern::LineStart()
+Pattern_shared Pattern::newLineStart()
 {
     auto ret = Pattern::create();
     ret->setLineStart();
     return ret;
 }
 
-Pattern_shared Pattern::LineEnd()
+Pattern_shared Pattern::newLineEnd()
 {
     auto ret = Pattern::create();
     ret->setLineEnd();
     return ret;
 }
 
-Pattern_shared Pattern::LineSplit()
+Pattern_shared Pattern::newLineSplit()
 {
     auto ret = Pattern::create();
     ret->setLineSplit();
     return ret;
 }
 
-Pattern_shared Pattern::ExactChar(UChar chr)
+Pattern_shared Pattern::newExactChar(UChar chr)
 {
     auto ret = Pattern::create();
     ret->setExactChar(chr);
     return ret;
 }
 
-Pattern_shared Pattern::CharRange(UChar char0, UChar char1)
+Pattern_shared Pattern::newCharRange(UChar char0, UChar char1)
 {
     auto ret = Pattern::create();
     ret->setCharRange(char0, char1);
     return ret;
 }
 
-Pattern_shared Pattern::AnyChar()
+Pattern_shared Pattern::newAnyChar()
 {
     auto ret = Pattern::create();
     ret->setAnyChar();
     return ret;
 }
 
-Pattern_shared Pattern::Sequence(Pattern_shared_deque seq)
+Pattern_shared Pattern::newSequence(Pattern_shared_deque_shared seq)
 {
     auto ret = Pattern::create();
     ret->setSequence(seq);
     return ret;
 }
 
-Pattern_shared Pattern::OrSequence(Pattern_shared_deque seq)
+Pattern_shared Pattern::newOrGroup(Pattern_shared_deque_shared seq)
 {
     auto ret = Pattern::create();
-    ret->setOrSequence(seq);
+    ret->setOrGroup(seq);
     return ret;
 }
 
@@ -315,7 +325,7 @@ std::tuple<
         std::size_t    start_at
     )
 {
-    auto pattern = Pattern::LineSplit();
+    auto pattern = Pattern::newLineSplit();
     pattern->setRepetition(PatternRepetitionType::Single);
 
     auto res = match(pattern, subject, start_at);
@@ -867,39 +877,48 @@ const Result_shared match_single(
                 }
             }
         }
-        case PatternType::Sequence:
+
+        case PatternType::Not:
         {
-            std::size_t end_tracker = start_at;
-
-            for (auto x : pattern->subpatterns)
+            if (pattern->subpatterns->size() != 1)
             {
-                auto res = match(x, subject, end_tracker);
-
-                if (res->error)
-                {
-                    ret->error = res->error;
-                    return ret;
-                }
-
-                if (res->matched)
-                {
-                    end_tracker = res->match_end;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->error = wayround_i2p::ccutils::errors::New(
+                    "invalid Pattern for 'Not' PatternType: sequence size() != 1"
+                );
+                return ret;
             }
 
-            ret->matched   = true;
-            ret->match_end = end_tracker;
+            auto tmp0 = pattern->subpatterns->operator[](0);
+            auto res  = match(tmp0, subject, start_at);
 
+            if (res->error)
+            {
+                ret->error = res->error;
+                return ret;
+            }
+
+            // todo: checks required. add checks to tests and put ref here
+
+            if (!res->matched)
+            {
+                ret->matched = true;
+
+                // note: missmatching means zerolength match is ok,
+                // so just leave ret->match_end without change
+                //  (which means ret->match_end == ret->match_start)
+
+                // ret->match_end = res->match_end;
+                return ret;
+            }
+
+            ret->matched = false;
+            ret->submatches.push_back(res);
             return ret;
         }
-        case PatternType::OrSequence:
+
+        case PatternType::OrGroup:
         {
-            for (auto x : pattern->subpatterns)
+            for (auto &x : *(pattern->subpatterns.get()))
             {
                 auto res = match(x, subject, start_at);
 
@@ -913,11 +932,45 @@ const Result_shared match_single(
                 {
                     ret->matched   = true;
                     ret->match_end = res->match_end;
+                    ret->submatches.push_back(res);
                     return ret;
                 }
             }
 
             ret->matched = false;
+            return ret;
+        }
+
+        case PatternType::Sequence:
+        {
+            std::size_t end_tracker = start_at;
+
+            for (auto &x : *(pattern->subpatterns.get()))
+            {
+                auto res = match(x, subject, end_tracker);
+
+                if (res->error)
+                {
+                    ret->error = res->error;
+                    return ret;
+                }
+
+                if (res->matched)
+                {
+                    end_tracker = res->match_end;
+                    ret->submatches.push_back(res);
+                }
+                else
+                {
+                    ret->matched = false;
+                    ret->submatches.clear();
+                    return ret;
+                }
+            }
+
+            ret->matched   = true;
+            ret->match_end = end_tracker;
+
             return ret;
         }
     }
