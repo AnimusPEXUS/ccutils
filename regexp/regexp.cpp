@@ -70,7 +70,53 @@ Pattern_shared Pattern::setAnyChar()
     return Pattern_shared(this->own_ptr);
 }
 
-//////////////////// placeholder
+Pattern_shared Pattern::setCharIsAlpha()
+{
+    this->pattern_type = PatternType::CharIsAlpha;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharIsLower()
+{
+    this->pattern_type = PatternType::CharIsLower;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharIsUpper()
+{
+    this->pattern_type = PatternType::CharIsUpper;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharIsPunct()
+{
+    this->pattern_type = PatternType::CharIsPunct;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharIsDigit()
+{
+    this->pattern_type = PatternType::CharIsDigit;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharIsXDigit()
+{
+    this->pattern_type = PatternType::CharIsXDigit;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharIsSpace()
+{
+    this->pattern_type = PatternType::CharIsSpace;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCharIsBlank()
+{
+    this->pattern_type = PatternType::CharIsBlank;
+    return Pattern_shared(this->own_ptr);
+}
 
 Pattern_shared Pattern::setNot(Pattern_shared subpattern)
 {
@@ -246,6 +292,62 @@ Pattern_shared Pattern::newAnyChar()
     return ret;
 }
 
+Pattern_shared Pattern::newCharIsAlpha()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsAlpha();
+    return ret;
+}
+
+Pattern_shared Pattern::newCharIsLower()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsLower();
+    return ret;
+}
+
+Pattern_shared Pattern::newCharIsPunct()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsPunct();
+    return ret;
+}
+
+Pattern_shared Pattern::newCharIsUpper()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsUpper();
+    return ret;
+}
+
+Pattern_shared Pattern::newCharIsDigit()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsDigit();
+    return ret;
+}
+
+Pattern_shared Pattern::newCharIsXDigit()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsXDigit();
+    return ret;
+}
+
+Pattern_shared Pattern::newCharIsSpace()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsSpace();
+    return ret;
+}
+
+Pattern_shared Pattern::newCharIsBlank()
+{
+    auto ret = Pattern::create();
+    ret->setCharIsBlank();
+    return ret;
+}
+
 Pattern_shared Pattern::newSequence(Pattern_shared_deque_shared seq)
 {
     auto ret = Pattern::create();
@@ -267,6 +369,59 @@ Pattern_shared Pattern::create()
     ret->setRepetition(PatternRepetitionType::Single);
     ret->greedy = false;
     return ret;
+}
+
+const Result_shared Pattern::match_single(
+    const UString &subject,
+    std::size_t    start_at
+)
+{
+    return wayround_i2p::ccutils::regexp::match_single(
+        Pattern_shared(this->own_ptr),
+        subject,
+        start_at
+    );
+}
+
+const Result_shared Pattern::match(
+    const UString &subject,
+    std::size_t    start_at
+)
+{
+    return wayround_i2p::ccutils::regexp::match(
+        Pattern_shared(this->own_ptr),
+        subject,
+        start_at
+    );
+}
+
+const Result_shared Pattern::search(
+    const UString &subject,
+    std::size_t    start_at,
+    bool           backward
+)
+{
+    return wayround_i2p::ccutils::regexp::search(
+        Pattern_shared(this->own_ptr),
+        subject,
+        start_at,
+        backward
+    );
+}
+
+const std::tuple<
+    const Result_shared_deque,
+    wayround_i2p::ccutils::errors::error_ptr>
+    Pattern::findAll(
+        const UString &subject,
+        std::size_t    start_at
+    )
+{
+    return wayround_i2p::ccutils::regexp::findAll(
+        Pattern_shared(this->own_ptr),
+        subject,
+        start_at
+    );
 }
 
 Pattern_shared create()

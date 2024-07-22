@@ -10,6 +10,34 @@
 namespace wayround_i2p::ccutils::unicode
 {
 
+UChar::UChar(const char *std_nullterminated_cstring) :
+    UChar(UString(std_nullterminated_cstring))
+{
+}
+
+UChar::UChar(std::string stdstring) :
+    UChar(UString(stdstring))
+{
+}
+
+// todo: testing required
+UChar::UChar(UString val) :
+    UChar(
+        [val]() -> std::int32_t
+        {
+            if (val.length() != 1)
+            {
+                throw wayround_i2p::ccutils::errors::New(
+                    "UChar::UChar(UString val) - invalid `val` size"
+                );
+            }
+
+            return val[0].as_int32();
+        }()
+    )
+{
+}
+
 UChar::~UChar()
 {
 }

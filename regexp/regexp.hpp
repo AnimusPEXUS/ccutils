@@ -150,6 +150,30 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     static Pattern_shared create();
 
+    const Result_shared match_single(
+        const UString       &subject,
+        std::size_t          start_at = 0
+    );
+
+    const Result_shared match(
+        const UString       &subject,
+        std::size_t          start_at = 0
+    );
+
+    const Result_shared search(
+        const UString       &subject,
+        std::size_t          start_at = 0,
+        bool                 backward = false
+    );
+
+    const std::tuple<
+        const Result_shared_deque,
+        wayround_i2p::ccutils::errors::error_ptr>
+        findAll(
+            const UString       &subject,
+            std::size_t          start_at = 0
+        );
+
   private:
     std::weak_ptr<Pattern> own_ptr;
 };
@@ -225,6 +249,15 @@ const Result_shared search(
     std::size_t          start_at = 0,
     bool                 backward = false
 );
+
+const std::tuple<
+    const Result_shared_deque,
+    wayround_i2p::ccutils::errors::error_ptr>
+    findAll(
+        const Pattern_shared pattern,
+        const UString       &subject,
+        std::size_t          start_at
+    );
 
 } // namespace wayround_i2p::ccutils::regexp
 

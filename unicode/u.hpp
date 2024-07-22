@@ -103,6 +103,12 @@ class UChar : // public UCharPropertiesI,
   public:
     UChar();
     UChar(std::int32_t val);
+
+    // to make char from string. string length must be exactly 1, else -> exception
+    UChar(const char *std_nullterminated_cstring);
+    UChar(std::string stdstring);
+    UChar(UString val);
+
     ~UChar();
 
     bool checkType(UCharCategory cat);

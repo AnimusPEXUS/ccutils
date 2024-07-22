@@ -562,9 +562,183 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    // auto pattern = wayround_i2p::regexp::Pattern
 
-    return {false};
+    auto sequence_for_pattern = wayround_i2p::ccutils::regexp::Pattern_shared_deque_shared(
+        new wayround_i2p::ccutils::regexp::Pattern_shared_deque(
+            {wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3),
+             wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
+             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3),
+             wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
+             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3),
+             wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
+             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3)
+            }
+        )
+    );
+
+    auto pattern = wayround_i2p::ccutils::regexp::Pattern::newSequence(
+        sequence_for_pattern
+    );
+
+    int matched            = 0;
+    int matched_correct    = 0;
+    int dismatched         = 0;
+    int dismatched_correct = 0;
+
+    // ----------------------------------
+
+    logger->Log(
+        wayround_i2p::ccutils::logger::Status,
+        "trying to parse 8.8.8.8 with regexp"
+    );
+
+    auto res = pattern->match("8.8.8.8");
+
+    matched_correct++;
+
+    if (res->error)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Error,
+            res->error->Error()
+        );
+    }
+
+    if (res->matched)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Success,
+            "matched"
+        );
+        matched++;
+    }
+    else
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Failure,
+            "dismatched"
+        );
+        dismatched++;
+    }
+
+    // ----------------------------------
+
+    logger->Log(
+        wayround_i2p::ccutils::logger::Status,
+        "trying to parse a.b.c.d with regexp"
+    );
+
+    res = pattern->match("a.b.c.d");
+
+    dismatched_correct++;
+
+    if (res->error)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Error,
+            res->error->Error()
+        );
+    }
+
+    if (res->matched)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Success,
+            "matched"
+        );
+        matched++;
+    }
+    else
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Failure,
+            "dismatched"
+        );
+        dismatched++;
+    }
+
+    // ----------------------------------
+
+    logger->Log(
+        wayround_i2p::ccutils::logger::Status,
+        "trying to parse 8.8.888.8 with regexp"
+    );
+
+    res = pattern->match("8.8.888.8");
+
+    matched_correct++;
+
+    if (res->error)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Error,
+            res->error->Error()
+        );
+    }
+
+    if (res->matched)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Success,
+            "matched"
+        );
+        matched++;
+    }
+    else
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Failure,
+            "dismatched"
+        );
+        dismatched++;
+    }
+
+    // ----------------------------------
+
+    logger->Log(
+        wayround_i2p::ccutils::logger::Status,
+        "trying to parse 8.8.8888.8 with regexp"
+    );
+
+    res = pattern->match("8.8.8888.8");
+
+    dismatched_correct++;
+
+    if (res->error)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Error,
+            res->error->Error()
+        );
+    }
+
+    if (res->matched)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Success,
+            "matched"
+        );
+        matched++;
+    }
+    else
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Failure,
+            "dismatched"
+        );
+        dismatched++;
+    }
+
+    // ----------------------------------
+
+    if (matched_correct == matched && dismatched_correct == dismatched)
+    {
+        return {true};
+    }
+    else
+    {
+        return {false};
+    }
 }
 
 wayround_i2p::ccutils::tst::TSTInfo main_008_i = {
