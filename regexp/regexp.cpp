@@ -450,7 +450,7 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts)
         R"+++(
 wayround_i2p::ccutils::regexp::Result{{
         error?                    : {}
-        original_sbject           : {}
+        original_subject          : {}
         matched?                  : {}
         matched_repetitions_count : {}
         match_start               : {}
