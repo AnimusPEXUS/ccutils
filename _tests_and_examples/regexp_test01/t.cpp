@@ -8,22 +8,25 @@
 int main(int argc, char **args)
 {
 
-    auto logger = wayround_i2p::ccutils::logger::TerminalLogger::create();
-
     wayround_i2p::ccutils::tst::run_tests_Parameters params;
 
-    params.title  = "WayRound.I2P ccutils::regexp test suite";
-    params.uri    = "https://github.com/AnimusPEXUS/ccutils";
-    params.logger = logger;
+    {
+        auto logger = wayround_i2p::ccutils::logger::TerminalLogger::create();
 
-    params.AddTest(main_001_i);
-    params.AddTest(main_002_i);
-    params.AddTest(main_003_i);
-    params.AddTest(main_004_i);
-    params.AddTest(main_005_i);
-    params.AddTest(main_006_i);
-    params.AddTest(main_007_i);
-    params.AddTest(main_008_i);
+        params.title  = "WayRound.I2P ccutils::regexp test suite";
+        params.uri    = "https://github.com/AnimusPEXUS/ccutils";
+        params.logger = logger;
+
+        params.AddTest(main_001_i);
+        params.AddTest(main_002_i);
+        params.AddTest(main_003_i);
+        params.AddTest(main_004_i);
+        params.AddTest(main_005_i);
+        params.AddTest(main_006_i);
+        params.AddTest(main_007_i);
+        params.AddTest(main_008_i);
+        params.AddTest(main_009_i);
+    }
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
 }

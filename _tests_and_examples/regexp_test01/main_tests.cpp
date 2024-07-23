@@ -3,6 +3,8 @@
 #include <wayround_i2p/ccutils/logger/logger.hpp>
 #include <wayround_i2p/ccutils/regexp/regexp.hpp>
 
+#include "ip_addr_text.cpp"
+
 wayround_i2p::ccutils::tst::TSTFuncResult main_001(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
@@ -580,153 +582,74 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
         sequence_for_pattern
     );
 
+    iitm["regexp_ip_pattern"] = pattern;
+
     int matched            = 0;
     int matched_correct    = 0;
     int dismatched         = 0;
     int dismatched_correct = 0;
 
-    // ----------------------------------
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "trying to parse 8.8.8.8 with regexp"
-    );
-
-    auto res = pattern->match("8.8.8.8");
-
-    matched_correct++;
-
-    if (res->error)
+    struct main_008_loop_struct
     {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Error,
-            res->error->Error()
-        );
+        wayround_i2p::ccutils::unicode::UString test_str;
+        bool                                    must_dismatch;
+    };
+
+    auto test_set = std::vector<main_008_loop_struct>{
+        {"8.8.8.8",    false},
+        {"a.b.c.d",    true },
+        {"8.8.888.8",  false},
+        {"8.8.8888.8", true },
+    };
+
+    for (auto &i : test_set)
+    {
+        if (i.must_dismatch)
+        {
+            dismatched_correct++;
+        }
+        else
+        {
+            matched_correct++;
+        }
     }
 
-    if (res->matched)
+    for (auto &i : test_set)
     {
         logger->Log(
-            wayround_i2p::ccutils::logger::Success,
-            "matched"
+            wayround_i2p::ccutils::logger::Status,
+            std::format(
+                "trying to parse {} with regexp",
+                i.test_str
+            )
         );
-        matched++;
-    }
-    else
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Failure,
-            "dismatched"
-        );
-        dismatched++;
-    }
 
-    // ----------------------------------
+        auto res = pattern->match(i.test_str);
 
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "trying to parse a.b.c.d with regexp"
-    );
+        if (res->error)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                res->error->Error()
+            );
+        }
 
-    res = pattern->match("a.b.c.d");
-
-    dismatched_correct++;
-
-    if (res->error)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Error,
-            res->error->Error()
-        );
-    }
-
-    if (res->matched)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Success,
-            "matched"
-        );
-        matched++;
-    }
-    else
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Failure,
-            "dismatched"
-        );
-        dismatched++;
-    }
-
-    // ----------------------------------
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "trying to parse 8.8.888.8 with regexp"
-    );
-
-    res = pattern->match("8.8.888.8");
-
-    matched_correct++;
-
-    if (res->error)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Error,
-            res->error->Error()
-        );
-    }
-
-    if (res->matched)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Success,
-            "matched"
-        );
-        matched++;
-    }
-    else
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Failure,
-            "dismatched"
-        );
-        dismatched++;
-    }
-
-    // ----------------------------------
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "trying to parse 8.8.8888.8 with regexp"
-    );
-
-    res = pattern->match("8.8.8888.8");
-
-    dismatched_correct++;
-
-    if (res->error)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Error,
-            res->error->Error()
-        );
-    }
-
-    if (res->matched)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Success,
-            "matched"
-        );
-        matched++;
-    }
-    else
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Failure,
-            "dismatched"
-        );
-        dismatched++;
+        if (res->matched)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Success,
+                "matched"
+            );
+            matched++;
+        }
+        else
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Failure,
+                "dismatched"
+            );
+            dismatched++;
+        }
     }
 
     // ----------------------------------
@@ -750,38 +673,53 @@ wayround_i2p::ccutils::tst::TSTInfo main_008_i = {
 
 // -------------------------------------------------
 
-/*
 wayround_i2p::ccutils::tst::TSTFuncResult main_009(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
-        iitm["test_subject_001"]
-    );
+    auto regexp_ip_pattern
+        = std::any_cast<wayround_i2p::ccutils::regexp::Pattern_shared>(
+            iitm["regexp_ip_pattern"]
+        );
 
-    for (
-        int i = 0;
-        i != ts.length();
-        i++
-    )
+    std::size_t index = 0;
+
+    while (true)
     {
-        auto c = ts[i];
-        // std::cout << c << " (" << i << ") : " << c.propertiesText() << std::endl;
+        auto res = regexp_ip_pattern->search(ip_addr_test_text, index);
+
+        if (!res)
+        {
+            break;
+        }
+
         logger->Log(
             wayround_i2p::ccutils::logger::Status,
-            std::format("{} ({}) : {}", c, i, c.propertiesText())
+            std::format(
+                "found {} at index: {}",
+                res->getResultString(),
+                res->match_start
+            )
         );
+        index = res->match_end;
+        if (res->match_end == res->match_start)
+        {
+            index++;
+        }
+        if (index >= ip_addr_test_text.length())
+        {
+            break;
+        }
     }
 
-    return {false};
+    return {true};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_008_9 = {
+wayround_i2p::ccutils::tst::TSTInfo main_009_i = {
     .group_name        = "main",
     .test_name         = "009",
-    .description_short = "ip parsing test",
+    .description_short = "ip parsing test #1",
     .func              = main_009
 };
-*/

@@ -429,6 +429,14 @@ Pattern_shared create()
     return Pattern::create();
 }
 
+UString Result::getResultString()
+{
+    return original_subject.substr(
+        this->match_start,
+        this->match_end - this->match_start
+    );
+}
+
 UString Result::repr_as_text()
 {
     return repr_as_text({});
