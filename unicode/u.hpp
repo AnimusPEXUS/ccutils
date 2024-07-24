@@ -111,7 +111,7 @@ class UChar : // public UCharPropertiesI,
 
     ~UChar();
 
-    bool checkType(UCharCategory cat);
+    bool checkType(UCharCategory cat) const;
 
     std::int32_t as_int32() const;
 
@@ -120,24 +120,24 @@ class UChar : // public UCharPropertiesI,
     // todo: todo
     //    UCharProperties getAllProperties();
 
-    bool isAlpha();
-    bool isLower();
-    bool isUpper();
-    bool isPunct();
-    bool isDigit();
-    bool isXDigit();
-    bool isAlnum();
-    bool isSpace();
-    bool isBlank();
-    bool isCntrl();
-    bool isGraph();
-    bool isPrint();
+    bool isAlpha() const;
+    bool isLower() const;
+    bool isUpper() const;
+    bool isPunct() const;
+    bool isDigit() const;
+    bool isXDigit() const;
+    bool isAlnum() const;
+    bool isSpace() const;
+    bool isBlank() const;
+    bool isCntrl() const;
+    bool isGraph() const;
+    bool isPrint() const;
 
-    UChar toLower();
-    UChar toUpper();
-    UChar toTitle();
+    UChar toLower() const;
+    UChar toUpper() const;
+    UChar toTitle() const;
 
-    UString propertiesText();
+    UString propertiesText() const;
 
   private:
 #if (CCUTILS_UNICODE_BACKEND == icu)
@@ -206,9 +206,9 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // todo: return size in bytes
     // size_t size() const;
 
-    UString toLower();
-    UString toUpper();
-    UString toTitle();
+    UString toLower() const;
+    UString toUpper() const;
+    UString toTitle() const;
 
     // note: result will be shorter than `length` if
     //       `length` going outside of string

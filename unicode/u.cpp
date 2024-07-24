@@ -42,7 +42,7 @@ UChar::~UChar()
 {
 }
 
-bool UChar::checkType(UCharCategory cat)
+bool UChar::checkType(UCharCategory cat) const
 {
     if (cat == UCharCategory::None)
     {
@@ -62,7 +62,7 @@ UString UChar::repr_as_text()
     return std::format(R"++({:#x})++", chr);
 }
 
-UString UChar::propertiesText()
+UString UChar::propertiesText() const
 {
     UString ret;
 
@@ -264,7 +264,7 @@ size_t UString::size() const
     return length();
 } */
 
-UString UString::toLower()
+UString UString::toLower() const
 {
     std::vector<UChar> res;
     for (std::size_t i = 0; i != length(); i++)
@@ -274,7 +274,7 @@ UString UString::toLower()
     return UString(res);
 }
 
-UString UString::toUpper()
+UString UString::toUpper() const
 {
     std::vector<UChar> res;
     for (std::size_t i = 0; i != length(); i++)
@@ -284,7 +284,7 @@ UString UString::toUpper()
     return UString(res);
 }
 
-UString UString::toTitle()
+UString UString::toTitle() const
 {
     std::vector<UChar> res;
     for (std::size_t i = 0; i != length(); i++)

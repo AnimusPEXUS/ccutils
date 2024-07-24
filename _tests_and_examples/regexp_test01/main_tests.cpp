@@ -753,3 +753,27 @@ wayround_i2p::ccutils::tst::TSTInfo main_009_i = {
     .description_short = "ip parsing test #1",
     .func              = main_009
 };
+
+// -------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_010(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+
+    logger->LogSplitLines(
+        wayround_i2p::ccutils::logger::Status,
+        ip_addr_test_text.toUpper()
+    );
+
+    return {true};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_010_i = {
+    .group_name        = "main",
+    .test_name         = "010",
+    .description_short = "UString.toUpper()",
+    .func              = main_010
+};

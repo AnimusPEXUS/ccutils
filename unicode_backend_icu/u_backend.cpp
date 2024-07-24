@@ -15,77 +15,77 @@ UChar::UChar(std::int32_t val) :
 {
 }
 
-bool UChar::isAlpha()
+bool UChar::isAlpha() const
 {
     return u_isalpha(this->chr);
 }
 
-bool UChar::isLower()
+bool UChar::isLower() const
 {
     return u_islower(this->chr);
 }
 
-bool UChar::isUpper()
+bool UChar::isUpper() const
 {
     return u_isupper(this->chr);
 }
 
-bool UChar::isPunct()
+bool UChar::isPunct() const
 {
     return u_ispunct(this->chr);
 }
 
-bool UChar::isDigit()
+bool UChar::isDigit() const
 {
     return u_isdigit(this->chr);
 }
 
-bool UChar::isXDigit()
+bool UChar::isXDigit() const
 {
     return u_isxdigit(this->chr);
 }
 
-bool UChar::isAlnum()
+bool UChar::isAlnum() const
 {
     return u_isalnum(this->chr);
 }
 
-bool UChar::isSpace()
+bool UChar::isSpace() const
 {
     return u_isspace(this->chr);
 }
 
-bool UChar::isBlank()
+bool UChar::isBlank() const
 {
     return u_isblank(this->chr);
 }
 
-bool UChar::isCntrl()
+bool UChar::isCntrl() const
 {
     return u_iscntrl(this->chr);
 }
 
-bool UChar::isGraph()
+bool UChar::isGraph() const
 {
     return u_isgraph(this->chr);
 }
 
-bool UChar::isPrint()
+bool UChar::isPrint() const
 {
     return u_isprint(this->chr);
 }
 
-UChar UChar::toLower()
+UChar UChar::toLower() const
 {
     return u_tolower(this->chr);
 }
 
-UChar UChar::toUpper()
+UChar UChar::toUpper() const
 {
     return u_toupper(this->chr);
 }
 
-UChar UChar::toTitle()
+UChar UChar::toTitle() const
 {
     return u_totitle(this->chr);
 }
