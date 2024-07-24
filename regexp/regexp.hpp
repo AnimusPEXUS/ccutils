@@ -81,7 +81,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // greedy = true = match as less(!) as possible
     bool greedy = false;
 
-    UString repr_as_text();
+    UString repr_as_text() const;
 
     Pattern_shared setTextStart();
     Pattern_shared setTextEnd();
@@ -210,8 +210,8 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     Result_shared getSubmatchByPatternName(UString name);
     Result_shared operator[](UString name);
 
-    UString repr_as_text();
-    UString repr_as_text(const Result_repr_as_text_opts &opts);
+    UString repr_as_text() const;
+    UString repr_as_text(const Result_repr_as_text_opts &opts) const;
 
     static Result_shared create();
 

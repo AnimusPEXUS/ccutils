@@ -14,7 +14,7 @@ namespace wayround_i2p::ccutils::repr
 class RepresentableAsText
 {
   public:
-    virtual wayround_i2p::ccutils::unicode::UString repr_as_text() = 0;
+    virtual wayround_i2p::ccutils::unicode::UString repr_as_text() const = 0;
 };
 
 } // namespace wayround_i2p::ccutils::repr

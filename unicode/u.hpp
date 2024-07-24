@@ -115,7 +115,7 @@ class UChar : // public UCharPropertiesI,
 
     std::int32_t as_int32() const;
 
-    UString repr_as_text();
+    UString repr_as_text() const;
 
     // todo: todo
     //    UCharProperties getAllProperties();
@@ -224,7 +224,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     std::vector<UChar> vector_UChar() const;
 
-    UString repr_as_text();
+    UString repr_as_text() const;
 
     UChar operator[](std::int32_t offset) const;
 

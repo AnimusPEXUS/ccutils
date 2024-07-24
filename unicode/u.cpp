@@ -57,7 +57,7 @@ std::int32_t UChar::as_int32() const
     return chr;
 }
 
-UString UChar::repr_as_text()
+UString UChar::repr_as_text() const
 {
     return std::format(R"++({:#x})++", chr);
 }
@@ -398,7 +398,7 @@ std::vector<UChar> UString::vector_UChar() const
     return ret;
 }
 
-UString UString::repr_as_text()
+UString UString::repr_as_text() const
 {
     std::string ret;
 

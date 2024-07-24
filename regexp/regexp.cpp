@@ -4,7 +4,7 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
-UString Pattern::repr_as_text()
+UString Pattern::repr_as_text() const
 {
     // todo: does this return copy? use pointers?
     // todo: todo
@@ -454,12 +454,12 @@ Result_shared Result::operator[](UString name)
     return getSubmatchByPatternName(name);
 }
 
-UString Result::repr_as_text()
+UString Result::repr_as_text() const
 {
     return repr_as_text({});
 }
 
-UString Result::repr_as_text(const Result_repr_as_text_opts &opts)
+UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 {
     // todo: use opts
 
