@@ -437,6 +437,23 @@ UString Result::getResultString()
     );
 }
 
+Result_shared Result::getSubmatchByPatternName(UString name)
+{
+    for (auto i : submatches)
+    {
+        if (i->corresponding_pattern->name == name)
+        {
+            return i;
+        }
+    }
+    return nullptr;
+}
+
+Result_shared Result::operator[](UString name)
+{
+    return getSubmatchByPatternName(name);
+}
+
 UString Result::repr_as_text()
 {
     return repr_as_text({});

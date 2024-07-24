@@ -151,27 +151,27 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     static Pattern_shared create();
 
     const Result_shared match_single(
-        const UString       &subject,
-        std::size_t          start_at = 0
+        const UString &subject,
+        std::size_t    start_at = 0
     );
 
     const Result_shared match(
-        const UString       &subject,
-        std::size_t          start_at = 0
+        const UString &subject,
+        std::size_t    start_at = 0
     );
 
     const Result_shared search(
-        const UString       &subject,
-        std::size_t          start_at = 0,
-        bool                 backward = false
+        const UString &subject,
+        std::size_t    start_at = 0,
+        bool           backward = false
     );
 
     const std::tuple<
         const Result_shared_deque,
         wayround_i2p::ccutils::errors::error_ptr>
         findAll(
-            const UString       &subject,
-            std::size_t          start_at = 0
+            const UString &subject,
+            std::size_t    start_at = 0
         );
 
   private:
@@ -208,6 +208,7 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     UString       getResultString();
     Result_shared getSubmatchByPatternName(UString name);
+    Result_shared operator[](UString name);
 
     UString repr_as_text();
     UString repr_as_text(const Result_repr_as_text_opts &opts);

@@ -567,13 +567,21 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
 
     auto sequence_for_pattern = wayround_i2p::ccutils::regexp::Pattern_shared_deque_shared(
         new wayround_i2p::ccutils::regexp::Pattern_shared_deque(
-            {wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3),
+            {wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                 ->setMinMaxCount(1, 3)
+                 ->setName("1"),
              wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
-             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3),
+             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                 ->setMinMaxCount(1, 3)
+                 ->setName("2"),
              wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
-             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3),
+             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                 ->setMinMaxCount(1, 3)
+                 ->setName("3"),
              wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
-             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()->setMinMaxCount(1, 3)
+             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                 ->setMinMaxCount(1, 3)
+                 ->setName("4")
             }
         )
     );
@@ -640,6 +648,16 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
                 wayround_i2p::ccutils::logger::Success,
                 "matched"
             );
+            logger->Log(
+                wayround_i2p::ccutils::logger::Info,
+                std::format(
+                    " 1: {}, 2: {}, 3: {}, 4: {}",
+                    (*res)["1"]->getResultString(),
+                    (*res)["2"]->getResultString(),
+                    (*res)["3"]->getResultString(),
+                    (*res)["4"]->getResultString()
+                )
+            );
             matched++;
         }
         else
@@ -701,6 +719,16 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
                 "found {} at index: {}",
                 res->getResultString(),
                 res->match_start
+            )
+        );
+        logger->Log(
+            wayround_i2p::ccutils::logger::Info,
+            std::format(
+                "   1: {}, 2: {}, 3: {}, 4: {}",
+                (*res)["1"]->getResultString(),
+                (*res)["2"]->getResultString(),
+                (*res)["3"]->getResultString(),
+                (*res)["4"]->getResultString()
             )
         );
         index = res->match_end;
