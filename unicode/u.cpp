@@ -264,6 +264,36 @@ size_t UString::size() const
     return length();
 } */
 
+UString UString::toLower()
+{
+    std::vector<UChar> res;
+    for (std::size_t i = 0; i != length(); i++)
+    {
+        res.push_back(this->operator[](i).toLower());
+    }
+    return UString(res);
+}
+
+UString UString::toUpper()
+{
+    std::vector<UChar> res;
+    for (std::size_t i = 0; i != length(); i++)
+    {
+        res.push_back(this->operator[](i).toUpper());
+    }
+    return UString(res);
+}
+
+UString UString::toTitle()
+{
+    std::vector<UChar> res;
+    for (std::size_t i = 0; i != length(); i++)
+    {
+        res.push_back(this->operator[](i).toTitle());
+    }
+    return UString(res);
+}
+
 UString UString::substr(std::size_t pos, std::size_t length) const
 {
     UString x;

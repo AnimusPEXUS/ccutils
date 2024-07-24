@@ -206,6 +206,10 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // todo: return size in bytes
     // size_t size() const;
 
+    UString toLower();
+    UString toUpper();
+    UString toTitle();
+
     // note: result will be shorter than `length` if
     //       `length` going outside of string
     UString substr(std::size_t pos, std::size_t length) const;

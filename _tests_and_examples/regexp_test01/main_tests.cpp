@@ -713,6 +713,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
             break;
         }
 
+        // todo: check for res->error? probably it's a matter of documentation
+
         logger->Log(
             wayround_i2p::ccutils::logger::Status,
             std::format(
