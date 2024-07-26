@@ -57,6 +57,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     PatternType pattern_type;
 
+    // this field used by pattern types requiring exact char values
     // count of values:
     // 1 - for ExactChar,
     // 2 - for CharRange
@@ -69,9 +70,21 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     //   OrSequence - 1 or more
     Pattern_shared_deque_shared subpatterns;
 
-    // for SpecialLetter or SpecialName
-    // UString special;
+    Pattern_shared parent_pattern;
+
+    // match() function uses this function to update parent_pattern fields in all
+    // subpatterns
+    error_ptr updateParents();
+
+    bool case_sensitive_from_parent = true;
+
+    // this setting influences following pattern types:
+    // ExactChar, CharRange
     bool case_sensitive = true;
+
+    // calculates case-sensitivity basing on
+    // case_sensitive_from_parent/case_sensitive values
+    bool isCaseSensitive();
 
     bool        has_min = false;
     bool        has_max = false;
@@ -113,6 +126,11 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Pattern_shared setName(UString value);
     Pattern_shared setRepetition(PatternRepetitionType pattern_repetition_type);
+    Pattern_shared setCaseSensitiveFromParent(bool value);
+
+    // note: call to this funcion with any value, sets
+    // case_sensitive_from_parent to false
+    Pattern_shared setCaseSensitive(bool value);
     Pattern_shared setGreedy(bool value = true);
 
     Pattern_shared setMinCount(std::size_t val);

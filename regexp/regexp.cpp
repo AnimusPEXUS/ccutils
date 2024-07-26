@@ -4,6 +4,44 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
+error_ptr Pattern::updateParents()
+{
+
+    auto current_parent_pattern = own_ptr.lock();
+    if (!current_parent_pattern)
+    {
+        return wayround_i2p::ccutils::errors::New(
+            "couldn't get own ptr (nuts!)"
+        );
+    }
+
+    std::function<void(Pattern_shared)> recSetParent
+        = [&recSetParent](Pattern_shared parent)
+    {
+        for (auto &i : *(parent->subpatterns))
+        {
+            i->parent_pattern = parent;
+        }
+
+        for (auto &i : *(parent->subpatterns))
+        {
+            recSetParent(i);
+        }
+    };
+
+    return nullptr;
+}
+
+bool Pattern::isCaseSensitive()
+{
+    if (parent_pattern && case_sensitive_from_parent)
+    {
+        return parent_pattern->isCaseSensitive();
+    }
+
+    return case_sensitive;
+}
+
 UString Pattern::repr_as_text() const
 {
     // todo: does this return copy? use pointers?
@@ -200,6 +238,19 @@ Pattern_shared Pattern::setRepetition(PatternRepetitionType pattern_repetition_t
             __LINE__
         )
     );
+}
+
+Pattern_shared Pattern::setCaseSensitiveFromParent(bool value)
+{
+    this->case_sensitive_from_parent = value;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setCaseSensitive(bool value)
+{
+    this->case_sensitive_from_parent = false;
+    this->case_sensitive             = value;
+    return Pattern_shared(this->own_ptr);
 }
 
 Pattern_shared Pattern::setGreedy(bool value)
@@ -800,6 +851,11 @@ const Result_shared match_single(
 
             auto target_char = pattern->values[0];
 
+            if (!pattern->isCaseSensitive())
+            {
+                target_char = target_char.toLower();
+            }
+
             if (start_at == subject_length)
             {
                 ret->matched = false;
@@ -807,6 +863,11 @@ const Result_shared match_single(
             }
 
             auto subj_char = subject[start_at];
+
+            if (!pattern->isCaseSensitive())
+            {
+                subj_char = subj_char.toLower();
+            }
 
             ret->matched = target_char == subj_char;
 
@@ -831,6 +892,12 @@ const Result_shared match_single(
             auto target_char0 = pattern->values[0];
             auto target_char1 = pattern->values[1];
 
+            if (!pattern->isCaseSensitive())
+            {
+                target_char0 = target_char0.toLower();
+                target_char1 = target_char1.toLower();
+            }
+
             if (target_char0 > target_char1)
             {
                 ret->error
@@ -847,6 +914,11 @@ const Result_shared match_single(
             }
 
             auto subj_char = subject[start_at];
+
+            if (!pattern->isCaseSensitive())
+            {
+                subj_char = subj_char.toLower();
+            }
 
             ret->matched = (target_char0 <= subj_char)
                         && (subj_char < target_char1);
