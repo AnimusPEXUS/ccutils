@@ -49,3 +49,9 @@ WIP. Should add some Golang vibe to C++.
 #### worker01
 
 This is tool for more comfy creation and handling of tasks/routines.
+
+#### test_suite_tool
+
+Is tool for creating test suites. At this point, while I'm developing regexp
+module, you can see how test_suite_tool is used in 
+[subdirectory](_tests_and_examples/regexp_test01) directory.
