@@ -378,7 +378,7 @@ std::deque<UString> &UString::lines(std::deque<UString> &ret) const
     return ret;
 }
 
-std::string UString::string_utf8() const
+std::string UString::to_string() const
 {
     std::string ret;
     ret = data.toUTF8String(ret);
@@ -455,7 +455,7 @@ UString &UString::operator+=(UString &&other)
 
 UString::operator std::string()
 {
-    return this->string_utf8();
+    return this->to_string();
 }
 
 bool operator==(
@@ -525,9 +525,9 @@ std::ostringstream &operator<<(
     const UString      &obj
 )
 {
-    os.str() = std::string(obj.string_utf8());
-    // os << obj.string_utf8();
-    // os << obj.string_utf8();
+    os.str() = std::string(obj.to_string());
+    // os << obj.to_string();
+    // os << obj.to_string();
     return os;
 }
 */

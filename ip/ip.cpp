@@ -408,7 +408,7 @@ std::tuple<UString, error_ptr>
 
         ret += std::format(
             ":{}",
-            std::get<0>(port_str_tup).string_utf8()
+            std::get<0>(port_str_tup).to_string()
         );
     }
 
@@ -430,7 +430,7 @@ std::tuple<UString, error_ptr>
 
         if (std::get<0>(ver) == 6)
         {
-            ip_str = std::format("[{}]", ip_str.string_utf8());
+            ip_str = std::format("[{}]", ip_str.to_string());
         }
 
         ret = ip_str + ret;

@@ -220,7 +220,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // pass existing deque - it will be truncated and new lines will be added
     std::deque<UString> &lines(std::deque<UString> &ret) const;
 
-    std::string string_utf8() const;
+    // returns std:string encoded in utf8
+    std::string to_string() const;
 
     std::vector<UChar> vector_UChar() const;
 
@@ -335,7 +336,7 @@ struct std::formatter<wayround_i2p::ccutils::unicode::UString>
     {
         std::ostringstream out;
 
-        out << s.string_utf8();
+        out << s.to_string();
 
         return std::ranges::copy(std::move(out).str(), ctx.out()).out;
     }
@@ -374,7 +375,7 @@ struct std::formatter<wayround_i2p::ccutils::unicode::UChar>
 
         wayround_i2p::ccutils::unicode::UString s(v);
 
-        out << s.string_utf8();
+        out << s.to_string();
 
         return std::ranges::copy(std::move(out).str(), ctx.out()).out;
     }

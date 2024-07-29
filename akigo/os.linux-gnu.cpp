@@ -12,7 +12,7 @@ using error_ptr = wayround_i2p::akigo::builtin::error_ptr;
 error_ptr Remove(ustring name)
 {
 
-    int int_err = remove(name.string_utf8().c_str());
+    int int_err = remove(name.to_string().c_str());
 
     if (int_err != 0)
     {

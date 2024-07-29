@@ -213,7 +213,7 @@ int FDAddress::setUnixAddress(wayround_i2p::ccutils::unicode::UString text)
     std::string utf8_str;
     size_t      utf8_str_size = 0;
 
-    utf8_str = text.string_utf8();
+    utf8_str = text.to_string();
 
     utf8_str_size = std::strlen(utf8_str.c_str());
 
