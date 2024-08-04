@@ -51,6 +51,10 @@ using CBFunctionToCheckChar01 = std::function<
           std::size_t // here you get char offset at subject string
     )>;
 
+// todo: add (thinking required)
+//       * 'OnlyIfMatched' pattern option, which forces dismatch if named
+//         pattern didn't matched
+
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     UString name; // can be used to get submatch by name

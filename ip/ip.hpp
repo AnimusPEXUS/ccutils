@@ -5,6 +5,7 @@
 #include <format>
 
 #include <wayround_i2p/ccutils/errors/e.hpp>
+#include <wayround_i2p/ccutils/regexp/regexp.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
 namespace wayround_i2p::ccutils::ip
@@ -12,6 +13,8 @@ namespace wayround_i2p::ccutils::ip
 
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 using UString   = wayround_i2p::ccutils::unicode::UString;
+
+constexpr wayround_i2p::ccutils::regexp::Pattern_shared IP_STR_PATTERN();
 
 class IP
 {
