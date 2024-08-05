@@ -125,8 +125,10 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setNot(Pattern_shared subpattern);
 
     Pattern_shared setOrGroup(Pattern_shared_deque_shared seq);
+    Pattern_shared setOrGroup(std::initializer_list<Pattern_shared> val);
 
     Pattern_shared setSequence(Pattern_shared_deque_shared seq);
+    Pattern_shared setSequence(std::initializer_list<Pattern_shared> val);
 
     Pattern_shared setName(UString value);
     Pattern_shared setRepetition(PatternRepetitionType pattern_repetition_type);
@@ -167,8 +169,10 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     static Pattern_shared newNot(Pattern_shared subpattern);
 
     static Pattern_shared newOrGroup(Pattern_shared_deque_shared seq);
+    static Pattern_shared newOrGroup(std::initializer_list<Pattern_shared> val);
 
     static Pattern_shared newSequence(Pattern_shared_deque_shared seq);
+    static Pattern_shared newSequence(std::initializer_list<Pattern_shared> val);
 
     static Pattern_shared create();
 

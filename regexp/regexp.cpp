@@ -164,6 +164,35 @@ Pattern_shared Pattern::setNot(Pattern_shared subpattern)
     return Pattern_shared(this->own_ptr);
 }
 
+void copyseq(
+    std::initializer_list<Pattern_shared> val,
+    Pattern_shared_deque                *&target
+)
+{
+    target = new Pattern_shared_deque();
+
+    for (auto &i : val)
+    {
+        target->push_back(i);
+    }
+}
+
+Pattern_shared Pattern::setOrGroup(Pattern_shared_deque_shared seq)
+{
+    this->pattern_type = PatternType::OrGroup;
+    this->subpatterns  = seq;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::setOrGroup(std::initializer_list<Pattern_shared> val)
+{
+    Pattern_shared_deque *t;
+    copyseq(val, t);
+    this->pattern_type = PatternType::OrGroup;
+    this->subpatterns  = Pattern_shared_deque_shared(t);
+    return Pattern_shared(this->own_ptr);
+}
+
 Pattern_shared Pattern::setSequence(Pattern_shared_deque_shared seq)
 {
     this->pattern_type = PatternType::Sequence;
@@ -171,10 +200,12 @@ Pattern_shared Pattern::setSequence(Pattern_shared_deque_shared seq)
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setOrGroup(Pattern_shared_deque_shared seq)
+Pattern_shared Pattern::setSequence(std::initializer_list<Pattern_shared> val)
 {
-    this->pattern_type = PatternType::OrGroup;
-    this->subpatterns  = seq;
+    Pattern_shared_deque *t;
+    copyseq(val, t);
+    this->pattern_type = PatternType::Sequence;
+    this->subpatterns  = Pattern_shared_deque_shared(t);
     return Pattern_shared(this->own_ptr);
 }
 
@@ -399,6 +430,20 @@ Pattern_shared Pattern::newCharIsBlank()
     return ret;
 }
 
+Pattern_shared Pattern::newOrGroup(Pattern_shared_deque_shared seq)
+{
+    auto ret = Pattern::create();
+    ret->setOrGroup(seq);
+    return ret;
+}
+
+Pattern_shared Pattern::newOrGroup(std::initializer_list<Pattern_shared> val)
+{
+    auto ret = Pattern::create();
+    ret->setOrGroup(val);
+    return ret;
+}
+
 Pattern_shared Pattern::newSequence(Pattern_shared_deque_shared seq)
 {
     auto ret = Pattern::create();
@@ -406,10 +451,10 @@ Pattern_shared Pattern::newSequence(Pattern_shared_deque_shared seq)
     return ret;
 }
 
-Pattern_shared Pattern::newOrGroup(Pattern_shared_deque_shared seq)
+Pattern_shared Pattern::newSequence(std::initializer_list<Pattern_shared> val)
 {
     auto ret = Pattern::create();
-    ret->setOrGroup(seq);
+    ret->setSequence(val);
     return ret;
 }
 
