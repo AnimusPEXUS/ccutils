@@ -1,94 +1,24 @@
 
-#include <iostream>
 
-#include <experimental/scope>
+#include <wayround_i2p/ccutils/logger/logger.hpp>
+#include <wayround_i2p/ccutils/test_suite_tool/tst.hpp>
 
-#include <wayround_i2p/ccutils/ip/ip.hpp>
+#include "tests_main.cpp"
 
 int main(int argc, char **args)
 {
-    bool         tests_ok     = false;
-    unsigned int errors_count = 0;
+
+    wayround_i2p::ccutils::tst::run_tests_Parameters params;
 
     {
-        auto ip = wayround_i2p::ccutils::ip::IP::create();
-        if (!ip)
-        {
-            std::cout << "error: can't create IP obj. line: "
-                      << __LINE__ << std::endl;
-            errors_count++;
-            goto end;
-        }
+        auto logger = wayround_i2p::ccutils::logger::TerminalLogger::create();
 
-        {
-            auto s     = ip->toString();
-            auto s_err = std::get<1>(s);
-            if (!s_err)
-            {
-                std::cout << "FAIL: this case should return error"
-                          << std::endl;
-                errors_count++;
-                goto end;
-            }
+        params.title  = "WayRound.I2P ccutils::ip test suite";
+        params.uri    = "https://github.com/AnimusPEXUS/ccutils";
+        params.logger = logger;
 
-            auto s_err_s = s_err->Error();
-
-            if (s_err_s != "not set")
-            {
-                std::cout << "FAIL: this case should return 'not set' error."
-                          << " returned err is: " << s_err_s << std::endl;
-                errors_count++;
-                goto end;
-            }
-        }
-
-    end:
+        params.AddTest(main_001_i);
     }
 
-    {
-        auto ip = wayround_i2p::ccutils::ip::IP::create();
-        if (!ip)
-        {
-            std::cout << "error: can't create IP obj. line: "
-                      << __LINE__ << std::endl;
-            errors_count++;
-            goto end;
-        }
-
-        {
-            auto s     = ip->toString();
-            auto s_err = std::get<1>(s);
-            if (!s_err)
-            {
-                std::cout << "FAIL: this case should return error"
-                          << std::endl;
-                errors_count++;
-                goto end;
-            }
-
-            auto s_err_s = s_err->Error();
-
-            if (s_err_s != "not set")
-            {
-                std::cout << "FAIL: this case should return 'not set' error."
-                          << " returned err is: " << s_err_s << std::endl;
-                errors_count++;
-                goto end;
-            }
-        }
-
-    end:
-    }
-
-    tests_ok = errors_count == 0;
-
-    if (tests_ok)
-    {
-        std::cout << "tests passed." << std::endl;
-        return 0;
-    }
-    else
-    {
-        return 1;
-    }
+    return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
 }

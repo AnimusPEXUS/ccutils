@@ -16,6 +16,8 @@ target_link_libraries(
     ccutils_ip_test
     PUBLIC
     ccutils_ip
+    ccutils_logger
+    ccutils_test_suite_tool
     )
 
 target_include_directories(

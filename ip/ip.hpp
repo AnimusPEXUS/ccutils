@@ -14,7 +14,12 @@ namespace wayround_i2p::ccutils::ip
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 using UString   = wayround_i2p::ccutils::unicode::UString;
 
-constexpr wayround_i2p::ccutils::regexp::Pattern_shared IP_STR_PATTERN();
+namespace regexp = wayround_i2p::ccutils::regexp;
+
+constexpr regexp::Pattern_shared IPv4_STR_PATTERN();
+constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN();
+constexpr regexp::Pattern_shared IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN();
+constexpr regexp::Pattern_shared IP_STR_PATTERN();
 
 class IP
 {
