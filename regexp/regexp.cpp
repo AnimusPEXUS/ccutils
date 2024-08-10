@@ -490,27 +490,17 @@ Pattern_shared Pattern::create()
     return ret;
 }
 
-const Result_shared Pattern::match_single(
-    const UString &subject,
-    std::size_t    start_at
-)
-{
-    return wayround_i2p::ccutils::regexp::match_single(
-        Pattern_shared(this->own_ptr),
-        subject,
-        start_at
-    );
-}
-
 const Result_shared Pattern::match(
-    const UString &subject,
-    std::size_t    start_at
+    const UString      &subject,
+    std::size_t         start_at,
+    const Result_shared parent_result
 )
 {
     return wayround_i2p::ccutils::regexp::match(
         Pattern_shared(this->own_ptr),
         subject,
-        start_at
+        start_at,
+        parent_result
     );
 }
 
@@ -546,6 +536,29 @@ const std::tuple<
 Pattern_shared create()
 {
     return Pattern::create();
+}
+
+Result_shared Result::getParentResult()
+{
+    return parent_result;
+}
+
+Result_shared Result::getRootResult()
+{
+    Result_shared ret = Result_shared(own_ptr);
+    while (true)
+    {
+        auto x = ret->getParentResult();
+        if (x)
+        {
+            ret = x;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return ret;
 }
 
 UString Result::getResultString()
@@ -680,7 +693,8 @@ std::tuple<
 const Result_shared match_single(
     const Pattern_shared pattern,
     const UString       &subject,
-    std::size_t          start_at
+    std::size_t          start_at,
+    const Result_shared  parent_result
 )
 {
     // todo: separate pattern sanity checks to inprove performance?
@@ -704,6 +718,7 @@ const Result_shared match_single(
 
     ret->original_subject      = subject;
     ret->corresponding_pattern = pattern;
+    ret->parent_result         = parent_result;
     ret->match_start           = start_at;
 
     const auto subject_length = subject.length();
@@ -1253,7 +1268,7 @@ const Result_shared match_single(
             }
 
             auto tmp0 = pattern->subpatterns->operator[](0);
-            auto res  = match(tmp0, subject, start_at);
+            auto res  = match(tmp0, subject, start_at, ret);
 
             if (res->error)
             {
@@ -1284,7 +1299,7 @@ const Result_shared match_single(
         {
             for (auto &x : *(pattern->subpatterns.get()))
             {
-                auto res = match(x, subject, start_at);
+                auto res = match(x, subject, start_at, ret);
 
                 if (res->error)
                 {
@@ -1311,7 +1326,7 @@ const Result_shared match_single(
 
             for (auto &x : *(pattern->subpatterns.get()))
             {
-                auto res = match(x, subject, end_tracker);
+                auto res = match(x, subject, end_tracker, ret);
 
                 if (res->error)
                 {
@@ -1345,7 +1360,8 @@ const Result_shared match_single(
 const Result_shared match(
     const Pattern_shared pattern,
     const UString       &subject,
-    std::size_t          start_at
+    std::size_t          start_at,
+    const Result_shared  parent_result
 )
 {
     Result_shared ret           = nullptr;
@@ -1391,8 +1407,9 @@ const Result_shared match(
 
     if (has_max && has_min && min > max)
     {
-        ret        = Result::create();
-        ret->error = wayround_i2p::ccutils::errors::New(
+        ret                = Result::create();
+        ret->parent_result = parent_result;
+        ret->error         = wayround_i2p::ccutils::errors::New(
             "invalid min/max in pattern"
         );
         return ret;
@@ -1402,7 +1419,12 @@ const Result_shared match(
 
     while (true)
     {
-        auto res = match_single(pattern, subject, next_start);
+        auto res = match_single(
+            pattern,
+            subject,
+            next_start,
+            parent_result
+        );
 
         if (!ret)
         {

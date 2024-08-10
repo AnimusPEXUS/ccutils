@@ -177,14 +177,10 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     static Pattern_shared create();
 
-    const Result_shared match_single(
-        const UString &subject,
-        std::size_t    start_at = 0
-    );
-
     const Result_shared match(
-        const UString &subject,
-        std::size_t    start_at = 0
+        const UString      &subject,
+        std::size_t         start_at      = 0,
+        const Result_shared parent_result = nullptr
     );
 
     const Result_shared search(
@@ -245,7 +241,12 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Pattern_shared corresponding_pattern;
 
+    Result_shared parent_result;
+
     Result_shared_deque submatches;
+
+    Result_shared getParentResult();
+    Result_shared getRootResult();
 
     UString       getResultString();
     Result_shared getSubmatchByPatternName(UString name);
@@ -271,18 +272,22 @@ std::tuple<
 
 // todo: add cancel/abort/limit mesures to functions
 
-// ignores repetition and greediness settings and does basic match
+// ignores repetition and greediness settings and does basic match.
+// this is internal function. users should use match() function/
 const Result_shared match_single(
     const Pattern_shared pattern,
     const UString       &subject,
-    std::size_t          start_at = 0
+    std::size_t          start_at      = 0,
+    const Result_shared  parent_result = nullptr
 );
 
-// adds repetition and greediness checks layer above match_single
+// adds repetition and greediness checks layer above match_single.
+// optional parent_result is used for backreference expressions.
 const Result_shared match(
     const Pattern_shared pattern,
     const UString       &subject,
-    std::size_t          start_at = 0
+    std::size_t          start_at      = 0,
+    const Result_shared  parent_result = nullptr
 );
 
 const Result_shared search(
