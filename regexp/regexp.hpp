@@ -2,6 +2,7 @@
 #define WAYROUND_I2P_20240718_170059_658721
 
 #include <cassert>
+#include <format>
 #include <functional>
 #include <vector>
 
@@ -206,9 +207,23 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
 struct Result_repr_as_text_opts
 {
-    bool original_subject      = false;
-    bool corresponding_pattern = false;
-    bool submatches            = false;
+    bool    original_subject      = false;
+    bool    corresponding_pattern = false;
+    bool    submatches            = false;
+    UString padding               = "  ";
+
+    Result_repr_as_text_opts(bool v1)
+    {
+        original_subject      = true;
+        corresponding_pattern = true;
+        submatches            = true;
+    }
+    Result_repr_as_text_opts(bool v1, bool v2, bool v3)
+    {
+        original_subject      = v1;
+        corresponding_pattern = v2;
+        submatches            = v3;
+    }
 };
 
 struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText

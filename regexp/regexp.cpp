@@ -290,10 +290,22 @@ Pattern_shared Pattern::setGreedy(bool value)
     return Pattern_shared(this->own_ptr);
 }
 
+void minmax_sanity_exception(Pattern *val)
+{
+    if (val->has_min && val->has_max)
+    {
+        if (val->min > val->max)
+        {
+            throw wayround_i2p::ccutils::errors::New("Pattern min > max");
+        }
+    }
+}
+
 Pattern_shared Pattern::setMinCount(std::size_t val)
 {
     this->has_min = true;
     this->min     = val;
+    minmax_sanity_exception(this);
     return Pattern_shared(this->own_ptr);
 }
 
@@ -301,20 +313,31 @@ Pattern_shared Pattern::setMaxCount(std::size_t val)
 {
     this->has_max = true;
     this->max     = val;
+    if (!this->has_min)
+    {
+        setMinCount(0);
+    }
+    minmax_sanity_exception(this);
     return Pattern_shared(this->own_ptr);
 }
 
 Pattern_shared Pattern::setMinMaxCount(std::size_t min, std::size_t max)
 {
+    // to avoid exception on min/max check
+    this->has_max = false;
     setMinCount(min);
     setMaxCount(max);
+    minmax_sanity_exception(this);
     return Pattern_shared(this->own_ptr);
 }
 
 Pattern_shared Pattern::setExactCount(std::size_t val)
 {
+    // to avoid exception on min/max check
+    this->has_max = false;
     setMinCount(val);
     setMaxCount(val);
+    minmax_sanity_exception(this);
     return Pattern_shared(this->own_ptr);
 }
 
@@ -552,37 +575,81 @@ Result_shared Result::operator[](UString name)
 
 UString Result::repr_as_text() const
 {
-    return repr_as_text({});
+    return repr_as_text(regexp::Result_repr_as_text_opts(false));
 }
 
 UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 {
     // todo: use opts
 
+    UString subm;
+
+    if (opts.submatches)
+    {
+        if (this->submatches.size() == 0)
+        {
+            subm = "(none)";
+        }
+        else
+        {
+            subm = std::format(
+                "(count: {})\n",
+                this->submatches.size()
+            );
+
+            UString padding = std::format(
+                "{}|           ",
+                opts.padding
+            );
+
+            std::size_t c = 0;
+            for (const auto &i : submatches)
+            {
+
+                auto cpn  = i->corresponding_pattern->name;
+                subm     += std::format(
+                    "{}+-- #{} submatch: {}\n",
+                    padding,
+                    c,
+                    (cpn != "" ?
+                             std::format("\"{}\"", cpn) :
+                             "(unnamed)")
+                );
+                auto opts2    = opts;
+                opts2.padding = std::format(
+                    "{}{}      ",
+                    padding,
+                    (c < this->submatches.size() - 1 ? "|" : " ")
+                );
+                subm += i->repr_as_text(opts2);
+                c++;
+            }
+        }
+    }
+
     UString ret = std::format(
-        R"+++(
-wayround_i2p::ccutils::regexp::Result{{
-        error?                    : {}
-        original_subject          : {}
-        matched?                  : {}
-        matched_repetitions_count : {}
-        match_start               : {}
-        match_end                 : {}
-        corresponding_pattern     : {}
-        submatches                : {}
-}}
-)+++",
+        R"+++({0:}+---- wayround_i2p::ccutils::regexp::Result{{
+{0:}|      error?                    : {2:}
+{0:}|      original_subject          : {3:}
+{0:}|      matched?                  : {4:}
+{0:}|      matched_repetitions_count : {5:}
+{0:}|      match_start               : {6:}
+{0:}|      match_end                 : {7:}
+{0:}|      corresponding_pattern     : {8:}
+{0:}|      submatches                : {9:}
+{0:}+---- }}{1:})+++",
+        opts.padding,
+        "\n",
         this->error ? this->error->Error() : "(no error)",
         opts.original_subject ? this->original_subject : "(disabled)",
         this->matched,
         this->matched_repetitions_count,
         this->match_start,
         this->match_end,
-        opts.corresponding_pattern ? this->corresponding_pattern->repr_as_text() :
-                                     "(disabled)",
-        opts.submatches ? "(todo)" : "(disabled)"
+        opts.corresponding_pattern ? this->corresponding_pattern->repr_as_text() : "(disabled)",
+        (opts.submatches ? subm : "(disabled)")
     );
-    // todo: does this return copy? use pointers?
+
     return ret;
 }
 

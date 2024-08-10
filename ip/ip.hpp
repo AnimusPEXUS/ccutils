@@ -16,10 +16,146 @@ using UString   = wayround_i2p::ccutils::unicode::UString;
 
 namespace regexp = wayround_i2p::ccutils::regexp;
 
-constexpr regexp::Pattern_shared IPv4_STR_PATTERN();
-constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN();
-constexpr regexp::Pattern_shared IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN();
-constexpr regexp::Pattern_shared IP_STR_PATTERN();
+constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
+{
+    auto ret
+        = regexp::Pattern::newSequence(
+              {regexp::Pattern::newCharIsDigit()
+                   ->setMinMaxCount(1, 3)
+                   ->setName("1"),
+               regexp::Pattern::newExactChar(".")
+                   ->setMinMaxCount(1, 1),
+               regexp::Pattern::newCharIsDigit()
+                   ->setMinMaxCount(1, 3)
+                   ->setName("2"),
+               regexp::Pattern::newExactChar(".")
+                   ->setMinMaxCount(1, 1),
+               regexp::Pattern::newCharIsDigit()
+                   ->setMinMaxCount(1, 3)
+                   ->setName("3"),
+               regexp::Pattern::newExactChar(".")
+                   ->setMinMaxCount(1, 1),
+               regexp::Pattern::newCharIsDigit()
+                   ->setMinMaxCount(1, 3)
+                   ->setName("4")
+              }
+        )
+              ->setName("IPv4_STR_PATTERN");
+    return ret;
+}
+
+constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
+{
+    auto ret
+        = regexp::Pattern::newSequence(
+              {regexp::Pattern::newSequence(
+                   {regexp::Pattern::newCharIsXDigit()
+                        ->setMinMaxCount(1, 4)
+                        ->setName("num"),
+                    regexp::Pattern::newExactChar(":")
+                        ->setMinMaxCount(1, 1)
+                   }
+               )
+                   ->setMinMaxCount(7, 7)
+                   ->setName("numbers"),
+               regexp::Pattern::newCharIsXDigit()
+                   ->setMinMaxCount(1, 4)
+                   ->setName("8")
+              }
+
+        )
+              ->setName("IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN");
+    return ret;
+}
+
+constexpr regexp::Pattern_shared IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN()
+{
+    auto ret
+        = regexp::Pattern::newSequence(
+              {regexp::Pattern::newSequence(
+                   {regexp::Pattern::newCharIsXDigit()
+                        ->setMinMaxCount(1, 2)
+                        ->setName("num"),
+                    regexp::Pattern::newExactChar(":")
+                        ->setMinMaxCount(1, 1)}
+               )
+                   ->setMinMaxCount(15, 15)
+                   ->setName("numbers"),
+               regexp::Pattern::newCharIsXDigit()
+                   ->setMinMaxCount(1, 2)
+                   ->setName("15")}
+        )
+              ->setName("IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN");
+    return ret;
+}
+
+constexpr regexp::Pattern_shared IP_STR_PATTERN()
+{
+    regexp::Pattern_shared ret
+        = regexp::Pattern::newSequence(
+              {regexp::Pattern::newOrGroup(
+                   {/* ipv4 pattern */
+                    IPv4_STR_PATTERN(),
+                    /* two ipv6 patterns */
+                    regexp::Pattern::newSequence(
+                        {regexp::Pattern::newExactChar("[")->setMaxCount(1),
+                         regexp::Pattern::newOrGroup(
+                             {/* long 1 byte */
+                              IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN(),
+                              /* long 2 byte */
+                              IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN(),
+                              /* short */
+                              regexp::Pattern::newSequence(
+                                  {regexp::Pattern::newAnyChar(),
+                                   regexp::Pattern::newExactChar(":")
+                                       ->setExactCount(2),
+                                   regexp::Pattern::newAnyChar()
+                                  }
+                              )
+                             }
+                         ),
+                         regexp::Pattern::newExactChar("]")
+                             ->setMaxCount(1)
+                        }
+                    )
+                   }
+               )
+                   ->setName("ip"),
+               regexp::Pattern::newSequence(
+                   {regexp::Pattern::newExactChar(":"),
+                    regexp::Pattern::newCharIsDigit()
+                        ->setName("port")
+                        ->setMinCount(1)
+                   }
+               )
+                   //                   ->setMinMaxCount(0, 1)
+                   ->setMaxCount(1)
+              }
+        )
+              ->setName("ip_and_port");
+
+    return ret;
+}
+
+const regexp::Pattern_shared IPv4_STR_PATTERN_c = []()
+{
+    return IPv4_STR_PATTERN();
+}();
+
+const regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_c = []()
+{
+    return IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN();
+}();
+
+const regexp::Pattern_shared IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN_c = []()
+{
+    return IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN();
+}();
+
+const regexp::Pattern_shared IP_STR_PATTERN_c = []()
+{
+    return IP_STR_PATTERN();
+}();
 
 class IP
 {
