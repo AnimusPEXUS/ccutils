@@ -6,8 +6,11 @@ using UString = wayround_i2p::ccutils::unicode::UString;
 
 const std::vector<UString> testing_examples{
     "0.0.0.0",
+    "12.34.56.78",
     "0.0.0.0/24",
+    "12.34.56.78/24",
     "0.0.0.0:9050",
+    "12.34.56.78:9050",
     "[::]:8080",
     "0123:4567:89ab:cdef:0123:4567:89ab:cdf0",
     "0123:4567:89ab::cdef",

@@ -652,10 +652,10 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
                 wayround_i2p::ccutils::logger::Info,
                 std::format(
                     " 1: {}, 2: {}, 3: {}, 4: {}",
-                    (*res)["1"]->getResultString(),
-                    (*res)["2"]->getResultString(),
-                    (*res)["3"]->getResultString(),
-                    (*res)["4"]->getResultString()
+                    (*res)["1"]->getMatchedString(),
+                    (*res)["2"]->getMatchedString(),
+                    (*res)["3"]->getMatchedString(),
+                    (*res)["4"]->getMatchedString()
                 )
             );
             matched++;
@@ -719,7 +719,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
             wayround_i2p::ccutils::logger::Status,
             std::format(
                 "found {} at index: {}",
-                res->getResultString(),
+                res->getMatchedString(),
                 res->match_start
             )
         );
@@ -727,10 +727,10 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
             wayround_i2p::ccutils::logger::Info,
             std::format(
                 "   1: {}, 2: {}, 3: {}, 4: {}",
-                (*res)["1"]->getResultString(),
-                (*res)["2"]->getResultString(),
-                (*res)["3"]->getResultString(),
-                (*res)["4"]->getResultString()
+                (*res)["1"]->getMatchedString(),
+                (*res)["2"]->getMatchedString(),
+                (*res)["3"]->getMatchedString(),
+                (*res)["4"]->getMatchedString()
             )
         );
         index = res->match_end;

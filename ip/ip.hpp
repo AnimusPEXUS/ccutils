@@ -93,45 +93,55 @@ constexpr regexp::Pattern_shared IP_STR_PATTERN()
 {
     regexp::Pattern_shared ret
         = regexp::Pattern::newSequence(
-              {regexp::Pattern::newOrGroup(
-                   {/* ipv4 pattern */
-                    IPv4_STR_PATTERN(),
-                    /* two ipv6 patterns */
-                    regexp::Pattern::newSequence(
-                        {regexp::Pattern::newExactChar("[")->setMaxCount(1),
-                         regexp::Pattern::newOrGroup(
-                             {/* long 1 byte */
-                              IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN(),
-                              /* long 2 byte */
-                              IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN(),
-                              /* short */
-                              regexp::Pattern::newSequence(
-                                  {regexp::Pattern::newAnyChar(),
-                                   regexp::Pattern::newExactChar(":")
-                                       ->setExactCount(2),
-                                   regexp::Pattern::newAnyChar()
-                                  }
-                              )
-                             }
-                         ),
-                         regexp::Pattern::newExactChar("]")
-                             ->setMaxCount(1)
-                        }
-                    )
-                   }
-               )
-                   ->setName("ip"),
-               regexp::Pattern::newSequence(
-                   {regexp::Pattern::newExactChar(":"),
-                    regexp::Pattern::newCharIsDigit()
-                        ->setName("port")
-                        ->setMinCount(1)
-                   }
-               )
-                   //                   ->setMinMaxCount(0, 1)
-                   ->setMaxCount(1)
+              {
+                  regexp::Pattern::newOrGroup(
+                      {/* ipv4 pattern */
+                       IPv4_STR_PATTERN(),
+                       /* two ipv6 patterns */
+                       regexp::Pattern::newSequence(
+                           {regexp::Pattern::newExactChar("[")
+                                ->setMaxCount(1)
+                                ->unsetMinCount(),
+                            regexp::Pattern::newOrGroup(
+                                {/* long 1 byte */
+                                 IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN(),
+                                 /* long 2 byte */
+                                 IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN(),
+                                 /* short */
+                                 regexp::Pattern::newSequence(
+                                     {regexp::Pattern::newAnyChar(),
+                                      regexp::Pattern::newExactChar(":")
+                                          ->setExactCount(2),
+                                      regexp::Pattern::newAnyChar()
+                                     }
+                                 )
+                                }
+                            ),
+                            regexp::Pattern::newExactChar("]")
+                                ->setMaxCount(1)
+                                ->unsetMinCount()
+                           }
+                       )
+                      }
+                  )
+                      ->setName("ip"),
+                  regexp::Pattern::newSequence(
+                      {
+                          regexp::Pattern::newExactChar(":")
+                              ->setExactCount(1),
+                          regexp::Pattern::newCharIsDigit()
+                              ->setName("port")
+                              ->setMinCount(1)
+                              ->unsetMaxCount()
+                          //->setMinMaxCount(1, 10)
+                      }
+                  )
+                      ->setMaxCount(1)
+                      ->unsetMinCount()
+                  //->setMinMaxCount(0, 1)
               }
         )
+              ->setExactCount(1)
               ->setName("ip_and_port");
 
     return ret;

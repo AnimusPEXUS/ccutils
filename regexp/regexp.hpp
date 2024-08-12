@@ -42,8 +42,6 @@ namespace wayround_i2p::ccutils::regexp
 // maybe CharT and/or ICU's UChar
 // will be added later, but doubt this will be necessary.
 
-// todo: create precompiled patterns
-
 using CBFunctionToCheckChar01 = std::function<
     std::tuple<
         error_ptr,    // return error if error
@@ -55,6 +53,17 @@ using CBFunctionToCheckChar01 = std::function<
 // todo: add (thinking required)
 //       * 'OnlyIfMatched' pattern option, which forces dismatch if named
 //         pattern didn't matched
+
+struct Pattern_repr_as_text_opts
+{
+    bool    subpatterns = false;
+    UString padding     = "  ";
+
+    Pattern_repr_as_text_opts(bool v1)
+    {
+        subpatterns = v1;
+    }
+};
 
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
@@ -89,7 +98,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     // calculates case-sensitivity basing on
     // case_sensitive_from_parent/case_sensitive values
-    bool isCaseSensitive();
+    bool isCaseSensitive() const;
 
     bool        has_min = false;
     bool        has_max = false;
@@ -100,6 +109,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     bool greedy = false;
 
     UString repr_as_text() const;
+    UString repr_as_text(const Pattern_repr_as_text_opts &opts) const;
 
     Pattern_shared setTextStart();
     Pattern_shared setTextEnd();
@@ -144,6 +154,9 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setMaxCount(std::size_t val);
     Pattern_shared setMinMaxCount(std::size_t min, std::size_t max);
     Pattern_shared setExactCount(std::size_t val);
+    Pattern_shared unsetMinCount();
+    Pattern_shared unsetMaxCount();
+    Pattern_shared unsetMinMaxCount();
 
     static Pattern_shared newTextStart();
     static Pattern_shared newTextEnd();
@@ -199,6 +212,8 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
   private:
     std::weak_ptr<Pattern> own_ptr;
+
+    void minmax_sanity_exception() const;
 };
 
 struct Result_repr_as_text_opts
@@ -210,9 +225,9 @@ struct Result_repr_as_text_opts
 
     Result_repr_as_text_opts(bool v1)
     {
-        original_subject      = true;
-        corresponding_pattern = true;
-        submatches            = true;
+        original_subject      = v1;
+        corresponding_pattern = v1;
+        submatches            = v1;
     }
     Result_repr_as_text_opts(bool v1, bool v2, bool v3)
     {
@@ -248,9 +263,9 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     Result_shared getParentResult();
     Result_shared getRootResult();
 
-    UString       getResultString();
-    Result_shared getSubmatchByPatternName(UString name);
-    Result_shared operator[](UString name);
+    UString       getMatchedString() const;
+    Result_shared getSubmatchByPatternName(UString name) const;
+    Result_shared operator[](UString name) const;
 
     UString repr_as_text() const;
     UString repr_as_text(const Result_repr_as_text_opts &opts) const;

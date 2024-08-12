@@ -32,7 +32,7 @@ error_ptr Pattern::updateParents()
     return nullptr;
 }
 
-bool Pattern::isCaseSensitive()
+bool Pattern::isCaseSensitive() const
 {
     if (parent_pattern && case_sensitive_from_parent)
     {
@@ -44,11 +44,42 @@ bool Pattern::isCaseSensitive()
 
 UString Pattern::repr_as_text() const
 {
+    return repr_as_text(Pattern_repr_as_text_opts(false));
+}
+
+UString Pattern::repr_as_text(const Pattern_repr_as_text_opts &opts) const
+{
     // todo: does this return copy? use pointers?
     // todo: todo
     UString ret = std::format(
-        R"+++(todo)+++"
+        R"+++({0:}+---- wayround_i2p::ccutils::regexp::Pattern{{
+{0:}|      name                      : {2:}
+{0:}|      pattern_type              : {3:}
+{0:}|      values                    : {4:}
+{0:}|      case_sensitive_from_parent: {5:}
+{0:}|      case_sensitive            : {6:}
+{0:}|      isCaseSensitive()         : {7:}
+{0:}|      has_min                   : {8:}
+{0:}|      has_max                   : {9:}
+{0:}|      min                       : {10:}
+{0:}|      max                       : {11:}
+{0:}|      greedy                    : {12:}
+{0:}+---- }}{1:})+++",
+        opts.padding,
+        "\n",
+        std::format("\"{}\"", this->name),
+        (int)(this->pattern_type),
+        "",
+        this->case_sensitive_from_parent,
+        this->case_sensitive,
+        this->isCaseSensitive(),
+        this->has_min,
+        this->has_max,
+        this->min,
+        this->max,
+        this->greedy
     );
+
     return ret;
 }
 
@@ -290,11 +321,11 @@ Pattern_shared Pattern::setGreedy(bool value)
     return Pattern_shared(this->own_ptr);
 }
 
-void minmax_sanity_exception(Pattern *val)
+void Pattern::minmax_sanity_exception() const
 {
-    if (val->has_min && val->has_max)
+    if (has_min && has_max)
     {
-        if (val->min > val->max)
+        if (min > max)
         {
             throw wayround_i2p::ccutils::errors::New("Pattern min > max");
         }
@@ -305,7 +336,7 @@ Pattern_shared Pattern::setMinCount(std::size_t val)
 {
     this->has_min = true;
     this->min     = val;
-    minmax_sanity_exception(this);
+    // minmax_sanity_exception();
     return Pattern_shared(this->own_ptr);
 }
 
@@ -313,11 +344,11 @@ Pattern_shared Pattern::setMaxCount(std::size_t val)
 {
     this->has_max = true;
     this->max     = val;
-    if (!this->has_min)
-    {
-        setMinCount(0);
-    }
-    minmax_sanity_exception(this);
+    // if (!this->has_min)
+    // {
+    //   setMinCount(0);
+    // }
+    // minmax_sanity_exception();
     return Pattern_shared(this->own_ptr);
 }
 
@@ -327,7 +358,7 @@ Pattern_shared Pattern::setMinMaxCount(std::size_t min, std::size_t max)
     this->has_max = false;
     setMinCount(min);
     setMaxCount(max);
-    minmax_sanity_exception(this);
+    // minmax_sanity_exception();
     return Pattern_shared(this->own_ptr);
 }
 
@@ -337,7 +368,28 @@ Pattern_shared Pattern::setExactCount(std::size_t val)
     this->has_max = false;
     setMinCount(val);
     setMaxCount(val);
-    minmax_sanity_exception(this);
+    // minmax_sanity_exception();
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::unsetMinCount()
+{
+    has_min = false;
+    min     = 0;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::unsetMaxCount()
+{
+    has_max = false;
+    max     = 0;
+    return Pattern_shared(this->own_ptr);
+}
+
+Pattern_shared Pattern::unsetMinMaxCount()
+{
+    unsetMinCount();
+    unsetMaxCount();
     return Pattern_shared(this->own_ptr);
 }
 
@@ -486,6 +538,7 @@ Pattern_shared Pattern::create()
     auto ret     = Pattern_shared(new Pattern());
     ret->own_ptr = ret;
     ret->setRepetition(PatternRepetitionType::Single);
+    ret->setExactCount(1);
     ret->greedy = false;
     return ret;
 }
@@ -561,7 +614,7 @@ Result_shared Result::getRootResult()
     return ret;
 }
 
-UString Result::getResultString()
+UString Result::getMatchedString() const
 {
     return original_subject.substr(
         this->match_start,
@@ -569,7 +622,7 @@ UString Result::getResultString()
     );
 }
 
-Result_shared Result::getSubmatchByPatternName(UString name)
+Result_shared Result::getSubmatchByPatternName(UString name) const
 {
     for (auto i : submatches)
     {
@@ -581,14 +634,14 @@ Result_shared Result::getSubmatchByPatternName(UString name)
     return nullptr;
 }
 
-Result_shared Result::operator[](UString name)
+Result_shared Result::operator[](UString name) const
 {
     return getSubmatchByPatternName(name);
 }
 
 UString Result::repr_as_text() const
 {
-    return repr_as_text(regexp::Result_repr_as_text_opts(false));
+    return repr_as_text(Result_repr_as_text_opts(false));
 }
 
 UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
@@ -640,6 +693,31 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
         }
     }
 
+    UString corp_patt;
+
+    if (opts.corresponding_pattern)
+    {
+        if (!this->corresponding_pattern)
+        {
+            subm = "(absent: and this is wrong!)";
+        }
+        else
+        {
+            corp_patt       = "\n";
+            UString padding = std::format(
+                "{}|           ",
+                opts.padding
+            );
+
+            auto opts2    = Pattern_repr_as_text_opts(false);
+            opts2.padding = std::format(
+                "{}|      ",
+                padding
+            );
+            corp_patt += this->corresponding_pattern->repr_as_text(opts2);
+        }
+    }
+
     UString ret = std::format(
         R"+++({0:}+---- wayround_i2p::ccutils::regexp::Result{{
 {0:}|      error?                    : {2:}
@@ -648,8 +726,9 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 {0:}|      matched_repetitions_count : {5:}
 {0:}|      match_start               : {6:}
 {0:}|      match_end                 : {7:}
-{0:}|      corresponding_pattern     : {8:}
-{0:}|      submatches                : {9:}
+{0:}|      matched string            : {8:}
+{0:}|      corresponding_pattern     : {9:}
+{0:}|      submatches                : {10:}
 {0:}+---- }}{1:})+++",
         opts.padding,
         "\n",
@@ -659,7 +738,8 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
         this->matched_repetitions_count,
         this->match_start,
         this->match_end,
-        opts.corresponding_pattern ? this->corresponding_pattern->repr_as_text() : "(disabled)",
+        (this->matched ? std::format("\"{}\"", this->getMatchedString()) : "(dismatched)"),
+        (opts.corresponding_pattern ? corp_patt : "(disabled)"),
         (opts.submatches ? subm : "(disabled)")
     );
 
@@ -671,6 +751,32 @@ Result_shared Result::create()
     auto ret     = Result_shared(new Result());
     ret->own_ptr = ret;
     return ret;
+}
+
+bool isTextEnd(
+    const UString &subject,
+    std::size_t    start_at
+)
+{
+    auto pattern = Pattern::newTextEnd();
+    pattern->setRepetition(PatternRepetitionType::Single);
+
+    auto res = match(pattern, subject, start_at);
+
+    return res->matched;
+}
+
+bool isLineEnd(
+    const UString &subject,
+    std::size_t    start_at
+)
+{
+    auto pattern = Pattern::newLineEnd();
+    pattern->setRepetition(PatternRepetitionType::Single);
+
+    auto res = match(pattern, subject, start_at);
+
+    return res->matched;
 }
 
 std::tuple<
@@ -720,6 +826,7 @@ const Result_shared match_single(
     ret->corresponding_pattern = pattern;
     ret->parent_result         = parent_result;
     ret->match_start           = start_at;
+    ret->match_end             = start_at;
 
     const auto subject_length = subject.length();
 
@@ -876,6 +983,7 @@ const Result_shared match_single(
         case PatternType::LineEnd:
         {
             ret->match_start = start_at;
+            ret->matched     = false;
             ret->match_end   = ret->match_start;
 
             if (start_at == subject_length)
@@ -891,8 +999,6 @@ const Result_shared match_single(
                 ret->matched = true;
                 return ret;
             }
-
-            ret->matched = false;
 
             return ret;
         }
@@ -976,6 +1082,12 @@ const Result_shared match_single(
                 return ret;
             }
 
+            if (isLineEnd(subject, start_at))
+            {
+                ret->matched = false;
+                return ret;
+            }
+
             auto target_char = pattern->values[0];
 
             if (!pattern->isCaseSensitive())
@@ -1013,6 +1125,12 @@ const Result_shared match_single(
                     = wayround_i2p::ccutils::errors::New(
                         "there must be exactly 2 values inside of pattern->values"
                     );
+                return ret;
+            }
+
+            if (isLineEnd(subject, start_at))
+            {
+                ret->matched = false;
                 return ret;
             }
 
@@ -1059,201 +1177,190 @@ const Result_shared match_single(
         }
         case PatternType::AnyChar:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
-            else
+
+            if (auto ls_res = isLineSplit(subject, start_at); std::get<0>(ls_res))
             {
-                ret->matched     = true;
-                ret->match_start = start_at;
-                ret->match_end   = ret->match_start + 1;
+                ret->matched   = true;
+                ret->match_end = start_at + std::get<1>(ls_res);
                 return ret;
             }
+
+            ret->matched     = true;
+            ret->match_start = start_at;
+            ret->match_end   = start_at + 1;
+            return ret;
         }
         case PatternType::CharIsAlpha:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isAlpha())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isAlpha())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
         case PatternType::CharIsLower:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isLower())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isLower())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
         case PatternType::CharIsUpper:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isUpper())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isUpper())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
         case PatternType::CharIsPunct:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isPunct())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isPunct())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
         case PatternType::CharIsDigit:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isDigit())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isDigit())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
         case PatternType::CharIsXDigit:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isXDigit())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isXDigit())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
         case PatternType::CharIsSpace:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isSpace())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isSpace())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
         case PatternType::CharIsBlank:
         {
-            if (start_at >= subject_length)
+            if (isLineEnd(subject, start_at))
             {
                 ret->matched = false;
                 return ret;
             }
+
+            if (subject[start_at].isBlank())
+            {
+                ret->matched     = true;
+                ret->match_start = start_at;
+                ret->match_end   = start_at + 1;
+                return ret;
+            }
             else
             {
-                if (subject[start_at].isBlank())
-                {
-                    ret->matched     = true;
-                    ret->match_start = start_at;
-                    ret->match_end   = ret->match_start + 1;
-                    return ret;
-                }
-                else
-                {
-                    ret->matched = false;
-                    return ret;
-                }
+                ret->matched = false;
+                return ret;
             }
         }
 
@@ -1357,6 +1464,7 @@ const Result_shared match_single(
     return ret;
 }
 
+// note: if min is not set - it's assumed equal to max
 const Result_shared match(
     const Pattern_shared pattern,
     const UString       &subject,
@@ -1364,8 +1472,9 @@ const Result_shared match(
     const Result_shared  parent_result
 )
 {
-    Result_shared ret           = nullptr;
-    std::size_t   matched_count = 0;
+    Result_shared ret = nullptr;
+
+    std::size_t matched_count = 0;
 
     auto ex01 = std::experimental::scope_exit(
         [&ret, &matched_count]()
@@ -1377,14 +1486,14 @@ const Result_shared match(
                 ret->matched = false;
             }
 
-            if (!ret->matched)
-            {
-                ret->match_end = ret->match_start;
-            }
-
             if (ret->matched)
             {
                 ret->matched_repetitions_count = matched_count;
+            }
+            else
+            {
+                ret->match_end                 = ret->match_start;
+                ret->matched_repetitions_count = 0;
             }
         }
     );
@@ -1395,14 +1504,14 @@ const Result_shared match(
     auto max     = pattern->max;
     auto greedy  = pattern->greedy;
 
-    if (!has_min)
-    {
-        min = 0;
-    }
-
     if (!has_max)
     {
         max = 0;
+    }
+
+    if (!has_min)
+    {
+        min = 0;
     }
 
     if (has_max && has_min && min > max)
@@ -1416,6 +1525,7 @@ const Result_shared match(
     }
 
     auto next_start = start_at;
+    // auto last_success_mustch_end = start_at;
 
     while (true)
     {
@@ -1443,29 +1553,62 @@ const Result_shared match(
 
             next_start = ret->match_end = res->match_end;
 
-            if (greedy && has_min && matched_count >= min)
+            // todo: detect if greedy but matching
+            // global pattern if matching here more than min?
+            // pass next pattern to this function and try match-searching?
+
+            if ((greedy)
+                && ((min == 0) || (min != 0 && matched_count >= min)))
             {
-                return ret;
+                goto match_and_exit;
             }
 
             if (has_max && matched_count == max)
             {
-                return ret;
+                goto match_and_exit;
+            }
+
+            if (has_max && matched_count > max)
+            {
+                throw wayround_i2p::ccutils::errors::New(
+                    "programming error? this should not be happening"
+                );
             }
         }
         else
         {
-            if (has_min && matched_count < min)
+            if (has_min)
             {
-                ret->matched = false;
-                return ret;
+                if (min != 0)
+                {
+                    if (matched_count < min)
+                    {
+                        goto dismatch_and_exit;
+                    }
+                    else
+                    {
+                        goto match_and_exit;
+                    }
+                }
+                else
+                {
+                    goto match_and_exit;
+                }
             }
             else
             {
-                ret->matched = true;
-                return ret;
+                goto match_and_exit;
             }
         }
+
+        continue;
+    match_and_exit:
+        ret->matched   = true;
+        ret->match_end = next_start;
+        return ret;
+    dismatch_and_exit:
+        ret->matched = false;
+        return ret;
     }
 
     return ret;
