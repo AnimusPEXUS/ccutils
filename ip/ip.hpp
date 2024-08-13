@@ -16,6 +16,34 @@ using UString   = wayround_i2p::ccutils::unicode::UString;
 
 namespace regexp = wayround_i2p::ccutils::regexp;
 
+constexpr regexp::Pattern_shared PORT_STR_PATTERN()
+{
+    auto ret
+        = regexp::Pattern::newSequence(
+            {regexp::Pattern::newExactChar(":"),
+             regexp::Pattern::newCharIsDigit()
+                 ->setName("port_num")
+                 ->setMinCount(1)
+                 ->unsetMaxCount()
+            }
+        );
+    return ret;
+}
+
+constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
+{
+    auto ret
+        = regexp::Pattern::newSequence(
+            {regexp::Pattern::newExactChar("/"),
+             regexp::Pattern::newCharIsDigit()
+                 ->setName("cidr_num")
+                 ->setMinCount(1)
+                 ->unsetMaxCount()
+            }
+        );
+    return ret;
+}
+
 constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
 {
     auto ret
@@ -93,56 +121,49 @@ constexpr regexp::Pattern_shared IP_STR_PATTERN()
 {
     regexp::Pattern_shared ret
         = regexp::Pattern::newSequence(
-              {
-                  regexp::Pattern::newOrGroup(
-                      {/* ipv4 pattern */
-                       IPv4_STR_PATTERN(),
-                       /* two ipv6 patterns */
-                       regexp::Pattern::newSequence(
-                           {regexp::Pattern::newExactChar("[")
-                                ->setMaxCount(1)
-                                ->unsetMinCount(),
-                            regexp::Pattern::newOrGroup(
-                                {/* long 1 byte */
-                                 IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN(),
-                                 /* long 2 byte */
-                                 IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN(),
-                                 /* short */
-                                 regexp::Pattern::newSequence(
-                                     {regexp::Pattern::newAnyChar(),
-                                      regexp::Pattern::newExactChar(":")
-                                          ->setExactCount(2),
-                                      regexp::Pattern::newAnyChar()
-                                     }
-                                 )
-                                }
-                            ),
-                            regexp::Pattern::newExactChar("]")
-                                ->setMaxCount(1)
-                                ->unsetMinCount()
-                           }
-                       )
-                      }
-                  )
-                      ->setName("ip"),
-                  regexp::Pattern::newSequence(
-                      {
-                          regexp::Pattern::newExactChar(":")
-                              ->setExactCount(1),
-                          regexp::Pattern::newCharIsDigit()
-                              ->setName("port")
-                              ->setMinCount(1)
-                              ->unsetMaxCount()
-                          //->setMinMaxCount(1, 10)
-                      }
-                  )
-                      ->setMaxCount(1)
-                      ->unsetMinCount()
-                  //->setMinMaxCount(0, 1)
+              {regexp::Pattern::newOrGroup(
+                   {/* ipv4 pattern */
+                    IPv4_STR_PATTERN(),
+                    /* two ipv6 patterns */
+                    regexp::Pattern::newSequence(
+                        {regexp::Pattern::newExactChar("[")
+                             ->setMaxCount(1)
+                             ->unsetMinCount(),
+                         regexp::Pattern::newOrGroup(
+                             {/* long 1 byte */
+                              IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN(),
+                              /* long 2 byte */
+                              IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN(),
+                              /* short */
+                              regexp::Pattern::newSequence(
+                                  {regexp::Pattern::newAnyChar(),
+                                   regexp::Pattern::newExactChar(":")
+                                       ->setExactCount(2),
+                                   regexp::Pattern::newAnyChar()
+                                  }
+                              )
+                             }
+                         ),
+                         regexp::Pattern::newExactChar("]")
+                             ->setMaxCount(1)
+                             ->unsetMinCount()
+                        }
+                    )
+                   }
+               )
+                   ->setName("ip"),
+               regexp::Pattern::newOrGroup(
+                   {PORT_STR_PATTERN(),
+                    CIDR_STR_PATTERN()
+                   }
+               )
+                   ->setName("port_or_cidr")
+                   ->setMaxCount(1)
+                   ->unsetMinCount()
               }
         )
               ->setExactCount(1)
-              ->setName("ip_and_port");
+              ->setName("IP_STR_PATTERN");
 
     return ret;
 }

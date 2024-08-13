@@ -82,6 +82,8 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     //   Not - exactly 1
     //   Sequence - 1 or more
     //   OrSequence - 1 or more
+    // todo: is this really have to be shared? probably it's not needed anymore.
+    // make this Pattern_shared_deque
     Pattern_shared_deque_shared subpatterns;
 
     Pattern_shared parent_pattern;
@@ -263,9 +265,13 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     Result_shared getParentResult();
     Result_shared getRootResult();
 
-    UString       getMatchedString() const;
+    UString getMatchedString() const;
+
+    std::size_t   getSubmatchCount() const;
     Result_shared getSubmatchByPatternName(UString name) const;
+    Result_shared getSubmatchByIndex(std::size_t index) const;
     Result_shared operator[](UString name) const;
+    Result_shared operator[](std::size_t index) const;
 
     UString repr_as_text() const;
     UString repr_as_text(const Result_repr_as_text_opts &opts) const;

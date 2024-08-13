@@ -246,7 +246,9 @@ Pattern_shared Pattern::setName(UString value)
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setRepetition(PatternRepetitionType pattern_repetition_type)
+Pattern_shared Pattern::setRepetition(
+    PatternRepetitionType pattern_repetition_type
+)
 {
     this->has_min = false;
     this->has_max = false;
@@ -265,31 +267,22 @@ Pattern_shared Pattern::setRepetition(PatternRepetitionType pattern_repetition_t
                 )
             );
         case PatternRepetitionType::Single:
-            this->has_min = true;
-            this->has_max = true;
-            this->min     = 1;
-            this->max     = 1;
+            setExactCount(1);
             return Pattern_shared(this->own_ptr);
 
         case PatternRepetitionType::NoneOrOne:
-            this->has_min = true;
-            this->has_max = true;
-            // this->min     = 0;
-            this->max     = 1;
+            setMaxCount(1);
+            unsetMinCount();
             return Pattern_shared(this->own_ptr);
 
         case PatternRepetitionType::NoneOrMore:
-            this->has_min = true;
-            // this->has_max = false;
-            // this->min     = 0;
-            // this->max     = 0;
+            unsetMinCount();
+            unsetMaxCount();
             return Pattern_shared(this->own_ptr);
 
         case PatternRepetitionType::OneOrMore:
-            this->has_min = true;
-            // this->has_max = false;
-            this->min     = 1;
-            // this->max     = 0;
+            setMinCount(1);
+            unsetMaxCount();
             return Pattern_shared(this->own_ptr);
     }
 
@@ -538,7 +531,7 @@ Pattern_shared Pattern::create()
     auto ret     = Pattern_shared(new Pattern());
     ret->own_ptr = ret;
     ret->setRepetition(PatternRepetitionType::Single);
-    ret->setExactCount(1);
+    // ret->setExactCount(1);
     ret->greedy = false;
     return ret;
 }
@@ -622,6 +615,11 @@ UString Result::getMatchedString() const
     );
 }
 
+std::size_t Result::getSubmatchCount() const
+{
+    return submatches.size();
+}
+
 Result_shared Result::getSubmatchByPatternName(UString name) const
 {
     for (auto i : submatches)
@@ -634,9 +632,19 @@ Result_shared Result::getSubmatchByPatternName(UString name) const
     return nullptr;
 }
 
+Result_shared Result::getSubmatchByIndex(std::size_t index) const
+{
+    return submatches[index];
+}
+
 Result_shared Result::operator[](UString name) const
 {
     return getSubmatchByPatternName(name);
+}
+
+Result_shared Result::operator[](std::size_t index) const
+{
+    return getSubmatchByIndex(index);
 }
 
 UString Result::repr_as_text() const
