@@ -23,6 +23,8 @@ target_link_libraries(
 target_include_directories(
     ccutils_ip_test
     PRIVATE 
-    ${ccutils_akigo_INCLUDE_DIRS}
+    ${ccutils_ip_INCLUDE_DIRS}
+    ${ccutils_logger_INCLUDE_DIRS}
+    ${ccutils_test_suite_tool_INCLUDE_DIRS}
     )
 

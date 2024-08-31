@@ -463,14 +463,14 @@ IPv4_shared IPv4::create()
     return ret;
 }
 
-IPv4_shared createFromArray(std::array<std::uint8_t, 4> arr)
+IPv4_shared IPv4::createFromArray(const std::array<std::uint8_t, 4> &arr)
 {
     auto ret = IPv4::create();
     ret->setFromArray(arr);
     return ret;
 }
 
-std::tuple<IPv4_shared, error_ptr> createFromVector(std::vector<std::uint8_t> vec)
+std::tuple<IPv4_shared, error_ptr> IPv4::createFromVector(const std::vector<std::uint8_t> &vec)
 {
     auto ret = IPv4::create();
     auto err = ret->setFromVector(vec);
@@ -482,19 +482,56 @@ std::tuple<IPv4_shared, error_ptr> createFromVector(std::vector<std::uint8_t> ve
     return {ret, nullptr};
 }
 
-std::tuple<IPv4_shared, error_ptr> createFromString(UString text)
+std::tuple<IPv4_shared, error_ptr> IPv4::createFromString(const UString &val)
+{
+    auto ret = IPv4::create();
+    auto err = ret->setFromString(val);
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {ret, nullptr};
+}
+
+void IPv4::setFromArray(const std::array<std::uint8_t, 4> &arr)
+{
+    buff = arr;
+}
+
+error_ptr IPv4::setFromVector(const std::vector<std::uint8_t> &vec)
+{
+    if (vec.size() != 4)
+    {
+        return wayround_i2p::ccutils::errors::New("invalid vector size");
+    }
+
+    for (std::size_t i = 0; i != 4; i++)
+    {
+        buff[i] = vec[i];
+    }
+
+    return nullptr;
+}
+
+error_ptr IPv4::setFromString(const UString &val)
 {
     auto pat = IPv4_STR_PATTERN();
-    auto res = pat->match(text);
+    auto res = pat->match(val);
 
     if (res->error)
     {
-        return {nullptr, res->error};
+        return res->error;
     }
 
     if (!res->matched)
     {
-        return {nullptr, nullptr};
+        return wayround_i2p::ccutils::errors::New("no match");
+    }
+
+    if (res->match_end != val.length())
+    {
+        return wayround_i2p::ccutils::errors::New("no match");
     }
 
     std::array<std::uint8_t, 4> tmp;
@@ -505,17 +542,17 @@ std::tuple<IPv4_shared, error_ptr> createFromString(UString text)
 
         if (!res2)
         {
-            return {nullptr, "no match"};
+            return wayround_i2p::ccutils::errors::New("no match");
         }
 
         if (res2->error)
         {
-            return {nullptr, res2->error};
+            return res2->error;
         }
 
         if (!res2->matched)
         {
-            return {nullptr, "no match"};
+            return wayround_i2p::ccutils::errors::New("no match");
         }
 
         auto x = res2->getMatchedString();
@@ -525,14 +562,270 @@ std::tuple<IPv4_shared, error_ptr> createFromString(UString text)
         }
         catch (std::invalid_argument const &ex)
         {
-            return {nullptr, wayround_i2p::ccutils::errors::New("invalid_argument")};
+            return wayround_i2p::ccutils::errors::New("invalid_argument");
         }
         catch (std::out_of_range const &ex)
         {
-            return {nullptr, wayround_i2p::ccutils::errors::New("out_of_range")};
+            return wayround_i2p::ccutils::errors::New("out_of_range");
         }
     }
-    return createFromArray(tmp);
+    setFromArray(tmp);
+    return nullptr;
+}
+
+UString IPv4::toString() const
+{
+    return std::format("{}.{}.{}.{}", buff[0], buff[1], buff[2], buff[3]);
+}
+
+std::array<std::uint8_t, 4> IPv4::toArray() const
+{
+    return buff;
+}
+
+std::vector<std::uint8_t> IPv4::toVector() const
+{
+    std::vector<std::uint8_t> ret(4);
+    for (std::size_t i = 0; i != 4; i++)
+    {
+        ret[i] = buff[i];
+    }
+    return ret;
+}
+
+IPv4::IPv4()
+{
+}
+
+IPv4::~IPv4()
+{
+}
+
+IPv6_shared IPv6::create()
+{
+    auto ret     = IPv6_shared(new IPv6());
+    ret->own_ptr = ret;
+    return ret;
+}
+
+IPv6_shared IPv6::createFromArray(const std::array<std::uint8_t, 16> &arr)
+{
+    auto ret = IPv6::create();
+    ret->setFromArray(arr);
+    return ret;
+}
+
+IPv6_shared IPv6::createFromArray(const std::array<std::uint16_t, 8> &arr)
+{
+    auto ret = IPv6::create();
+    ret->setFromArray(arr);
+    return ret;
+}
+
+std::tuple<IPv6_shared, error_ptr> IPv6::createFromVector(const std::vector<std::uint8_t> &vec)
+{
+    auto ret = IPv6::create();
+    auto err = ret->setFromVector(vec);
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {ret, nullptr};
+}
+
+std::tuple<IPv6_shared, error_ptr> IPv6::createFromVector(const std::vector<std::uint16_t> &vec)
+{
+    auto ret = IPv6::create();
+    auto err = ret->setFromVector(vec);
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {ret, nullptr};
+}
+
+std::tuple<IPv6_shared, error_ptr> IPv6::createFromString(const UString &text)
+{
+    auto ret = IPv6::create();
+    auto err = ret->setFromString(text);
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {ret, nullptr};
+}
+
+void IPv6::setFromArray(const std::array<std::uint8_t, 16> &arr)
+{
+    buff = arr;
+}
+
+void IPv6::setFromArray(const std::array<std::uint16_t, 8> &arr)
+{
+    for (std::size_t i = 0; i != 16; i++)
+    {
+        buff[i] = ((std::uint8_t *)arr.data())[i];
+    }
+}
+
+error_ptr IPv6::setFromVector(const std::vector<std::uint8_t> &vec)
+{
+    if (vec.size() != 16)
+    {
+        return wayround_i2p::ccutils::errors::New("invalid vector size");
+    }
+
+    for (std::size_t i = 0; i != 16; i++)
+    {
+        buff[i] = vec[i];
+    }
+}
+
+error_ptr IPv6::setFromVector(const std::vector<std::uint16_t> &vec)
+{
+    if (vec.size() != 8)
+    {
+        return wayround_i2p::ccutils::errors::New("invalid vector size");
+    }
+
+    for (std::size_t i = 0; i != 16; i++)
+    {
+        buff[i] = ((std::uint8_t *)vec.data())[i];
+    }
+}
+
+error_ptr IPv6::setFromString(const UString &text)
+{
+    // todo: todo
+    return nullptr;
+}
+
+UString IPv6::toString(bool long_particle) const
+{
+    return toStringShort();
+}
+
+UString IPv6::toStringLong(bool long_particle) const
+{
+    UString ret;
+    for (std::size_t i = 0; i < 16; i += (long_particle ? 2 : 1))
+    {
+        ret += std::to_string(buff[i]);
+        if (i < 15)
+        {
+            ret += ":";
+        }
+    }
+    return ret;
+}
+
+UString IPv6::toStringShort(bool long_particle) const
+{
+    struct zeroes_slice
+    {
+        std::size_t start;
+        std::size_t length;
+    };
+
+    std::deque<zeroes_slice> slices;
+
+    bool        zeroes_slice_started = false;
+    std::size_t zeroes_slice_i       = -1;
+
+    auto search_slices
+        = [&]<
+              typename ParticleType,
+              char particle_count>() -> void
+    {
+        auto buff_t = (ParticleType *)(buff.data());
+        for (std::size_t i = 0; i < particle_count; i++)
+        {
+            if (buff_t[i] == 0)
+            {
+                if (zeroes_slice_started)
+                {
+                    auto &x = slices[zeroes_slice_i];
+                    x.length++;
+                }
+                else
+                {
+                    zeroes_slice_i++;
+                    slices.push_back(zeroes_slice{i, 1});
+                    zeroes_slice_started = true;
+                }
+            }
+            else
+            {
+                if (zeroes_slice_started)
+                {
+                    zeroes_slice_started = false;
+                }
+            }
+        }
+    };
+
+    if (long_particle)
+    {
+        search_slices.operator()<std::uint16_t, 8>();
+    }
+    else
+    {
+        search_slices.operator()<std::uint8_t, 16>();
+    }
+
+    if (slices.size() == 0)
+    {
+        return toStringLong(long_particle);
+    }
+#error "continue here"
+}
+
+std::array<std::uint8_t, 16> IPv6::toArray() const
+{
+}
+
+std::vector<std::uint8_t> IPv6::toVector() const
+{
+}
+
+void IPv6::setIPv4Comb(bool val)
+{
+    ipv4_comb = val;
+}
+
+void IPv6::setIPv4Comb(const IPv4_shared &comb_part)
+{
+    auto arr = comb_part->toArray();
+    for (std::size_t i = 0; i != 4; i++)
+    {
+        buff[i + 12] = arr[i];
+    }
+}
+
+bool IPv6::isIPv4Comb() const
+{
+    return ipv4_comb;
+}
+
+IPv4_shared IPv6::getIPv4Comb() const
+{
+    std::array<std::uint8_t, 4> arr;
+    for (std::size_t i = 0; i != 4; i++)
+    {
+        arr[i] = buff[i + 12];
+    }
+    return IPv4::createFromArray(arr);
+}
+
+IPv6::IPv6()
+{
+}
+
+IPv6::~IPv6()
+{
 }
 
 } // namespace wayround_i2p::ccutils::ip

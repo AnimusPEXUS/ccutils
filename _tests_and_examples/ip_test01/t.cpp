@@ -17,7 +17,9 @@ int main(int argc, char **args)
         params.uri    = "https://github.com/AnimusPEXUS/ccutils";
         params.logger = logger;
 
+        params.AddTest(main_000_i);
         params.AddTest(main_001_i);
+        params.AddTest(main_002_i);
     }
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);

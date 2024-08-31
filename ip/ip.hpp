@@ -266,13 +266,13 @@ class IPv4
   public:
     static IPv4_shared create();
 
-    static IPv4_shared                        createFromArray(std::array<std::uint8_t, 4> arr);
-    static std::tuple<IPv4_shared, error_ptr> createFromVector(std::vector<std::uint8_t> vec);
-    static std::tuple<IPv4_shared, error_ptr> createFromString(UString text);
+    static IPv4_shared                        createFromArray(const std::array<std::uint8_t, 4> &arr);
+    static std::tuple<IPv4_shared, error_ptr> createFromVector(const std::vector<std::uint8_t> &vec);
+    static std::tuple<IPv4_shared, error_ptr> createFromString(const UString &val);
 
-    void      setFromArray(std::array<std::uint8_t, 4> arr);
-    error_ptr setFromVector(std::vector<std::uint8_t> vec);
-    error_ptr setFromString(UString val);
+    void      setFromArray(const std::array<std::uint8_t, 4> &arr);
+    error_ptr setFromVector(const std::vector<std::uint8_t> &vec);
+    error_ptr setFromString(const UString &val);
 
     UString                     toString() const;
     std::array<std::uint8_t, 4> toArray() const;
@@ -299,24 +299,26 @@ class IPv6
   public:
     static IPv6_shared create();
 
-    static IPv6_shared                        createFromArray(std::array<std::uint8_t, 16> arr);
-    static IPv6_shared                        createFromArray(std::array<std::uint16_t, 8> arr);
-    static std::tuple<IPv6_shared, error_ptr> createFromVector(std::vector<std::uint8_t> vec, bool ipv4_comb = false);
-    static std::tuple<IPv6_shared, error_ptr> createFromVector(std::vector<std::uint16_t> vec, bool ipv4_comb = false);
-    static std::tuple<IPv6_shared, error_ptr> createFromString(UString text);
+    static IPv6_shared                        createFromArray(const std::array<std::uint8_t, 16> &arr);
+    static IPv6_shared                        createFromArray(const std::array<std::uint16_t, 8> &arr);
+    static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint8_t> &vec);
+    static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint16_t> &vec);
+    static std::tuple<IPv6_shared, error_ptr> createFromString(const UString &text);
 
-    void        setFromArray(std::array<std::uint8_t, 16> arr);
-    IPv6_shared setFromArray(std::array<std::uint16_t, 8> arr);
-    error_ptr   setFromVector(std::vector<std::uint8_t> vec);
-    error_ptr   setFromVector(std::vector<std::uint16_t> vec);
-    error_ptr   setFromString(UString text);
+    void      setFromArray(const std::array<std::uint8_t, 16> &arr);
+    void      setFromArray(const std::array<std::uint16_t, 8> &arr);
+    error_ptr setFromVector(const std::vector<std::uint8_t> &vec);
+    error_ptr setFromVector(const std::vector<std::uint16_t> &vec);
+    error_ptr setFromString(const UString &text);
 
-    UString                      toString() const;
+    UString                      toString(bool long_particle = true) const;
+    UString                      toStringLong(bool long_particle = true) const;
+    UString                      toStringShort(bool long_particle = true) const;
     std::array<std::uint8_t, 16> toArray() const;
     std::vector<std::uint8_t>    toVector() const;
 
-    void        setIPv4Comb();
-    void        setIPv4Comb(IPv4_shared comb_part);
+    void        setIPv4Comb(bool val = true);
+    void        setIPv4Comb(const IPv4_shared &comb_part);
     bool        isIPv4Comb() const;
     IPv4_shared getIPv4Comb() const;
 
@@ -329,6 +331,7 @@ class IPv6
   private:
     std::array<std::uint8_t, 16> buff;
     IPv6_weak                    own_ptr;
+    bool                         ipv4_comb = false;
 };
 
 // todo: is this unused?
