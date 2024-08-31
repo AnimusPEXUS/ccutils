@@ -4,6 +4,8 @@
 namespace wayround_i2p::ccutils::ip
 {
 
+/*
+
 std::shared_ptr<IP>
     IP::create()
 {
@@ -121,8 +123,11 @@ error_ptr
     }
 }
 
-error_ptr
-    IP::setFromString(UString text)
+std::tuple<
+    error_ptr,
+
+    >
+    parseString(UString text)
 {
     // todo: todo (requires unicode regexps support in ccutils)
     return {
@@ -445,6 +450,89 @@ IPAndPort::IPAndPort()
 
 IPAndPort::~IPAndPort()
 {
+}
+
+*/
+
+// ------------------------ vv new vv ------------------------
+
+IPv4_shared IPv4::create()
+{
+    auto ret     = IPv4_shared(new IPv4());
+    ret->own_ptr = ret;
+    return ret;
+}
+
+IPv4_shared createFromArray(std::array<std::uint8_t, 4> arr)
+{
+    auto ret = IPv4::create();
+    ret->setFromArray(arr);
+    return ret;
+}
+
+std::tuple<IPv4_shared, error_ptr> createFromVector(std::vector<std::uint8_t> vec)
+{
+    auto ret = IPv4::create();
+    auto err = ret->setFromVector(vec);
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {ret, nullptr};
+}
+
+std::tuple<IPv4_shared, error_ptr> createFromString(UString text)
+{
+    auto pat = IPv4_STR_PATTERN();
+    auto res = pat->match(text);
+
+    if (res->error)
+    {
+        return {nullptr, res->error};
+    }
+
+    if (!res->matched)
+    {
+        return {nullptr, nullptr};
+    }
+
+    std::array<std::uint8_t, 4> tmp;
+
+    for (unsigned char i = 0; i != 4; i++)
+    {
+        auto res2 = res->searchSubmatchByPatternName(std::to_string(i + 1));
+
+        if (!res2)
+        {
+            return {nullptr, "no match"};
+        }
+
+        if (res2->error)
+        {
+            return {nullptr, res2->error};
+        }
+
+        if (!res2->matched)
+        {
+            return {nullptr, "no match"};
+        }
+
+        auto x = res2->getMatchedString();
+        try
+        {
+            tmp[i] = std::stoi(x);
+        }
+        catch (std::invalid_argument const &ex)
+        {
+            return {nullptr, wayround_i2p::ccutils::errors::New("invalid_argument")};
+        }
+        catch (std::out_of_range const &ex)
+        {
+            return {nullptr, wayround_i2p::ccutils::errors::New("out_of_range")};
+        }
+    }
+    return createFromArray(tmp);
 }
 
 } // namespace wayround_i2p::ccutils::ip

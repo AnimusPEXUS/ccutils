@@ -273,6 +273,9 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     Result_shared operator[](UString name) const;
     Result_shared operator[](std::size_t index) const;
 
+    // recurcive search
+    Result_shared searchSubmatchByPatternName(UString name) const;
+
     UString repr_as_text() const;
     UString repr_as_text(const Result_repr_as_text_opts &opts) const;
 

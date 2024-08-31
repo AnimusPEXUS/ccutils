@@ -647,6 +647,28 @@ Result_shared Result::operator[](std::size_t index) const
     return getSubmatchByIndex(index);
 }
 
+Result_shared Result::searchSubmatchByPatternName(UString name) const
+{
+    for (auto i : submatches)
+    {
+        if (i->corresponding_pattern->name == name)
+        {
+            return i;
+        }
+    }
+
+    for (auto i : submatches)
+    {
+        auto r = i->searchSubmatchByPatternName(name);
+        if (r != nullptr)
+        {
+            return r;
+        }
+    }
+
+    return nullptr;
+}
+
 UString Result::repr_as_text() const
 {
     return repr_as_text(Result_repr_as_text_opts(false));
@@ -1472,7 +1494,6 @@ const Result_shared match_single(
     return ret;
 }
 
-// note: if min is not set - it's assumed equal to max
 const Result_shared match(
     const Pattern_shared pattern,
     const UString       &subject,

@@ -1,3 +1,5 @@
+#include <csignal>
+
 #include <wayround_i2p/ccutils/ip/ip.hpp>
 
 namespace regexp = wayround_i2p::ccutils::regexp;
@@ -39,20 +41,25 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_001(
 
         for (
             auto &j :
-            std::vector<std::tuple<std::function<regexp::Pattern_shared()>, UString>>{
-                {ip::IPv4_STR_PATTERN, "IPv4_STR_PATTERN"},
-                {ip::IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN"},
-                {ip::IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN"},
-                {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN, "IPv6_SHORT_GRP_HEX_STR_PATTERN"},
-                {ip::IP_STR_PATTERN, "IP_STR_PATTERN"},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr_or_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr_or_port)"},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr)"},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_port)"},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr_or_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_cidr_or_port)"},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_cidr)"},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_port)"},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_only), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_only)"
-                }
+            std::vector<
+                std::tuple<
+                    std::function<regexp::Pattern_shared()>, // get regexp to test
+                    UString,                                 // title
+                    bool                                     // call debugger
+                    >>{
+                {ip::IP_STR_PATTERN, "IP_STR_PATTERN", false},
+                {ip::IPv4_STR_PATTERN, "IPv4_STR_PATTERN", false},
+                {ip::IPv6_STR_PATTERN, "IPv6_STR_PATTERN", false},
+                {ip::IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN", false},
+                {ip::IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN", false},
+                {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN, "IPv6_SHORT_GRP_HEX_STR_PATTERN", false},
+                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr_or_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr_or_port)", false},
+                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr)", false},
+                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_port)", false},
+                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr_or_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_cidr_or_port)", false},
+                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_cidr)", false},
+                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_port)", false},
+                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_only), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_only)", false}
         }
         )
         {
@@ -60,6 +67,14 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_001(
                 wayround_i2p::ccutils::logger::Status,
                 std::format(" {}", std::get<1>(j))
             );
+
+            /*
+                if (std::get<2>(j))
+                {
+                    std::raise(SIGUSR1);
+                }
+            */
+
             auto res = (std::get<0>(j))()->match(i);
 
             if (res->error)

@@ -22,7 +22,7 @@ constexpr regexp::Pattern_shared PORT_STR_PATTERN()
         = regexp::Pattern::newSequence(
             {regexp::Pattern::newExactChar(":"),
              regexp::Pattern::newCharIsDigit()
-                 ->setName("port_num")
+                 ->setName("number")
                  ->setMinCount(1)
                  ->unsetMaxCount()
             }
@@ -36,7 +36,7 @@ constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
         = regexp::Pattern::newSequence(
             {regexp::Pattern::newExactChar("/"),
              regexp::Pattern::newCharIsDigit()
-                 ->setName("cidr_num")
+                 ->setName("number")
                  ->setMinCount(1)
                  ->unsetMaxCount()
             }
@@ -79,7 +79,7 @@ constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
               {regexp::Pattern::newSequence(
                    {regexp::Pattern::newCharIsXDigit()
                         ->setMinMaxCount(1, 4)
-                        ->setName("num"),
+                        ->setName("number"),
                     regexp::Pattern::newExactChar(":")
                         ->setMinMaxCount(1, 1)
                    }
@@ -103,7 +103,7 @@ constexpr regexp::Pattern_shared IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN()
               {regexp::Pattern::newSequence(
                    {regexp::Pattern::newCharIsXDigit()
                         ->setMinMaxCount(1, 2)
-                        ->setName("num"),
+                        ->setName("number"),
                     regexp::Pattern::newExactChar(":")
                         ->setMinMaxCount(1, 1)}
                )
@@ -111,7 +111,7 @@ constexpr regexp::Pattern_shared IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN()
                    ->setName("numbers"),
                regexp::Pattern::newCharIsXDigit()
                    ->setMinMaxCount(1, 2)
-                   ->setName("15")}
+                   ->setName("number")}
         )
               ->setName("IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN");
     return ret;
@@ -121,23 +121,20 @@ constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
 {
     auto ret
         = regexp::Pattern::newSequence(
-              {
-                  regexp::Pattern::newSequence(
-                      {regexp::Pattern::newCharIsXDigit()
-                           ->setMinMaxCount(0, 4),
-                       regexp::Pattern::newExactChar(":")
-                      }
-                  )
-                      ->setMinCount(1)
-                      ->setMaxCount(8),
-                  regexp::Pattern::newSequence(
-                      {regexp::Pattern::newExactChar(":"),
-                       regexp::Pattern::newCharIsXDigit()
-                           ->setMinMaxCount(0, 4)
-                      }
-                  )
-                      ->setMinCount(1)
-                      ->setMaxCount(8),
+              {regexp::Pattern::newSequence(
+                   {regexp::Pattern::newCharIsXDigit()
+                        ->setMinMaxCount(0, 4)
+                        ->setName("number"),
+                    regexp::Pattern::newExactChar(":")
+                        ->setMinCount(1)
+                        ->setMaxCount(2)
+                   }
+               )
+                   ->setMinCount(1)
+                   ->setMaxCount(8),
+               regexp::Pattern::newCharIsXDigit()
+                   ->setMinMaxCount(0, 4)
+                   ->setName("number")
               }
         )
               ->setName("IPv6_SHORT_GRP_HEX_STR_PATTERN");
@@ -259,137 +256,153 @@ constexpr regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
     return ret;
 }
 
-class IP
+class IPv4;
+
+using IPv4_shared = std::shared_ptr<IPv4>;
+using IPv4_weak   = std::weak_ptr<IPv4>;
+
+class IPv4
 {
   public:
-    static std::shared_ptr<IP>
-        create();
+    static IPv4_shared create();
 
-    static std::tuple<std::shared_ptr<IP>, error_ptr>
-        createFromArray(std::array<std::uint8_t, 4> arr);
+    static IPv4_shared                        createFromArray(std::array<std::uint8_t, 4> arr);
+    static std::tuple<IPv4_shared, error_ptr> createFromVector(std::vector<std::uint8_t> vec);
+    static std::tuple<IPv4_shared, error_ptr> createFromString(UString text);
 
-    static std::tuple<std::shared_ptr<IP>, error_ptr>
-        createFromArray(std::array<std::uint8_t, 16> arr);
+    void      setFromArray(std::array<std::uint8_t, 4> arr);
+    error_ptr setFromVector(std::vector<std::uint8_t> vec);
+    error_ptr setFromString(UString val);
 
-    static std::tuple<std::shared_ptr<IP>, error_ptr>
-        createFromArray(std::array<std::uint16_t, 8> arr);
-
-    static std::tuple<std::shared_ptr<IP>, error_ptr>
-        createFromVector(std::vector<std::uint8_t> vec);
-
-    static std::tuple<std::shared_ptr<IP>, error_ptr>
-        createFromVector(std::vector<std::uint16_t> vec);
-
-    static std::tuple<std::shared_ptr<IP>, error_ptr>
-        createFromString(UString text);
-
-    error_ptr
-        setFromArray(std::array<std::uint8_t, 4> arr);
-    error_ptr
-        setFromArray(std::array<std::uint8_t, 16> arr);
-    error_ptr
-        setFromArray(std::array<std::uint16_t, 8> arr);
-    error_ptr
-        setFromVector(std::vector<std::uint8_t> vec);
-    error_ptr
-        setFromVector(std::vector<std::uint16_t> vec);
-    error_ptr
-        setFromString(UString text);
-
-    bool
-        isSet();
-
-    // get bytes size
-    std::tuple<int, error_ptr>
-        getSize();
-    std::tuple<int, error_ptr>
-        getVer();
-
-    std::tuple<UString, error_ptr>
-        toString();
-    std::tuple<UString, error_ptr>
-        to4String();
-    std::tuple<UString, error_ptr>
-        to6String();
+    UString                     toString() const;
+    std::array<std::uint8_t, 4> toArray() const;
+    std::vector<std::uint8_t>   toVector() const;
 
   protected:
-    IP();
+    IPv4();
 
   public:
-    ~IP();
+    ~IPv4();
 
   private:
-    std::vector<std::uint8_t> buff;
+    std::array<std::uint8_t, 4> buff;
+    IPv4_weak                   own_ptr;
 };
 
-class Port
+class IPv6;
+
+using IPv6_shared = std::shared_ptr<IPv6>;
+using IPv6_weak   = std::weak_ptr<IPv6>;
+
+class IPv6
 {
   public:
-    static std::shared_ptr<Port>
-        create();
+    static IPv6_shared create();
 
-    static std::tuple<std::shared_ptr<Port>, error_ptr>
-        createFromUInt16(std::uint16_t port);
+    static IPv6_shared                        createFromArray(std::array<std::uint8_t, 16> arr);
+    static IPv6_shared                        createFromArray(std::array<std::uint16_t, 8> arr);
+    static std::tuple<IPv6_shared, error_ptr> createFromVector(std::vector<std::uint8_t> vec, bool ipv4_comb = false);
+    static std::tuple<IPv6_shared, error_ptr> createFromVector(std::vector<std::uint16_t> vec, bool ipv4_comb = false);
+    static std::tuple<IPv6_shared, error_ptr> createFromString(UString text);
 
-    static std::tuple<std::shared_ptr<Port>, error_ptr>
-        createFromString(UString text);
+    void        setFromArray(std::array<std::uint8_t, 16> arr);
+    IPv6_shared setFromArray(std::array<std::uint16_t, 8> arr);
+    error_ptr   setFromVector(std::vector<std::uint8_t> vec);
+    error_ptr   setFromVector(std::vector<std::uint16_t> vec);
+    error_ptr   setFromString(UString text);
 
-    error_ptr
-        setFromUInt16(std::uint16_t port);
-    error_ptr
-        setFromString(UString text);
+    UString                      toString() const;
+    std::array<std::uint8_t, 16> toArray() const;
+    std::vector<std::uint8_t>    toVector() const;
 
-    std::tuple<UString, error_ptr> toString();
+    void        setIPv4Comb();
+    void        setIPv4Comb(IPv4_shared comb_part);
+    bool        isIPv4Comb() const;
+    IPv4_shared getIPv4Comb() const;
 
   protected:
-    Port();
+    IPv6();
 
   public:
-    ~Port();
+    ~IPv6();
 
   private:
+    std::array<std::uint8_t, 16> buff;
+    IPv6_weak                    own_ptr;
+};
+
+// todo: is this unused?
+enum class IPCombine_mode : unsigned char
+{
+    v4,
+    v6
+};
+
+template <typename T>
+concept IPvType = (std::same_as<T, IPv4> || std::same_as<T, IPv6>);
+
+template <IPvType T>
+struct IPCombine_parts
+{
+    IPCombine_mode     mode;
+    std::shared_ptr<T> addr;
+    bool               has_port;
+    std::uint16_t      port;
+    std::shared_ptr<T> mask;
+    bool               has_cidr;
+    std::uint16_t      cidr;
+};
+
+template <IPvType T>
+class IPCombine;
+
+template <IPvType T>
+using IPCombine_shared = std::shared_ptr<IPCombine<T>>;
+
+template <IPvType T>
+using IPCombine_weak = std::weak_ptr<IPCombine<T>>;
+
+template <IPvType T>
+class IPCombine
+{
+  public:
+    static IPCombine_shared<T> createFromParts(
+        IPCombine_parts<T> &parts
+    );
+
+    void setIP(T val);
+    void setPort(std::uint16_t val);
+    void setCIDR(std::uint16_t);
+
+    void delIP();
+    void delPort();
+    void delCIDR();
+
+    bool hasIP();
+    bool hasPort();
+    bool hasCIDR();
+
+    T             getIP() const;
+    std::uint16_t getPort() const;
+    std::uint16_t getCIDR() const;
+
+  protected:
+    IPCombine();
+
+  public:
+    ~IPCombine();
+
+  private:
+    IPCombine_weak<T> own_ptr;
+
+    std::shared_ptr<T> ip;
+
+    bool has_port;
+    bool has_cidr;
+
     std::uint16_t port;
-};
-
-class IPAndPort
-{
-  public:
-    static std::shared_ptr<IPAndPort>
-        create();
-
-    static std::tuple<std::shared_ptr<IPAndPort>, error_ptr>
-        createFromString(UString text);
-
-    error_ptr
-        setFromString(UString text);
-
-    error_ptr
-        setIP(std::shared_ptr<IP> ip);
-    error_ptr
-        setPort(std::shared_ptr<Port> port);
-
-    std::shared_ptr<IP>
-        getIP();
-    std::shared_ptr<Port>
-        getPort();
-
-    void
-        delIP();
-    void
-        delPort();
-
-    std::tuple<UString, error_ptr>
-        toString();
-
-  protected:
-    IPAndPort();
-
-  public:
-    ~IPAndPort();
-
-  private:
-    std::shared_ptr<IP>   ip;
-    std::shared_ptr<Port> port;
+    // todo: type? - make variable type depending on template?
+    std::uint16_t cidr;
 };
 
 } // namespace wayround_i2p::ccutils::ip
