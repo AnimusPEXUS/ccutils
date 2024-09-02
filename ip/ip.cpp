@@ -665,6 +665,8 @@ void IPv6::setFromArray(const std::array<std::uint8_t, 16> &arr)
 
 void IPv6::setFromArray(const std::array<std::uint16_t, 8> &arr)
 {
+    // todo: check this is correct in different endianneses
+
     for (std::size_t i = 0; i != 16; i++)
     {
         buff[i] = ((std::uint8_t *)arr.data())[i];
@@ -682,6 +684,8 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint8_t> &vec)
     {
         buff[i] = vec[i];
     }
+
+    return nullptr;
 }
 
 error_ptr IPv6::setFromVector(const std::vector<std::uint16_t> &vec)
@@ -691,20 +695,31 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint16_t> &vec)
         return wayround_i2p::ccutils::errors::New("invalid vector size");
     }
 
+    // todo: check this is correct in different endianneses
+
     for (std::size_t i = 0; i != 16; i++)
     {
         buff[i] = ((std::uint8_t *)vec.data())[i];
     }
+
+    return nullptr;
 }
 
 error_ptr IPv6::setFromString(const UString &text)
 {
     // todo: todo
+    for (std::size_t i = 0; i != 16; i++)
+    {
+        buff[i] = i;
+    }
     return nullptr;
 }
 
 UString IPv6::toString(bool long_particle) const
 {
+if (long_particle)
+{
+}
     return toStringShort();
 }
 
@@ -735,12 +750,16 @@ UString IPv6::toStringShort(bool long_particle) const
     bool        zeroes_slice_started = false;
     std::size_t zeroes_slice_i       = -1;
 
+    // todo: check this is correct in different endianneses
+
     auto search_slices
         = [&]<
               typename ParticleType,
-              char particle_count>() -> void
+              char particle_count>()
+        -> void
     {
         auto buff_t = (ParticleType *)(buff.data());
+
         for (std::size_t i = 0; i < particle_count; i++)
         {
             if (buff_t[i] == 0)
@@ -780,15 +799,100 @@ UString IPv6::toStringShort(bool long_particle) const
     {
         return toStringLong(long_particle);
     }
-#error "continue here"
+
+    zeroes_slice *longest = &(slices[0]);
+
+    for (std::size_t i = 1; i < slices.size(); i++)
+    {
+        if (slices[i].length > (*longest).length)
+        {
+            longest = &(slices[i]);
+        }
+    }
+
+    zeroes_slice &longest_np = *longest;
+
+    UString ret;
+
+    // todo: check this is correct in different endianneses
+
+    auto format_slices
+        = [&]<
+              typename ParticleType,
+              char particle_count>()
+        -> void
+    {
+        auto buff_t = (ParticleType *)(buff.data());
+
+        for (
+            std::size_t i = 0;
+            i < longest_np.start;
+            i++
+        )
+        {
+            ret += std::vformat("{:x}", std::make_format_args(buff_t[i]));
+            ret += ":";
+        }
+
+        for (
+            std::size_t i = longest_np.start + longest_np.length;
+            i < particle_count;
+            i++
+        )
+        {
+            ret += ":";
+            ret += std::vformat("{:x}", std::make_format_args(buff_t[i]));
+        }
+    };
+
+    if (long_particle)
+    {
+        format_slices.operator()<std::uint16_t, 8>();
+    }
+    else
+    {
+        format_slices.operator()<std::uint8_t, 16>();
+    }
+    return ret;
 }
 
-std::array<std::uint8_t, 16> IPv6::toArray() const
+std::array<std::uint8_t, 16> IPv6::toArray8() const
 {
+    return buff;
 }
 
-std::vector<std::uint8_t> IPv6::toVector() const
+std::array<std::uint16_t, 8> IPv6::toArray16() const
 {
+    // todo: check this is correct in different endianneses
+    std::array<std::uint16_t, 8> ret;
+    auto                         buff_t = (std::uint8_t *)(ret.data());
+    for (std::size_t i = 0; i != 16; i++)
+    {
+        buff_t[i] = buff[i];
+    }
+    return ret;
+}
+
+std::vector<std::uint8_t> IPv6::toVector8() const
+{
+    std::vector<std::uint8_t> ret(16);
+    for (std::size_t i = 0; i != 16; i++)
+    {
+        ret[i] = buff[i];
+    }
+    return ret;
+}
+
+std::vector<std::uint16_t> IPv6::toVector16() const
+{
+    // todo: check this is correct in different endianneses
+    std::vector<std::uint16_t> ret(8);
+    auto                       buff_t = (std::uint8_t *)(ret.data());
+    for (std::size_t i = 0; i != 16; i++)
+    {
+        buff_t[i] = buff[i];
+    }
+    return ret;
 }
 
 void IPv6::setIPv4Comb(bool val)

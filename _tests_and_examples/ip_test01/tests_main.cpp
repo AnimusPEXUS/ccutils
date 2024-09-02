@@ -320,7 +320,18 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
 
         logger->Log(
             wayround_i2p::ccutils::logger::Success,
-            std::format("  + parsed: {}", res->toString())
+            std::format(
+                R"---(  + parsed: 
+      short (long  part)  {}
+      short (short  part) {}
+      long  (long part)   {}
+      long  (short part)  {}
+)---",
+                res->toStringShort(true),
+                res->toStringShort(false),
+                res->toStringLong(true),
+                res->toStringLong(false)
+            )
         );
     }
 

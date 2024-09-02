@@ -314,8 +314,10 @@ class IPv6
     UString                      toString(bool long_particle = true) const;
     UString                      toStringLong(bool long_particle = true) const;
     UString                      toStringShort(bool long_particle = true) const;
-    std::array<std::uint8_t, 16> toArray() const;
-    std::vector<std::uint8_t>    toVector() const;
+    std::array<std::uint8_t, 16> toArray8() const;
+    std::array<std::uint16_t, 8> toArray16() const;
+    std::vector<std::uint8_t>    toVector8() const;
+    std::vector<std::uint16_t>   toVector16() const;
 
     void        setIPv4Comb(bool val = true);
     void        setIPv4Comb(const IPv4_shared &comb_part);
