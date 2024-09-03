@@ -96,27 +96,6 @@ constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
     return ret;
 }
 
-constexpr regexp::Pattern_shared IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newSequence(
-              {regexp::Pattern::newSequence(
-                   {regexp::Pattern::newCharIsXDigit()
-                        ->setMinMaxCount(1, 2)
-                        ->setName("number"),
-                    regexp::Pattern::newExactChar(":")
-                        ->setMinMaxCount(1, 1)}
-               )
-                   ->setMinMaxCount(15, 15)
-                   ->setName("numbers"),
-               regexp::Pattern::newCharIsXDigit()
-                   ->setMinMaxCount(1, 2)
-                   ->setName("number")}
-        )
-              ->setName("IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN");
-    return ret;
-}
-
 constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
 {
     auto ret
@@ -151,7 +130,7 @@ constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
                    ->unsetMinCount(),
                regexp::Pattern::newOrGroup(
                    {/* long 1 byte */
-                    IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN(),
+                    // IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN(),
                     /* long 2 byte */
                     IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN(),
                     /* short */
@@ -294,6 +273,13 @@ class IPv6;
 using IPv6_shared = std::shared_ptr<IPv6>;
 using IPv6_weak   = std::weak_ptr<IPv6>;
 
+union IPv6_array
+{
+    std::array<std::uint8_t, 16> b8;
+    std::array<std::uint16_t, 8> b16;
+    std::array<std::uint32_t, 4> b32;
+};
+
 class IPv6
 {
   public:
@@ -301,23 +287,29 @@ class IPv6
 
     static IPv6_shared                        createFromArray(const std::array<std::uint8_t, 16> &arr);
     static IPv6_shared                        createFromArray(const std::array<std::uint16_t, 8> &arr);
+    static IPv6_shared                        createFromArray(const std::array<std::uint32_t, 4> &arr);
+    static IPv6_shared                        createFromArray(const IPv6_array &arr);
     static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint8_t> &vec);
     static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint16_t> &vec);
+    static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint32_t> &vec);
     static std::tuple<IPv6_shared, error_ptr> createFromString(const UString &text);
 
     void      setFromArray(const std::array<std::uint8_t, 16> &arr);
     void      setFromArray(const std::array<std::uint16_t, 8> &arr);
+    void      setFromArray(const std::array<std::uint32_t, 4> &arr);
+    void      setFromArray(const IPv6_array &arr);
     error_ptr setFromVector(const std::vector<std::uint8_t> &vec);
     error_ptr setFromVector(const std::vector<std::uint16_t> &vec);
+    error_ptr setFromVector(const std::vector<std::uint32_t> &vec);
     error_ptr setFromString(const UString &text);
 
-    UString                      toString(bool long_particle = true) const;
-    UString                      toStringLong(bool long_particle = true) const;
-    UString                      toStringShort(bool long_particle = true) const;
-    std::array<std::uint8_t, 16> toArray8() const;
-    std::array<std::uint16_t, 8> toArray16() const;
-    std::vector<std::uint8_t>    toVector8() const;
-    std::vector<std::uint16_t>   toVector16() const;
+    IPv6_array                 toArray() const;
+    std::vector<std::uint8_t>  toVector8() const;
+    std::vector<std::uint16_t> toVector16() const;
+    std::vector<std::uint32_t> toVector32() const;
+    UString                    toString() const;
+    UString                    toStringLong() const;
+    UString                    toStringShort() const;
 
     void        setIPv4Comb(bool val = true);
     void        setIPv4Comb(const IPv4_shared &comb_part);
@@ -331,9 +323,9 @@ class IPv6
     ~IPv6();
 
   private:
-    std::array<std::uint8_t, 16> buff;
-    IPv6_weak                    own_ptr;
-    bool                         ipv4_comb = false;
+    IPv6_array buff;
+    IPv6_weak  own_ptr;
+    bool       ipv4_comb = false;
 };
 
 // todo: is this unused?

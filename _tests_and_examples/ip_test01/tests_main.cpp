@@ -188,7 +188,6 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_001(
                 {ip::IPv4_STR_PATTERN, "IPv4_STR_PATTERN", false},
                 {ip::IPv6_STR_PATTERN, "IPv6_STR_PATTERN", false},
                 {ip::IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN", false},
-                {ip::IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_1BYTE_GRP_HEX_STR_PATTERN", false},
                 {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN, "IPv6_SHORT_GRP_HEX_STR_PATTERN", false},
                 {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr_or_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr_or_port)", false},
                 {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr)", false},
@@ -318,19 +317,15 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
             continue;
         }
 
-        logger->Log(
+        logger->LogSplitLines(
             wayround_i2p::ccutils::logger::Success,
             std::format(
                 R"---(  + parsed: 
-      short (long  part)  {}
-      short (short  part) {}
-      long  (long part)   {}
-      long  (short part)  {}
+      short {}
+      long  {}
 )---",
-                res->toStringShort(true),
-                res->toStringShort(false),
-                res->toStringLong(true),
-                res->toStringLong(false)
+                res->toStringShort(),
+                res->toStringLong()
             )
         );
     }
