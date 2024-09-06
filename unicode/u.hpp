@@ -106,9 +106,11 @@ class UChar : // public UCharPropertiesI,
     UChar();
     UChar(std::int32_t val);
 
+    UChar(char val);
+
     // to make char from string. string length must be exactly 1, else -> exception
-    UChar(const char *std_nullterminated_cstring);
-    UChar(std::string stdstring);
+    // UChar(const char *std_nullterminated_cstring);
+    // UChar(std::string stdstring);
     UChar(UString val);
 
     ~UChar();
@@ -185,11 +187,17 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
   public:
     UString();
 
+    /*
+    UString(const char *val);
+    UString(const std::string &val);
+    */
+
+    UString(const UChar &other);
+
     UString(
         const char *val,
         std::string encoding = "utf-8"
     );
-
     UString(
         const std::string &val,
         std::string        encoding = "utf-8"
@@ -205,7 +213,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     UString center(
         std::size_t width,
-        UChar       fillchar = " "
+        UChar       fillchar = ' '
     ) const;
     UString count(
         UString     sub,
@@ -278,8 +286,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         ssize_t count = -1
     );
 
-    UString ljust(std::size_t width, UString fillchar = " ");
-    UString rjust(std::size_t width, UString fillchar = " ");
+    UString ljust(std::size_t width, UString fillchar = std::string(" "));
+    UString rjust(std::size_t width, UString fillchar = std::string(" "));
 
     std::deque<UString> &split(
         std::deque<UString>     &ret,
@@ -310,10 +318,14 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     UChar operator[](ssize_t offset) const;
     UChar operator[](ssize_t offset1, ssize_t offset2) const;
 
-    UString operator+(UString &other);
+    UString operator+(const UString &other) const;
+    UString operator+(const UChar &chr) const;
 
-    UString &operator+=(UString &other);
-    UString &operator+=(UString &&other);
+    UString &operator+=(const UString &other);
+    UString &operator+=(const UChar &other);
+
+    // UString &operator+=(const  UString &&other) const;
+    // UString &operator+=(const  UChar &&other) const;
 
     operator std::string();
 
@@ -342,6 +354,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
   private:
 #if (CCUTILS_UNICODE_BACKEND == icu)
     icu::UnicodeString data;
+    icu::UnicodeString getData() const;
 #endif
 };
 

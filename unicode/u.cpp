@@ -10,6 +10,7 @@
 namespace wayround_i2p::ccutils::unicode
 {
 
+/*
 UChar::UChar(const char *std_nullterminated_cstring) :
     UChar(UString(std_nullterminated_cstring))
 {
@@ -17,6 +18,12 @@ UChar::UChar(const char *std_nullterminated_cstring) :
 
 UChar::UChar(std::string stdstring) :
     UChar(UString(stdstring))
+{
+}
+*/
+
+UChar::UChar(char val) :
+    UChar((std::int32_t)val)
 {
 }
 
@@ -249,6 +256,23 @@ UString::UString() :
 {
 }
 
+/*
+UString::UString(const char *val) :
+    UString(val, "utf-8")
+{
+}
+
+UString::UString(const std::string &val) :
+    UString(val, "utf-8")
+{
+}
+*/
+
+UString::UString(const UChar &other) :
+    UString(std::vector<UChar>{other})
+{
+}
+
 UString::~UString()
 {
 }
@@ -256,6 +280,33 @@ UString::~UString()
 size_t UString::length() const
 {
     return this->data.length();
+}
+
+UString UString::center(
+    std::size_t width,
+    UChar       fillchar
+) const
+{
+    if (width <= length())
+    {
+        return *this;
+    }
+
+    auto diff1      = length() - width;
+    auto diff1_half = std::size_t(float(diff1) / 2);
+
+    UString new_half_string = "";
+
+    for (std::size_t i = 0; i < diff1_half; i++)
+    {
+        new_half_string += fillchar;
+    }
+
+    UString ret;
+
+    ret = new_half_string + *this + new_half_string;
+
+    return ret;
 }
 
 UString UString::lower() const
@@ -433,9 +484,15 @@ UChar UString::operator[](ssize_t offset1, ssize_t offset2) const
     return substr(offset1, offset2);
 }
 
-UString UString::operator+(UString &other)
+UString UString::operator+(const UString &other) const
 {
-    auto x = data.append(other.data);
+    // todo: bacause of .data usage, this code should be moved to backend
+    // todo: optimizations and improvements required here
+
+    auto od = other.data;
+    auto td = data;
+
+    auto x = td.append(od);
 
     auto z = UString();
     z.data = x;
@@ -443,18 +500,35 @@ UString UString::operator+(UString &other)
     return z;
 }
 
-UString &UString::operator+=(UString &other)
+UString UString::operator+(const UChar &other) const
+{
+    return *this + UString(other);
+}
+
+UString &UString::operator+=(const UString &other)
 {
     data = data.append(other.data);
     return *this;
 }
 
-// todo: is this really functional
-UString &UString::operator+=(UString &&other)
+UString &UString::operator+=(const UChar &other)
 {
-    data = data.append(other.data);
+    data = data.append(UString(other).data);
     return *this;
 }
+
+// todo: is this really functional?
+/*
+UString &UString::operator+=(const UString &&other) const
+{
+    return this + other;
+}
+
+UString &UString::operator+=(const UChar &&other) const
+{
+    return this + UString(other);
+}
+*/
 
 UString::operator std::string()
 {

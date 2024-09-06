@@ -536,7 +536,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_007(
     );
 
     std::deque<wayround_i2p::ccutils::unicode::UString> ts_lines;
-    ts_lines = ts.lines(ts_lines);
+    ts_lines = ts.splitlines(ts_lines);
 
     for (std::size_t i = 0; i != ts_lines.size(); i++)
     {
@@ -765,7 +765,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_010(
 
     logger->LogSplitLines(
         wayround_i2p::ccutils::logger::Status,
-        ip_addr_test_text.toUpper()
+        ip_addr_test_text.upper()
     );
 
     return {true};
