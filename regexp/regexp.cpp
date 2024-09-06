@@ -1122,7 +1122,7 @@ const Result_shared match_single(
 
             if (!pattern->isCaseSensitive())
             {
-                target_char = target_char.toLower();
+                target_char = target_char.lower();
             }
 
             if (start_at == subject_length)
@@ -1135,7 +1135,7 @@ const Result_shared match_single(
 
             if (!pattern->isCaseSensitive())
             {
-                subj_char = subj_char.toLower();
+                subj_char = subj_char.lower();
             }
 
             ret->matched = target_char == subj_char;
@@ -1169,8 +1169,8 @@ const Result_shared match_single(
 
             if (!pattern->isCaseSensitive())
             {
-                target_char0 = target_char0.toLower();
-                target_char1 = target_char1.toLower();
+                target_char0 = target_char0.lower();
+                target_char1 = target_char1.lower();
             }
 
             if (target_char0 > target_char1)
@@ -1192,7 +1192,7 @@ const Result_shared match_single(
 
             if (!pattern->isCaseSensitive())
             {
-                subj_char = subj_char.toLower();
+                subj_char = subj_char.lower();
             }
 
             ret->matched = (target_char0 <= subj_char)

@@ -75,17 +75,17 @@ bool UChar::isPrint() const
     return u_isprint(this->chr);
 }
 
-UChar UChar::toLower() const
+UChar UChar::lower() const
 {
     return u_tolower(this->chr);
 }
 
-UChar UChar::toUpper() const
+UChar UChar::upper() const
 {
     return u_toupper(this->chr);
 }
 
-UChar UChar::toTitle() const
+UChar UChar::title() const
 {
     return u_totitle(this->chr);
 }

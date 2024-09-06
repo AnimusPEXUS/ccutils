@@ -57,6 +57,8 @@ using byte_vector = std::vector<std::uint8_t>;
 
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 
+// using ssize_t = std::make_signed_t < std::size_t >> ;
+
 // class UString;
 
 enum class UCharCategory : std::uint32_t
@@ -133,15 +135,15 @@ class UChar : // public UCharPropertiesI,
     bool isGraph() const;
     bool isPrint() const;
 
-    UChar toLower() const;
-    UChar toUpper() const;
-    UChar toTitle() const;
+    UChar lower() const;
+    UChar upper() const;
+    UChar title() const;
 
     UString propertiesText() const;
 
   private:
 #if (CCUTILS_UNICODE_BACKEND == icu)
-    UChar32 chr; // todo: can't make this const?
+    UChar32 chr;
 #endif
 };
 
@@ -199,26 +201,104 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     ~UString();
 
-    std::tuple<byte_vector, error_ptr> encode(std::string encoding = "utf-8");
-
     size_t length() const;
 
-    // todo: return size in bytes
-    // size_t size() const;
+    UString center(
+        std::size_t width,
+        UChar       fillchar = " "
+    ) const;
+    UString count(
+        UString     sub,
+        std::size_t start,
+        std::size_t end
+    ) const;
 
-    UString toLower() const;
-    UString toUpper() const;
-    UString toTitle() const;
+    std::tuple<byte_vector, error_ptr> encode(
+        std::string encoding = "utf-8"
+    ) const;
 
-    // note: result will be shorter than `length` if
-    //       `length` going outside of string
-    UString substr(std::size_t pos, std::size_t length) const;
+    bool startswith(
+        UString     suffix,
+        std::size_t start,
+        std::size_t end
+    ) const;
+
+    bool endswith(
+        UString     suffix,
+        std::size_t start,
+        std::size_t end
+    ) const;
+
+    UString expandtabs(std::size_t tabsize = 8) const;
+
+    std::tuple<std::size_t, bool> index(
+        UString     sub,
+        std::size_t start,
+        std::size_t end
+    ) const;
+
+    std::tuple<std::size_t, bool> rindex(
+        UString     sub,
+        std::size_t start,
+        std::size_t end
+    ) const;
+
+    bool isAlpha() const;
+    bool isLower() const;
+    bool isUpper() const;
+    bool isPunct() const;
+    bool isDigit() const;
+    bool isXDigit() const;
+    bool isAlnum() const;
+    bool isSpace() const;
+    bool isBlank() const;
+    bool isCntrl() const;
+    bool isGraph() const;
+    bool isPrint() const;
+
+    UString capitalize() const;
+    UString casefold() const;
+    UString lower() const;
+    UString upper() const;
+    UString title() const;
+    UString swapcase() const;
+
+    UString lstrip(std::vector<UString> chars = {}) const;
+    UString rstrip(std::vector<UString> chars = {}) const;
+    UString strip(std::vector<UString> chars = {}) const;
+
+    std::tuple<UString, UString, UString> partition(UString sep) const;
+
+    UString removeprefix(UString prefix);
+    UString removesuffix(UString prefix);
+
+    UString replace(
+        UString old_s,
+        UString new_s,
+        ssize_t count = -1
+    );
+
+    UString ljust(std::size_t width, UString fillchar = " ");
+    UString rjust(std::size_t width, UString fillchar = " ");
+
+    std::deque<UString> &split(
+        std::deque<UString>     &ret,
+        std::unique_ptr<UString> sep,
+        ssize_t                  maxsplit = -1
+    ) const;
 
     // split string to lines.
     // result doesn't includes splitting characters
     // (/r, /n and/or they'r combinations).
     // pass existing deque - it will be truncated and new lines will be added
-    std::deque<UString> &lines(std::deque<UString> &ret) const;
+    std::deque<UString> &splitlines(
+        std::deque<UString> &ret,
+        bool                 keepends = false
+    ) const;
+
+    // note: result will be shorter than `length` if
+    //       `length` going outside of string
+    UString substr(std::size_t pos, std::size_t length) const;
 
     // returns std:string encoded in utf8
     std::string to_string() const;
@@ -227,7 +307,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     UString repr_as_text() const;
 
-    UChar operator[](std::int32_t offset) const;
+    UChar operator[](ssize_t offset) const;
+    UChar operator[](ssize_t offset1, ssize_t offset2) const;
 
     UString operator+(UString &other);
 

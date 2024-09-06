@@ -258,38 +258,33 @@ size_t UString::length() const
     return this->data.length();
 }
 
-/*
-size_t UString::size() const
-{
-    return length();
-} */
-
-UString UString::toLower() const
+UString UString::lower() const
 {
     std::vector<UChar> res;
     for (std::size_t i = 0; i != length(); i++)
     {
-        res.push_back(this->operator[](i).toLower());
+        res.push_back(this->operator[](i).lower());
     }
     return UString(res);
 }
 
-UString UString::toUpper() const
+UString UString::upper() const
 {
     std::vector<UChar> res;
     for (std::size_t i = 0; i != length(); i++)
     {
-        res.push_back(this->operator[](i).toUpper());
+        res.push_back(this->operator[](i).upper());
     }
     return UString(res);
 }
 
-UString UString::toTitle() const
+UString UString::title() const
 {
+    // todo: check and fix
     std::vector<UChar> res;
     for (std::size_t i = 0; i != length(); i++)
     {
-        res.push_back(this->operator[](i).toTitle());
+        res.push_back(this->operator[](i).title());
     }
     return UString(res);
 }
@@ -301,7 +296,10 @@ UString UString::substr(std::size_t pos, std::size_t length) const
     return x;
 }
 
-std::deque<UString> &UString::lines(std::deque<UString> &ret) const
+std::deque<UString> &UString::splitlines(
+    std::deque<UString> &ret,
+    bool                 keepends
+) const
 {
     // std::deque<UString> ret;
     ret.resize(0);
@@ -424,10 +422,15 @@ UString UString::repr_as_text() const
     return ret;
 }
 
-UChar UString::operator[](std::int32_t offset) const
+UChar UString::operator[](ssize_t offset) const
 {
     UChar ret(this->data.char32At(offset));
     return ret;
+}
+
+UChar UString::operator[](ssize_t offset1, ssize_t offset2) const
+{
+    return substr(offset1, offset2);
 }
 
 UString UString::operator+(UString &other)

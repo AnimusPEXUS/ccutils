@@ -35,6 +35,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
+    return {false};
 }
 
 wayround_i2p::ccutils::tst::TSTInfo main_002_i = {

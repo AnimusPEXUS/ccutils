@@ -747,13 +747,62 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint32_t> &vec)
 
 error_ptr IPv6::setFromString(const UString &text)
 {
-    // todo: todo
+    std::array<std::uint16_t, 8> tmp;
 
-    for (std::size_t i = 0; i != 8; i++)
+    auto pat = IPv6_STR_PATTERN();
+    auto res = pat->match(text);
+
+    if (res->error)
     {
-        buff.b16[7 - i] = i;
+        return res->error;
     }
 
+    if (!res->matched)
+    {
+        return wayround_i2p::ccutils::errors::New("no match");
+    }
+
+    if (res->match_end != text.length())
+    {
+        return wayround_i2p::ccutils::errors::New("no match");
+    }
+
+    for (auto i : {
+             "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN",
+             "IPv6_SHORT_GRP_HEX_STR_PATTERN"
+         })
+    {
+        auto res2 = res->searchSubmatchByPatternName(i);
+        if (res2->error)
+        {
+            continue;
+        }
+
+        if (!res2->matched)
+        {
+            continue;
+        }
+
+        if (res2->match_end != text.length())
+        {
+            continue;
+        }
+
+        if (i == "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN")
+        {
+        }
+
+        if (i == "IPv6_SHORT_GRP_HEX_STR_PATTERN")
+        {
+        }
+
+        return wayround_i2p::ccutils::errors::New(
+            "parsing error: IPv6_SHORT_GRP_HEX_STR_PATTERN"
+            "|IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN didn't match"
+        );
+    }
+
+    setFromArray(tmp);
     return nullptr;
 }
 

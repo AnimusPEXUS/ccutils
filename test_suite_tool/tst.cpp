@@ -423,7 +423,7 @@ void IndividualFunctionLogger::LogSplitLines(
 ) const
 {
     std::deque<wayround_i2p::ccutils::unicode::UString> msgs;
-    msgs = msg.lines(msgs);
+    msgs = msg.splitlines(msgs);
     this->Log(t, msgs);
 }
 
