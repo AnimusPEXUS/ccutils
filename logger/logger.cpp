@@ -51,6 +51,53 @@ wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
     return icon;
 }
 
+wayround_i2p::ccutils::unicode::UString string_for_type(LoggerMSGType t)
+{
+    wayround_i2p::ccutils::unicode::UString ret;
+
+    switch (t)
+    {
+        default:
+            ret = "undefined";
+            break;
+        case Text:
+            ret = "";
+            break;
+        case Status:
+            ret = "status";
+            break;
+        case Info:
+            ret = "info";
+            break;
+        case Warning:
+            ret = "!warning!";
+            break;
+        case Error:
+            ret = "!!error!!";
+            break;
+        case Failure:
+            ret = "failure";
+            break;
+        case Success:
+            ret = "success";
+            break;
+        case ExpectedFailure:
+            ret = "expected failure";
+            break;
+        case UnexpectedSuccess:
+            ret = "unexpected failure";
+            break;
+        case ToDo:
+            ret = "todo";
+            break;
+        case FixMe:
+            ret = "fixme";
+            break;
+    }
+
+    return ret;
+}
+
 wayround_i2p::ccutils::unicode::UString timestamp()
 {
     auto t = std::chrono::utc_clock::now();
@@ -91,12 +138,23 @@ TerminalLogger::~TerminalLogger()
 }
 
 void TerminalLogger::Log(
+    LoggerMSGType t
+) const
+{
+    std::cout << std::format(
+        "[{}] [{}] {}",
+        icon_by_type(t),
+        timestamp(),
+        string_for_type(t)
+    )
+              << std::endl;
+}
+
+void TerminalLogger::Log(
     LoggerMSGType                                  t,
     const wayround_i2p::ccutils::unicode::UString &msg
 ) const
 {
-    // msg = FixMsg(t, msg);
-
     std::cout << std::format(
         "[{}] [{}] {}",
         icon_by_type(t),

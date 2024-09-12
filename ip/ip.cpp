@@ -773,6 +773,11 @@ error_ptr IPv6::setFromString(const UString &text)
          })
     {
         auto res2 = res->searchSubmatchByPatternName(i);
+        if (!res2)
+        {
+            continue;
+        }
+
         if (res2->error)
         {
             continue;

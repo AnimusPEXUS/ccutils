@@ -73,6 +73,10 @@ class IndividualFunctionLogger : public wayround_i2p::ccutils::logger::LoggerI
     );
 
     void Log(
+        wayround_i2p::ccutils::logger::LoggerMSGType t
+    ) const;
+
+    void Log(
         wayround_i2p::ccutils::logger::LoggerMSGType   t,
         const wayround_i2p::ccutils::unicode::UString &msg
     ) const;

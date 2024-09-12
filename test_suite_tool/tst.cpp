@@ -391,6 +391,13 @@ IndividualFunctionLogger::~IndividualFunctionLogger()
 }
 
 void IndividualFunctionLogger::Log(
+    wayround_i2p::ccutils::logger::LoggerMSGType t
+) const
+{
+    params.logger->Log(t);
+}
+
+void IndividualFunctionLogger::Log(
     wayround_i2p::ccutils::logger::LoggerMSGType   t,
     const wayround_i2p::ccutils::unicode::UString &msg
 ) const

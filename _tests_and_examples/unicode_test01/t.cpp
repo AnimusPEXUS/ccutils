@@ -1,4 +1,5 @@
 
+#include <wayround_i2p/ccutils/errors/e.hpp>
 
 #include <wayround_i2p/ccutils/test_suite_tool/tst.hpp>
 
@@ -6,6 +7,23 @@
 
 int main(int argc, char **args)
 {
+
+    std::set_terminate(
+        []() -> void
+        {
+            try
+            {
+                throw;
+            }
+            catch (const wayround_i2p::ccutils::errors::error_ptr &e)
+            {
+                std::cout << "exception: " << e->ErrorLong() << std::endl;
+            }
+
+            std::set_terminate(nullptr);
+            std::terminate();
+        }
+    );
 
     auto logger = wayround_i2p::ccutils::logger::TerminalLogger::create();
 
@@ -17,6 +35,7 @@ int main(int argc, char **args)
 
     params.AddTest(main_001_i);
     params.AddTest(main_002_i);
+    params.AddTest(main_003_i);
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
 }

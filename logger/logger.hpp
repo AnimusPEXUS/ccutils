@@ -38,6 +38,11 @@ class LoggerI
 {
   public:
     virtual void Log(
+        LoggerMSGType t
+    ) const
+        = 0;
+
+    virtual void Log(
         LoggerMSGType                                  t,
         const wayround_i2p::ccutils::unicode::UString &msg
     ) const
@@ -62,6 +67,10 @@ class TerminalLogger : public LoggerI
 {
   public:
     static std::shared_ptr<TerminalLogger> create();
+
+    void Log(
+        LoggerMSGType t
+    ) const;
 
     void Log(
         LoggerMSGType                                  t,

@@ -109,8 +109,8 @@ class UChar : // public UCharPropertiesI,
     UChar(char val);
 
     // to make char from string. string length must be exactly 1, else -> exception
-    // UChar(const char *std_nullterminated_cstring);
-    // UChar(std::string stdstring);
+    UChar(const char *std_nullterminated_cstring);
+    UChar(std::string stdstring);
     UChar(UString val);
 
     ~UChar();
@@ -215,10 +215,11 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         std::size_t width,
         UChar       fillchar = ' '
     ) const;
+
     UString count(
-        UString     sub,
-        std::size_t start,
-        std::size_t end
+        UString sub,
+        ssize_t start = -1,
+        ssize_t end   = -1
     ) const;
 
     std::tuple<byte_vector, error_ptr> encode(
@@ -226,29 +227,30 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     ) const;
 
     bool startswith(
-        UString     suffix,
-        std::size_t start,
-        std::size_t end
+        UString suffix,
+        ssize_t start = -1,
+        ssize_t end   = -1
     ) const;
 
     bool endswith(
-        UString     suffix,
-        std::size_t start,
-        std::size_t end
+        UString suffix,
+        ssize_t start = -1,
+        ssize_t end   = -1
     ) const;
 
     UString expandtabs(std::size_t tabsize = 8) const;
 
-    std::tuple<std::size_t, bool> index(
-        UString     sub,
-        std::size_t start,
-        std::size_t end
+    ssize_t index(
+        UString sub,
+        ssize_t start     = -1,
+        ssize_t end       = -1,
+        bool    backwards = false
     ) const;
 
-    std::tuple<std::size_t, bool> rindex(
-        UString     sub,
-        std::size_t start,
-        std::size_t end
+    ssize_t rindex(
+        UString sub,
+        ssize_t start = -1,
+        ssize_t end   = -1
     ) const;
 
     bool isAlpha() const;
@@ -307,6 +309,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // note: result will be shorter than `length` if
     //       `length` going outside of string
     UString substr(std::size_t pos, std::size_t length) const;
+    // UString view(std::size_t pos, std::size_t length) const;
 
     // returns std:string encoded in utf8
     std::string to_string() const;
@@ -315,14 +318,18 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     UString repr_as_text() const;
 
-    UChar operator[](ssize_t offset) const;
-    UChar operator[](ssize_t offset1, ssize_t offset2) const;
+    UChar   operator[](ssize_t offset) const;
+    UString operator[](ssize_t offset1, ssize_t offset2) const;
 
     UString operator+(const UString &other) const;
     UString operator+(const UChar &chr) const;
+    UString operator+(const std::string &other) const;
+    UString operator+(const char *other) const;
 
     UString &operator+=(const UString &other);
     UString &operator+=(const UChar &other);
+    UString &operator+=(const std::string &other);
+    UString &operator+=(const char *other);
 
     // UString &operator+=(const  UString &&other) const;
     // UString &operator+=(const  UChar &&other) const;
@@ -356,6 +363,11 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     icu::UnicodeString data;
     icu::UnicodeString getData() const;
 #endif
+
+  private:
+    void setup_default_start_end(UString &txt, ssize_t &start, ssize_t &end) const;
+    bool is_start_end_correct(UString &txt, ssize_t start, ssize_t end) const;
+    void exception_on_incorrect_start_end(UString &txt, ssize_t start, ssize_t end) const;
 };
 
 bool operator==(

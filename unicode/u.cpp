@@ -10,7 +10,6 @@
 namespace wayround_i2p::ccutils::unicode
 {
 
-/*
 UChar::UChar(const char *std_nullterminated_cstring) :
     UChar(UString(std_nullterminated_cstring))
 {
@@ -20,7 +19,6 @@ UChar::UChar(std::string stdstring) :
     UChar(UString(stdstring))
 {
 }
-*/
 
 UChar::UChar(char val) :
     UChar((std::int32_t)val)
@@ -32,10 +30,11 @@ UChar::UChar(UString val) :
     UChar(
         [val]() -> std::int32_t
         {
-            if (val.length() != 1)
+            auto vl = val.length();
+            if (vl != 1)
             {
                 throw wayround_i2p::ccutils::errors::New(
-                    "UChar::UChar(UString val) - invalid `val` size"
+                    std::format("UChar::UChar(UString val) - invalid `val` size: {}", vl)
                 );
             }
 
@@ -287,12 +286,13 @@ UString UString::center(
     UChar       fillchar
 ) const
 {
-    if (width <= length())
+    auto l = length();
+    if (width <= l)
     {
         return *this;
     }
 
-    auto diff1      = length() - width;
+    auto diff1      = width - l;
     auto diff1_half = std::size_t(float(diff1) / 2);
 
     UString new_half_string = "";
@@ -304,9 +304,145 @@ UString UString::center(
 
     UString ret;
 
-    ret = new_half_string + *this + new_half_string;
+    ret = (new_half_string + *this + new_half_string)[0, width];
+
+    while (ret.length() < width) { ret += fillchar; }
 
     return ret;
+}
+
+void UString::setup_default_start_end(
+    UString &txt,
+    ssize_t &start,
+    ssize_t &end
+) const
+{
+    if ((!(end < 0)) && (start < 0))
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "incorrect start/end. end - set, start - not"
+        );
+    }
+
+    if (start < 0)
+    {
+        start = 0;
+    }
+
+    if (end < 0)
+    {
+        end = length();
+    }
+}
+
+bool UString::is_start_end_correct(
+    UString &txt,
+    ssize_t  start,
+    ssize_t  end
+) const
+{
+    return (
+        ((start < 0 && end < 0) || (start >= 0 && end < 0) || (start >= 0 && end >= start))
+        && (start < 0 || (start >= 0 && start < length()))
+        && (end < 0 || (end >= 0 && end < length()))
+    );
+}
+
+void UString::exception_on_incorrect_start_end(
+    UString &txt,
+    ssize_t  start,
+    ssize_t  end
+) const
+{
+    if (!is_start_end_correct(txt, start, end))
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            std::format(
+                "invalid start({})/end({})/txt.length()({}) combination",
+                start,
+                end,
+                txt.length()
+            )
+        );
+    }
+}
+
+bool UString::startswith(
+    UString suffix,
+    ssize_t start,
+    ssize_t end
+) const
+{
+    return false;
+}
+
+bool UString::endswith(
+    UString suffix,
+    ssize_t start,
+    ssize_t end
+) const
+{
+    return false;
+}
+
+ssize_t UString::index(
+    UString sub,
+    ssize_t start,
+    ssize_t end,
+    bool    backwards
+) const
+{
+    exception_on_incorrect_start_end(sub, start, end);
+
+    setup_default_start_end(sub, start, end);
+
+    auto sub_len = sub.length();
+
+    if (sub_len == 0)
+    {
+        if (!backwards)
+        {
+            return start;
+        }
+        else
+        {
+            return end;
+        }
+    }
+
+    auto end_min_sub_len = end - sub_len;
+
+    if (end_min_sub_len < 0)
+    {
+        return -1;
+    }
+
+    for (
+        ssize_t i = (!backwards ? start : end_min_sub_len);
+        (!backwards ? i <= end_min_sub_len : i >= start);
+        (!backwards ? i++ : i--)
+    )
+    {
+        for (ssize_t j = 0; j < sub_len; j++)
+        {
+            if (operator[](i + j) != sub[j])
+            {
+                goto not_submatched_continue;
+            }
+        }
+        return i;
+    not_submatched_continue:
+    }
+    return -1;
+}
+
+ssize_t UString::rindex(
+    UString sub,
+    ssize_t start,
+    ssize_t end
+) const
+{
+    return index(sub, start, end, true);
 }
 
 UString UString::lower() const
@@ -479,9 +615,10 @@ UChar UString::operator[](ssize_t offset) const
     return ret;
 }
 
-UChar UString::operator[](ssize_t offset1, ssize_t offset2) const
+UString UString::operator[](ssize_t offset1, ssize_t offset2) const
 {
-    return substr(offset1, offset2);
+    // todo: add parameters sanity check
+    return substr(offset1, offset2 - offset1);
 }
 
 UString UString::operator+(const UString &other) const
@@ -505,6 +642,16 @@ UString UString::operator+(const UChar &other) const
     return *this + UString(other);
 }
 
+UString UString::operator+(const std::string &other) const
+{
+    return *this + UString(other);
+}
+
+UString UString::operator+(const char *other) const
+{
+    return *this + UString(other);
+}
+
 UString &UString::operator+=(const UString &other)
 {
     data = data.append(other.data);
@@ -512,6 +659,18 @@ UString &UString::operator+=(const UString &other)
 }
 
 UString &UString::operator+=(const UChar &other)
+{
+    data = data.append(UString(other).data);
+    return *this;
+}
+
+UString &UString::operator+=(const std::string &other)
+{
+    data = data.append(UString(other).data);
+    return *this;
+}
+
+UString &UString::operator+=(const char *other)
 {
     data = data.append(UString(other).data);
     return *this;
