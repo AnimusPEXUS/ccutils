@@ -11,12 +11,9 @@
 #include <tuple>
 #include <vector>
 
-// #include <wayround_i2p/ccutils/errors/e.hpp>
-// #include <wayround_i2p/ccutils/regexp/regexp_enums.hpp>
 #include <wayround_i2p/ccutils/regexp/regexp_fds_and_enums.hpp>
-// #include <wayround_i2p/ccutils/regexp/regexp.hpp>
-
 #include <wayround_i2p/ccutils/repr/repr.hpp>
+#include <wayround_i2p/ccutils/utils/cf.hpp>
 
 namespace wayround_i2p::ccutils::repr
 {
@@ -253,7 +250,45 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         ssize_t end   = -1
     ) const;
 
-    bool isAlpha() const;
+  private:
+    bool isAlphaPrecalcIsSet = false;
+    bool isAlphaPrecalc      = false;
+
+    bool isLowerPrecalcIsSet = false;
+    bool isLowerPrecalc      = false;
+
+    bool isUpperPrecalcIsSet = false;
+    bool isUpperPrecalc      = false;
+
+    bool isPunctPrecalcIsSet = false;
+    bool isPunctPrecalc      = false;
+
+    bool isDigitPrecalcIsSet = false;
+    bool isDigitPrecalc      = false;
+
+    bool isXDigitPrecalcIsSet = false;
+    bool isXDigitPrecalc      = false;
+
+    bool isAlnumPrecalcIsSet = false;
+    bool isAlnumPrecalc      = false;
+
+    bool isSpacePrecalcIsSet = false;
+    bool isSpacePrecalc      = false;
+
+    bool isBlankPrecalcIsSet = false;
+    bool isBlankPrecalc      = false;
+
+    bool isCntrlPrecalcIsSet = false;
+    bool isCntrlPrecalc      = false;
+
+    bool isGraphPrecalcIsSet = false;
+    bool isGraphPrecalc      = false;
+
+    bool isPrintPrecalcIsSet = false;
+    bool isPrintPrecalc      = false;
+
+  public:
+    // bool isAlpha() const;
     bool isLower() const;
     bool isUpper() const;
     bool isPunct() const;
@@ -265,6 +300,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     bool isCntrl() const;
     bool isGraph() const;
     bool isPrint() const;
+
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> isAlpha;
 
     UString capitalize() const;
     UString casefold() const;

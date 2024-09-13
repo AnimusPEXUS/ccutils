@@ -28,7 +28,7 @@ endif()
 
 
 function(create_ccutils_component)
-  set(options )
+  set(options)
   set(oneValueArgs TARGETNAME SUBDIR)
   set(multiValueArgs
     SOURCES HEADERS
@@ -137,6 +137,21 @@ function(create_ccutils_component)
 endfunction()
 
 create_ccutils_component(
+  TARGETNAME ccutils_utils_cf
+  SUBDIR utils
+
+  SOURCES
+  cf
+
+  HEADERS
+  cf
+
+  LIBS_PUB
+  ccutils_unicode
+  ccutils_errors
+)
+
+create_ccutils_component(
   TARGETNAME ccutils_errors
   SUBDIR errors
 
@@ -189,14 +204,16 @@ set(
   ccutils_errors
   ccutils_regexp
   ccutils_repr
+  ccutils_utils_cf
 )
 
-set(
-  CCUTILS_UNICODE_LIBS_PUB
-  ccutils_errors
-  ccutils_regexp
-  ccutils_repr
-)
+
+#set(
+#  CCUTILS_UNICODE_LIBS_PUB
+#  ccutils_errors
+#  ccutils_regexp
+#  ccutils_repr
+#)
 
 set(
   CCUTILS_UNICODE_INC_DIRS_PUB

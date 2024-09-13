@@ -251,7 +251,15 @@ bool operator<=(
 }
 
 UString::UString() :
-    data("")
+    data(""),
+    isAlpha(
+        wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool>(
+            []()
+            { return false; },
+            [](bool &x)
+            { return; }
+        )
+    )
 {
 }
 
@@ -443,6 +451,63 @@ ssize_t UString::rindex(
 ) const
 {
     return index(sub, start, end, true);
+}
+
+/* bool UString::isAlpha() const
+{
+    // todo: preserve and reuse result if data not changed?
+    for (std::size_t i = 0; i < length(); i++)
+    {
+        if (!operator[](i).isAlpha())
+        {
+            return false;
+        }
+    }
+    return true;
+} */
+
+bool UString::isLower() const
+{
+}
+
+bool UString::isUpper() const
+{
+}
+
+bool UString::isPunct() const
+{
+}
+
+bool UString::isDigit() const
+{
+}
+
+bool UString::isXDigit() const
+{
+}
+
+bool UString::isAlnum() const
+{
+}
+
+bool UString::isSpace() const
+{
+}
+
+bool UString::isBlank() const
+{
+}
+
+bool UString::isCntrl() const
+{
+}
+
+bool UString::isGraph() const
+{
+}
+
+bool UString::isPrint() const
+{
 }
 
 UString UString::lower() const
