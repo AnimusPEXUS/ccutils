@@ -250,17 +250,136 @@ bool operator<=(
     return lhs.as_int32() <= rhs.as_int32();
 }
 
+void allcharscheck(
+    UString *s,
+    bool (UChar::*member)() const,
+    bool &x
+)
+{
+    auto l = s->length();
+    for (std::size_t i = 0; i < l; i++)
+    {
+        if (!(((*s)[i]).*member)())
+        {
+            x = false;
+            return;
+        }
+    }
+    x = true;
+}
+
 UString::UString() :
     data(""),
-    isAlpha(
-        wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool>(
-            []()
-            { return false; },
-            [](bool &x)
-            { return; }
+    _isAlpha(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isAlpha, x);
+            }
+        )
+    ),
+    _isLower(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isLower, x);
+            }
+        )
+    ),
+    _isUpper(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isUpper, x);
+            }
+        )
+    ),
+    _isPunct(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isPunct, x);
+            }
+        )
+    ),
+    _isDigit(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isDigit, x);
+            }
+        )
+    ),
+    _isXDigit(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isXDigit, x);
+            }
+        )
+    ),
+    _isAlnum(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isAlnum, x);
+            }
+        )
+    ),
+    _isSpace(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isSpace, x);
+            }
+        )
+    ),
+    _isBlank(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isBlank, x);
+            }
+        )
+    ),
+    _isCntrl(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isCntrl, x);
+            }
+        )
+    ),
+    _isGraph(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isGraph, x);
+            }
+        )
+    ),
+    _isPrint(
+        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+            last_chage_time_point,
+            [&](bool &x)
+            {
+                allcharscheck(this, &UChar::isPrint, x);
+            }
         )
     )
 {
+    update_last_chage_time_point();
 }
 
 /*
@@ -753,6 +872,11 @@ UString &UString::operator+=(const UChar &&other) const
     return this + UString(other);
 }
 */
+
+void UString::update_last_chage_time_point()
+{
+    last_chage_time_point = std::chrono::steady_clock::now();
+}
 
 UString::operator std::string()
 {

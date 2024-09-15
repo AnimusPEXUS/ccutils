@@ -2,6 +2,7 @@
 #define WAYROUND_I2P_20240718_170059_650904
 
 #include <cassert>
+#include <chrono>
 #include <cstdint>
 #include <deque>
 #include <iostream>
@@ -250,45 +251,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         ssize_t end   = -1
     ) const;
 
-  private:
-    bool isAlphaPrecalcIsSet = false;
-    bool isAlphaPrecalc      = false;
-
-    bool isLowerPrecalcIsSet = false;
-    bool isLowerPrecalc      = false;
-
-    bool isUpperPrecalcIsSet = false;
-    bool isUpperPrecalc      = false;
-
-    bool isPunctPrecalcIsSet = false;
-    bool isPunctPrecalc      = false;
-
-    bool isDigitPrecalcIsSet = false;
-    bool isDigitPrecalc      = false;
-
-    bool isXDigitPrecalcIsSet = false;
-    bool isXDigitPrecalc      = false;
-
-    bool isAlnumPrecalcIsSet = false;
-    bool isAlnumPrecalc      = false;
-
-    bool isSpacePrecalcIsSet = false;
-    bool isSpacePrecalc      = false;
-
-    bool isBlankPrecalcIsSet = false;
-    bool isBlankPrecalc      = false;
-
-    bool isCntrlPrecalcIsSet = false;
-    bool isCntrlPrecalc      = false;
-
-    bool isGraphPrecalcIsSet = false;
-    bool isGraphPrecalc      = false;
-
-    bool isPrintPrecalcIsSet = false;
-    bool isPrintPrecalc      = false;
-
   public:
-    // bool isAlpha() const;
+    bool isAlpha() const;
     bool isLower() const;
     bool isUpper() const;
     bool isPunct() const;
@@ -301,8 +265,21 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     bool isGraph() const;
     bool isPrint() const;
 
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> isAlpha;
+  private:
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isAlpha;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isLower;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isUpper;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isPunct;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isDigit;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isXDigit;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isAlnum;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isSpace;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isBlank;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isCntrl;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isGraph;
+    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isPrint;
 
+  public:
     UString capitalize() const;
     UString casefold() const;
     UString lower() const;
@@ -405,6 +382,10 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     void setup_default_start_end(UString &txt, ssize_t &start, ssize_t &end) const;
     bool is_start_end_correct(UString &txt, ssize_t start, ssize_t end) const;
     void exception_on_incorrect_start_end(UString &txt, ssize_t start, ssize_t end) const;
+
+    std::chrono::time_point<std::chrono::steady_clock> last_chage_time_point;
+
+    void update_last_chage_time_point();
 };
 
 bool operator==(

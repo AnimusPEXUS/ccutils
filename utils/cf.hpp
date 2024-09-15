@@ -40,7 +40,7 @@ class CatchedFunction
 };
 
 template <class R, class... Args>
-class SteadyClockCatchedFunction : CatchedFunction<R, Args...>
+class SteadyClockCatchedFunction : public CatchedFunction<R, Args...>
 {
   public:
     SteadyClockCatchedFunction(
