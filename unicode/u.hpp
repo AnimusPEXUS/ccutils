@@ -252,32 +252,32 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     ) const;
 
   public:
-    bool isAlpha() const;
-    bool isLower() const;
-    bool isUpper() const;
-    bool isPunct() const;
-    bool isDigit() const;
-    bool isXDigit() const;
-    bool isAlnum() const;
-    bool isSpace() const;
-    bool isBlank() const;
-    bool isCntrl() const;
-    bool isGraph() const;
-    bool isPrint() const;
+    bool isAlpha();
+    bool isLower();
+    bool isUpper();
+    bool isPunct();
+    bool isDigit();
+    bool isXDigit();
+    bool isAlnum();
+    bool isSpace();
+    bool isBlank();
+    bool isCntrl();
+    bool isGraph();
+    bool isPrint();
 
   private:
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isAlpha;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isLower;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isUpper;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isPunct;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isDigit;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isXDigit;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isAlnum;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isSpace;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isBlank;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isCntrl;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isGraph;
-    wayround_i2p::ccutils::utils::catched_function::CatchedFunction<bool> _isPrint;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isAlpha;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isLower;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isUpper;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isPunct;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isDigit;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isXDigit;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isAlnum;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isSpace;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isBlank;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isCntrl;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isGraph;
+    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isPrint;
 
   public:
     UString capitalize() const;

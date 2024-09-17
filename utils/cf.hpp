@@ -3,62 +3,62 @@
 
 // todo: testing required
 
-namespace wayround_i2p::ccutils::utils::catched_function
+namespace wayround_i2p::ccutils::utils::cached_function
 {
 
 template <class R, class... Args>
-class CatchedFunction
+class CachedFunction
 {
   public:
-    CatchedFunction(
-        std::function<bool(Args... args)>                  updateRequired,
-        std::function<void(R &catched_data, Args... args)> update
+    CachedFunction(
+        std::function<bool(Args... args)>                 updateRequired,
+        std::function<void(R &cached_data, Args... args)> update
     ) :
         updateRequired(updateRequired),
         update(update)
     {
     }
 
-    ~CatchedFunction()
+    ~CachedFunction()
     {
     }
 
-    R operator()(Args... args)
+    R getCaching(Args... args)
     {
         if (updateRequired(args...))
         {
-            update(&catched_data, args...);
+            update(cached_data, args...);
         }
 
-        return catched_data;
+        return cached_data;
     }
 
-    std::function<bool(Args... args)>                  updateRequired;
-    std::function<void(R &catched_data, Args... args)> update;
+    std::function<bool(Args... args)>                 updateRequired;
+    std::function<void(R &cached_data, Args... args)> update;
 
-    R catched_data;
+    R cached_data;
 };
 
 template <class R, class... Args>
-class SteadyClockCatchedFunction : public CatchedFunction<R, Args...>
+class SteadyClockCachedFunction : public CachedFunction<R, Args...>
 {
   public:
-    SteadyClockCatchedFunction(
+    SteadyClockCachedFunction(
         std::chrono::time_point<std::chrono::steady_clock>
             &tracked_object_last_change_time_point,
 
-        std::function<void(R &catched_data, Args... args)> update
+        std::function<void(R &cached_data, Args... args)> update
     ) :
-        CatchedFunction<R, Args...>(
+        CachedFunction<R, Args...>(
             [&](Args... args)
             {
                 return !(
                     tracked_object_last_change_time_point < last_time_function_result_calculated
                 );
             },
-            [&](R &catched_data, Args... args)
+            [&](R &cached_data, Args... args)
             {
-                update(catched_data, args...);
+                update(cached_data, args...);
                 tracked_object_last_change_time_point = std::chrono::steady_clock::now();
             }
         )
@@ -67,7 +67,7 @@ class SteadyClockCatchedFunction : public CatchedFunction<R, Args...>
             = tracked_object_last_change_time_point;
     }
 
-    ~SteadyClockCatchedFunction()
+    ~SteadyClockCachedFunction()
     {
     }
 
@@ -76,4 +76,4 @@ class SteadyClockCatchedFunction : public CatchedFunction<R, Args...>
         last_time_function_result_calculated;
 };
 
-} // namespace wayround_i2p::ccutils::utils::catched_function
+} // namespace wayround_i2p::ccutils::utils::cached_function

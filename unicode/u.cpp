@@ -271,7 +271,7 @@ void allcharscheck(
 UString::UString() :
     data(""),
     _isAlpha(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -280,7 +280,7 @@ UString::UString() :
         )
     ),
     _isLower(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -289,7 +289,7 @@ UString::UString() :
         )
     ),
     _isUpper(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -298,7 +298,7 @@ UString::UString() :
         )
     ),
     _isPunct(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -307,7 +307,7 @@ UString::UString() :
         )
     ),
     _isDigit(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -316,7 +316,7 @@ UString::UString() :
         )
     ),
     _isXDigit(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -325,7 +325,7 @@ UString::UString() :
         )
     ),
     _isAlnum(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -334,7 +334,7 @@ UString::UString() :
         )
     ),
     _isSpace(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -343,7 +343,7 @@ UString::UString() :
         )
     ),
     _isBlank(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -352,7 +352,7 @@ UString::UString() :
         )
     ),
     _isCntrl(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -361,7 +361,7 @@ UString::UString() :
         )
     ),
     _isGraph(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -370,7 +370,7 @@ UString::UString() :
         )
     ),
     _isPrint(
-        wayround_i2p::ccutils::utils::catched_function::SteadyClockCatchedFunction<bool>(
+        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
             last_chage_time_point,
             [&](bool &x)
             {
@@ -572,61 +572,64 @@ ssize_t UString::rindex(
     return index(sub, start, end, true);
 }
 
-/* bool UString::isAlpha() const
+bool UString::isAlpha()
 {
-    // todo: preserve and reuse result if data not changed?
-    for (std::size_t i = 0; i < length(); i++)
-    {
-        if (!operator[](i).isAlpha())
-        {
-            return false;
-        }
-    }
-    return true;
-} */
-
-bool UString::isLower() const
-{
+    return _isAlpha.getCaching();
 }
 
-bool UString::isUpper() const
+bool UString::isLower()
 {
+    return _isLower.getCaching();
 }
 
-bool UString::isPunct() const
+bool UString::isUpper()
 {
+    return _isUpper.getCaching();
 }
 
-bool UString::isDigit() const
+bool UString::isPunct()
 {
+    return _isPunct.getCaching();
 }
 
-bool UString::isXDigit() const
+bool UString::isDigit()
 {
+    return _isDigit.getCaching();
 }
 
-bool UString::isAlnum() const
+bool UString::isXDigit()
 {
+    return _isXDigit.getCaching();
 }
 
-bool UString::isSpace() const
+bool UString::isAlnum()
 {
+    return _isAlnum.getCaching();
 }
 
-bool UString::isBlank() const
+bool UString::isSpace()
 {
+    return _isSpace.getCaching();
 }
 
-bool UString::isCntrl() const
+bool UString::isBlank()
 {
+    return _isBlank.getCaching();
 }
 
-bool UString::isGraph() const
+bool UString::isCntrl()
 {
+    return _isCntrl.getCaching();
 }
 
-bool UString::isPrint() const
+bool UString::isGraph()
 {
+    return _isGraph.getCaching();
+}
+
+bool UString::isPrint()
+{
+    return _isPrint.getCaching();
 }
 
 UString UString::lower() const
