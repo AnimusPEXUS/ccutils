@@ -489,20 +489,13 @@ bool UString::startswith(
     exception_on_incorrect_start_end(prefix, start, end);
     setup_default_start_end(prefix, start, end);
 
-    ssize_t x = 0;
-
     ssize_t start_plu_prefix_length = start + prefix.length();
 
-    if (start_plu_prefix_length > end)
-    {
-        x = end;
-    }
-    else
-    {
-        x = start_plu_prefix_length;
-    }
-
-    auto res = index(prefix, start, x);
+    auto res = index(
+        prefix,
+        start,
+        (start_plu_prefix_length > end ? end : start_plu_prefix_length)
+    );
     return res == start;
 }
 
