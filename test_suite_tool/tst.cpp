@@ -265,7 +265,7 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                                 rtp.logger->Log(
                                     t,
                                     std::format(
-                                        "[{}:{}] {}",
+                                        "[{}:{}] {}"
                                         x.group_name,
                                         x.test_name,
                                         msg
@@ -276,11 +276,18 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
 
                     total_count++;
 
-                    individual_logger->Log(
+                    individual_logger->LogSplitLines(
                         wayround_i2p::ccutils::logger::Status,
                         std::format(
-                            "starting: {}",
-                            x.description_short
+                            "starting:    title: {}\n"
+                            "       short descr: {}\n"
+                            "             descr:\n"
+                            "vvv\n"
+                            "{}\n"
+                            "^^^",
+                            x.test_name,
+                            x.description_short,
+                            x.description
                         )
                     );
 
@@ -394,7 +401,7 @@ void IndividualFunctionLogger::Log(
     wayround_i2p::ccutils::logger::LoggerMSGType t
 ) const
 {
-    params.logger->Log(t);
+    Log(t, wayround_i2p::ccutils::logger::string_for_type(t));
 }
 
 void IndividualFunctionLogger::Log(

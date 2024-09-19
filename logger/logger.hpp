@@ -17,6 +17,8 @@
 namespace wayround_i2p::ccutils::logger
 {
 
+using UString = wayround_i2p::ccutils::unicode::UString;
+
 // todo: make ref variants for Log functions?
 
 enum LoggerMSGType : unsigned char
@@ -43,20 +45,20 @@ class LoggerI
         = 0;
 
     virtual void Log(
-        LoggerMSGType                                  t,
-        const wayround_i2p::ccutils::unicode::UString &msg
+        LoggerMSGType  t,
+        const UString &msg
     ) const
         = 0;
 
     virtual void Log(
-        LoggerMSGType                                              t,
-        const std::deque<wayround_i2p::ccutils::unicode::UString> &msg
+        LoggerMSGType              t,
+        const std::deque<UString> &msg
     ) const
         = 0;
 
     virtual void LogSplitLines(
-        LoggerMSGType                                  t,
-        const wayround_i2p::ccutils::unicode::UString &msg
+        LoggerMSGType  t,
+        const UString &msg
     ) const
         = 0;
 };
@@ -73,18 +75,18 @@ class TerminalLogger : public LoggerI
     ) const;
 
     void Log(
-        LoggerMSGType                                  t,
-        const wayround_i2p::ccutils::unicode::UString &msg
+        LoggerMSGType  t,
+        const UString &msg
     ) const;
 
     void Log(
-        LoggerMSGType                                              t,
-        const std::deque<wayround_i2p::ccutils::unicode::UString> &msgs
+        LoggerMSGType              t,
+        const std::deque<UString> &msgs
     ) const;
 
     void LogSplitLines(
-        LoggerMSGType                                  t,
-        const wayround_i2p::ccutils::unicode::UString &msg
+        LoggerMSGType  t,
+        const UString &msg
     ) const;
 
     ~TerminalLogger();
@@ -96,8 +98,9 @@ class TerminalLogger : public LoggerI
     // std::weak_ptr<TerminalLogger> own_ptr;
 };
 
-wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType);
-wayround_i2p::ccutils::unicode::UString timestamp();
+UString timestamp();
+UString icon_by_type(LoggerMSGType t);
+UString string_for_type(LoggerMSGType t);
 
 } // namespace wayround_i2p::ccutils::logger
 

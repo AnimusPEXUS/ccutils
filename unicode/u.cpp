@@ -391,6 +391,65 @@ UString::~UString()
 {
 }
 
+void UString::setup_default_start_end(
+    UString &txt,
+    ssize_t &start,
+    ssize_t &end
+) const
+{
+    if (start < 0)
+    {
+        start = 0;
+    }
+
+    if (end < 0)
+    {
+        end = length();
+    }
+}
+
+bool UString::is_start_end_correct(
+    UString &txt,
+    ssize_t  start,
+    ssize_t  end
+) const
+{
+    auto l = length();
+    return (
+        (
+            (start < 0 && end < 0)
+            || (start < 0 && end >= 0)
+            || (start >= 0 && end < 0)
+            || (start >= 0 && end >= start)
+        )
+        && (start < 0 || (start >= 0 && start <= l))
+        && (end < 0 || (end >= 0 && end <= l))
+    );
+}
+
+void UString::exception_on_incorrect_start_end(
+    UString &txt,
+    ssize_t  start,
+    ssize_t  end
+) const
+{
+    if (!is_start_end_correct(txt, start, end))
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            std::format(
+                "invalid length({})"
+                "/start({})"
+                "/end({})"
+                "/txt.length()({}) combination",
+                length(),
+                start,
+                end,
+                txt.length()
+            )
+        );
+    }
+}
+
 UString UString::center(
     std::size_t width,
     UChar       fillchar
@@ -421,69 +480,17 @@ UString UString::center(
     return ret;
 }
 
-void UString::setup_default_start_end(
-    UString &txt,
-    ssize_t &start,
-    ssize_t &end
-) const
-{
-    if ((!(end < 0)) && (start < 0))
-    {
-        throw wayround_i2p::ccutils::errors::New(
-            "incorrect start/end. end - set, start - not"
-        );
-    }
-
-    if (start < 0)
-    {
-        start = 0;
-    }
-
-    if (end < 0)
-    {
-        end = length();
-    }
-}
-
-bool UString::is_start_end_correct(
-    UString &txt,
-    ssize_t  start,
-    ssize_t  end
-) const
-{
-    return (
-        ((start < 0 && end < 0) || (start >= 0 && end < 0) || (start >= 0 && end >= start))
-        && (start < 0 || (start >= 0 && start < length()))
-        && (end < 0 || (end >= 0 && end < length()))
-    );
-}
-
-void UString::exception_on_incorrect_start_end(
-    UString &txt,
-    ssize_t  start,
-    ssize_t  end
-) const
-{
-    if (!is_start_end_correct(txt, start, end))
-    {
-        throw wayround_i2p::ccutils::errors::New(
-            std::format(
-                "invalid start({})/end({})/txt.length()({}) combination",
-                start,
-                end,
-                txt.length()
-            )
-        );
-    }
-}
-
 bool UString::startswith(
-    UString suffix,
+    UString prefix,
     ssize_t start,
     ssize_t end
 ) const
 {
-    return false;
+    exception_on_incorrect_start_end(prefix, start, end);
+    setup_default_start_end(prefix, start, end);
+
+    auto res = index(prefix, start, start + prefix.length());
+    return res == start;
 }
 
 bool UString::endswith(
@@ -492,7 +499,19 @@ bool UString::endswith(
     ssize_t end
 ) const
 {
-    return false;
+    exception_on_incorrect_start_end(suffix, start, end);
+    setup_default_start_end(suffix, start, end);
+
+    auto suff_len         = suffix.length();
+    auto end_min_suff_len = end - suff_len;
+
+    if (end_min_suff_len < 0 || end_min_suff_len < start)
+    {
+        return false;
+    }
+
+    auto res = index(suffix, end_min_suff_len, end);
+    return res == end_min_suff_len;
 }
 
 ssize_t UString::index(
@@ -503,7 +522,6 @@ ssize_t UString::index(
 ) const
 {
     exception_on_incorrect_start_end(sub, start, end);
-
     setup_default_start_end(sub, start, end);
 
     auto sub_len = sub.length();
@@ -655,12 +673,6 @@ std::deque<UString> &UString::splitlines(
     ret.resize(0);
 
     auto pattern = wayround_i2p::ccutils::regexp::Pattern::newLineSplit();
-
-    /*
-    auto pattern = wayround_i2p::ccutils::regexp::Pattern::newLineSplit(
-        wayround_i2p::ccutils::regexp::PatternType::LineSplit
-    );
-*/
 
     auto search_res = wayround_i2p::ccutils::regexp::findAll(
         pattern,

@@ -220,7 +220,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     ) const;
 
     bool startswith(
-        UString suffix,
+        UString prefix,
         ssize_t start = -1,
         ssize_t end   = -1
     ) const;

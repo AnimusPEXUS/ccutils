@@ -6,7 +6,7 @@ namespace wayround_i2p::ccutils::logger
 
 wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
 {
-    wayround_i2p::ccutils::unicode::UString icon;
+    UString icon;
 
     switch (t)
     {
@@ -51,9 +51,9 @@ wayround_i2p::ccutils::unicode::UString icon_by_type(LoggerMSGType t)
     return icon;
 }
 
-wayround_i2p::ccutils::unicode::UString string_for_type(LoggerMSGType t)
+UString string_for_type(LoggerMSGType t)
 {
-    wayround_i2p::ccutils::unicode::UString ret;
+    UString ret;
 
     switch (t)
     {
@@ -104,25 +104,6 @@ wayround_i2p::ccutils::unicode::UString timestamp()
     return std::format("{0:%F}T{0:%T}z", t);
 }
 
-/*
-wayround_i2p::ccutils::unicode::UString FixMsg(
-    LoggerMSGType                           t,
-    wayround_i2p::ccutils::unicode::UString msg
-)
-{
-    if (t == ToDo)
-    {
-        msg = wayround_i2p::ccutils::unicode::UString("todo: ") + msg;
-    }
-
-    if (t == FixMe)
-    {
-        msg = wayround_i2p::ccutils::unicode::UString("fixme: ") + msg;
-    }
-    return msg;
-}
-*/
-
 std::shared_ptr<TerminalLogger> TerminalLogger::create()
 {
     auto ret = std::shared_ptr<TerminalLogger>(new TerminalLogger());
@@ -151,8 +132,8 @@ void TerminalLogger::Log(
 }
 
 void TerminalLogger::Log(
-    LoggerMSGType                                  t,
-    const wayround_i2p::ccutils::unicode::UString &msg
+    LoggerMSGType  t,
+    const UString &msg
 ) const
 {
     std::cout << std::format(
@@ -165,8 +146,8 @@ void TerminalLogger::Log(
 }
 
 void TerminalLogger::Log(
-    LoggerMSGType                                              t,
-    const std::deque<wayround_i2p::ccutils::unicode::UString> &msgs
+    LoggerMSGType              t,
+    const std::deque<UString> &msgs
 ) const
 {
     for (auto &msg : msgs)
@@ -176,11 +157,11 @@ void TerminalLogger::Log(
 }
 
 void TerminalLogger::LogSplitLines(
-    LoggerMSGType                                  t,
-    const wayround_i2p::ccutils::unicode::UString &msg
+    LoggerMSGType  t,
+    const UString &msg
 ) const
 {
-    std::deque<wayround_i2p::ccutils::unicode::UString> msgs;
+    std::deque<UString> msgs;
     msgs = msg.splitlines(msgs);
     this->Log(t, msgs);
 }
