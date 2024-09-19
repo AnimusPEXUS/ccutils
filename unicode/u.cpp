@@ -489,7 +489,7 @@ bool UString::startswith(
     exception_on_incorrect_start_end(prefix, start, end);
     setup_default_start_end(prefix, start, end);
 
-    auto res = index(prefix, start, start + prefix.length());
+    auto res = index(prefix, start, end);
     return res == start;
 }
 
