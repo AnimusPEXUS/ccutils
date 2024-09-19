@@ -18,6 +18,8 @@
 namespace wayround_i2p::ccutils::tst
 {
 
+using UString = wayround_i2p::ccutils::unicode::UString;
+
 struct TSTInfo;
 
 struct TSTFuncResult
@@ -33,10 +35,11 @@ using TST_TEST_FUNCTION = std::function<TSTFuncResult(
 
 struct TSTInfo
 {
-    wayround_i2p::ccutils::unicode::UString group_name;
-    wayround_i2p::ccutils::unicode::UString test_name;
-    wayround_i2p::ccutils::unicode::UString description_short;
-    wayround_i2p::ccutils::unicode::UString description;
+    UString group_name;
+    UString test_name;
+    UString description_short;
+    UString description;
+    bool    description_print;
 
     bool expected_failure = false;
 
@@ -45,19 +48,19 @@ struct TSTInfo
 
 struct GroupsMapItem
 {
-    std::vector<wayround_i2p::ccutils::unicode::UString>               test_order;
-    std::map<wayround_i2p::ccutils::unicode::UString, const TSTInfo &> tests;
+    std::vector<UString>               test_order;
+    std::map<UString, const TSTInfo &> tests;
 };
 
 struct run_tests_Parameters
 {
-    wayround_i2p::ccutils::unicode::UString                          title = "(not set)";
-    wayround_i2p::ccutils::unicode::UString                          description;
-    wayround_i2p::ccutils::unicode::UString                          uri;
-    wayround_i2p::ccutils::unicode::UString                          version;
-    wayround_i2p::ccutils::unicode::UString                          mod_date;
-    std::vector<wayround_i2p::ccutils::unicode::UString>             group_order;
-    std::map<wayround_i2p::ccutils::unicode::UString, GroupsMapItem> groups;
+    UString                          title = "(not set)";
+    UString                          description;
+    UString                          uri;
+    UString                          version;
+    UString                          mod_date;
+    std::vector<UString>             group_order;
+    std::map<UString, GroupsMapItem> groups;
 
     wayround_i2p::ccutils::logger::LoggerI_shared logger;
 
@@ -77,18 +80,18 @@ class IndividualFunctionLogger : public wayround_i2p::ccutils::logger::LoggerI
     ) const;
 
     void Log(
-        wayround_i2p::ccutils::logger::LoggerMSGType   t,
-        const wayround_i2p::ccutils::unicode::UString &msg
+        wayround_i2p::ccutils::logger::LoggerMSGType t,
+        const UString                               &msg
     ) const;
 
     void Log(
-        wayround_i2p::ccutils::logger::LoggerMSGType               t,
-        const std::deque<wayround_i2p::ccutils::unicode::UString> &msg
+        wayround_i2p::ccutils::logger::LoggerMSGType t,
+        const std::deque<UString>                   &msg
     ) const;
 
     void LogSplitLines(
-        wayround_i2p::ccutils::logger::LoggerMSGType   t,
-        const wayround_i2p::ccutils::unicode::UString &msg
+        wayround_i2p::ccutils::logger::LoggerMSGType t,
+        const UString                               &msg
     ) const;
 
     ~IndividualFunctionLogger();

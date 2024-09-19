@@ -54,19 +54,19 @@ int run_tests_Parameters::AddTest(
 
 void print_head(const run_tests_Parameters &tlo)
 {
-    wayround_i2p::ccutils::unicode::UString for_string = "WayRound.I2P's tool";
-    wayround_i2p::ccutils::unicode::UString for_string_line;
-    wayround_i2p::ccutils::unicode::UString desc_string;
-    wayround_i2p::ccutils::unicode::UString uri_string;
-    wayround_i2p::ccutils::unicode::UString ver_string;
-    wayround_i2p::ccutils::unicode::UString mod_string;
+    UString for_string = "WayRound.I2P's tool";
+    UString for_string_line;
+    UString desc_string;
+    UString uri_string;
+    UString ver_string;
+    UString mod_string;
 
     if (tlo.title != "")
     {
         for_string = tlo.title;
     }
 
-    for_string = wayround_i2p::ccutils::unicode::UString("  ") + for_string;
+    for_string = UString("  ") + for_string;
 
     for (auto i = 0; i != for_string.length() + 2; i++)
     {
@@ -255,41 +255,42 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                         x
                     );
 
-                    /*
-                            LOGGER_CB_FUNCTION_TYPE cb_log_function_for_test =
-                                [&rtp, &x](
-                                    wayround_i2p::ccutils::logger::LoggerMSGType t,
-                                    wayround_i2p::ccutils::unicode::UString      msg
-                                ) -> void
-                            {
-                                rtp.logger->Log(
-                                    t,
-                                    std::format(
-                                        "[{}:{}] {}"
-                                        x.group_name,
-                                        x.test_name,
-                                        msg
-                                    )
-                                );
-                            };
-                    */
-
                     total_count++;
 
                     individual_logger->LogSplitLines(
                         wayround_i2p::ccutils::logger::Status,
-                        std::format(
-                            "starting:    title: {}\n"
-                            "       short descr: {}\n"
-                            "             descr:\n"
-                            "vvv\n"
-                            "{}\n"
-                            "^^^",
-                            x.test_name,
-                            x.description_short,
-                            x.description
-                        )
+                        "starting:"
                     );
+
+                    if (x.test_name != "")
+                    {
+                        individual_logger->Log(
+                            wayround_i2p::ccutils::logger::Status,
+                            std::format("   test name: {}", x.test_name)
+                        );
+                    }
+
+                    if (x.description_short != "")
+                    {
+                        individual_logger->Log(
+                            wayround_i2p::ccutils::logger::Status,
+                            std::format("   short description: {}", x.description_short)
+                        );
+                    }
+
+                    if (x.description != "" && x.description_print)
+                    {
+                        individual_logger->LogSplitLines(
+                            wayround_i2p::ccutils::logger::Status,
+                            std::format(
+                                "   description:\n"
+                                "vvv\n"
+                                "{}\n"
+                                "^^^",
+                                x.description
+                            )
+                        );
+                    }
 
                     if (!x.func)
                     {
@@ -405,8 +406,8 @@ void IndividualFunctionLogger::Log(
 }
 
 void IndividualFunctionLogger::Log(
-    wayround_i2p::ccutils::logger::LoggerMSGType   t,
-    const wayround_i2p::ccutils::unicode::UString &msg
+    wayround_i2p::ccutils::logger::LoggerMSGType t,
+    const UString                               &msg
 ) const
 {
     params.logger->Log(
@@ -421,8 +422,8 @@ void IndividualFunctionLogger::Log(
 }
 
 void IndividualFunctionLogger::Log(
-    wayround_i2p::ccutils::logger::LoggerMSGType               t,
-    const std::deque<wayround_i2p::ccutils::unicode::UString> &msg
+    wayround_i2p::ccutils::logger::LoggerMSGType t,
+    const std::deque<UString>                   &msg
 ) const
 {
     for (auto &i : msg)
@@ -432,11 +433,11 @@ void IndividualFunctionLogger::Log(
 }
 
 void IndividualFunctionLogger::LogSplitLines(
-    wayround_i2p::ccutils::logger::LoggerMSGType   t,
-    const wayround_i2p::ccutils::unicode::UString &msg
+    wayround_i2p::ccutils::logger::LoggerMSGType t,
+    const UString                               &msg
 ) const
 {
-    std::deque<wayround_i2p::ccutils::unicode::UString> msgs;
+    std::deque<UString> msgs;
     msgs = msg.splitlines(msgs);
     this->Log(t, msgs);
 }
