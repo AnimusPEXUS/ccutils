@@ -185,11 +185,6 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
   public:
     UString();
 
-    /*
-    UString(const char *val);
-    UString(const std::string &val);
-    */
-
     UString(const UChar &other);
 
     UString(

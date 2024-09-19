@@ -382,18 +382,6 @@ UString::UString() :
     update_last_chage_time_point();
 }
 
-/*
-UString::UString(const char *val) :
-    UString(val, "utf-8")
-{
-}
-
-UString::UString(const std::string &val) :
-    UString(val, "utf-8")
-{
-}
-*/
-
 UString::UString(const UChar &other) :
     UString(std::vector<UChar>{other})
 {
@@ -401,11 +389,6 @@ UString::UString(const UChar &other) :
 
 UString::~UString()
 {
-}
-
-size_t UString::length() const
-{
-    return this->data.length();
 }
 
 UString UString::center(
@@ -663,13 +646,6 @@ UString UString::title() const
     return UString(res);
 }
 
-UString UString::substr(std::size_t pos, std::size_t length) const
-{
-    UString x;
-    this->data.extract(pos, length, x.data);
-    return x;
-}
-
 std::deque<UString> &UString::splitlines(
     std::deque<UString> &ret,
     bool                 keepends
@@ -763,8 +739,6 @@ std::vector<UChar> UString::vector_UChar() const
     std::vector<UChar> ret(tl);
     for (size_t i = 0; i != tl; i++)
     {
-        // (reinterpret_cast<UChar *>(ret.data()))[i] = UChar(data.char32At(i));
-        // ret[i] = UChar(reinterpret_cast<std::int32_t>(data.char32At(i)));
         ret[i] = UChar(data.char32At(i));
     }
     return ret;
@@ -808,22 +782,6 @@ UString UString::operator[](ssize_t offset1, ssize_t offset2) const
     return substr(offset1, offset2 - offset1);
 }
 
-UString UString::operator+(const UString &other) const
-{
-    // todo: bacause of .data usage, this code should be moved to backend
-    // todo: optimizations and improvements required here
-
-    auto od = other.data;
-    auto td = data;
-
-    auto x = td.append(od);
-
-    auto z = UString();
-    z.data = x;
-
-    return z;
-}
-
 UString UString::operator+(const UChar &other) const
 {
     return *this + UString(other);
@@ -837,30 +795,6 @@ UString UString::operator+(const std::string &other) const
 UString UString::operator+(const char *other) const
 {
     return *this + UString(other);
-}
-
-UString &UString::operator+=(const UString &other)
-{
-    data = data.append(other.data);
-    return *this;
-}
-
-UString &UString::operator+=(const UChar &other)
-{
-    data = data.append(UString(other).data);
-    return *this;
-}
-
-UString &UString::operator+=(const std::string &other)
-{
-    data = data.append(UString(other).data);
-    return *this;
-}
-
-UString &UString::operator+=(const char *other)
-{
-    data = data.append(UString(other).data);
-    return *this;
 }
 
 // todo: is this really functional?
@@ -886,36 +820,12 @@ UString::operator std::string()
     return this->to_string();
 }
 
-bool operator==(
-    const UString &lhs,
-    const UString &rhs
-)
-{
-    return lhs.data == rhs.data;
-};
-
 bool operator!=(
     const UString &lhs,
     const UString &rhs
 )
 {
     return !(lhs == rhs);
-};
-
-bool operator<(
-    const UString &lhs,
-    const UString &rhs
-)
-{
-    return lhs.data < rhs.data;
-}
-
-bool operator==(
-    const UString &lhs,
-    const char    *rhs
-)
-{
-    return lhs.data == UString(rhs).data;
 };
 
 bool operator!=(
@@ -925,15 +835,6 @@ bool operator!=(
 {
     return !(lhs == rhs);
 };
-
-std::ostream &operator<<(
-    std::ostream  &os,
-    const UString &obj
-)
-{
-    os << obj.data;
-    return os;
-}
 
 std::ostream &operator<<(
     std::ostream &os,

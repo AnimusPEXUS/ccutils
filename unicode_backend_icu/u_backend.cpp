@@ -137,4 +137,88 @@ UString::UString(
     return;
 }
 
+size_t UString::length() const
+{
+    return this->data.length();
+}
+
+UString UString::substr(std::size_t pos, std::size_t length) const
+{
+    UString x;
+    this->data.extract(pos, length, x.data);
+    return x;
+}
+
+UString UString::operator+(const UString &other) const
+{
+    // todo: optimizations and improvements required here
+
+    auto od = other.data;
+    auto td = data;
+
+    auto x = td.append(od);
+
+    auto z = UString();
+    z.data = x;
+
+    return z;
+}
+
+UString &UString::operator+=(const UString &other)
+{
+    data = data.append(other.data);
+    return *this;
+}
+
+UString &UString::operator+=(const UChar &other)
+{
+    data = data.append(UString(other).data);
+    return *this;
+}
+
+UString &UString::operator+=(const std::string &other)
+{
+    data = data.append(UString(other).data);
+    return *this;
+}
+
+UString &UString::operator+=(const char *other)
+{
+    data = data.append(UString(other).data);
+    return *this;
+}
+
+bool operator==(
+    const UString &lhs,
+    const UString &rhs
+)
+{
+    return lhs.data == rhs.data;
+};
+
+bool operator<(
+    const UString &lhs,
+    const UString &rhs
+)
+{
+    return lhs.data < rhs.data;
+}
+
+bool operator==(
+    const UString &lhs,
+    const char    *rhs
+)
+{
+    return lhs.data == UString(rhs).data;
+};
+
+std::ostream &operator<<(
+    std::ostream  &os,
+    const UString &obj
+)
+{
+    os << obj.data;
+    return os;
+}
+
 } // namespace wayround_i2p::ccutils::unicode
