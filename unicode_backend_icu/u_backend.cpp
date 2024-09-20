@@ -121,6 +121,22 @@ UString::UString(
 }
 
 UString::UString(
+    const std::deque<UChar> &val
+) :
+    UString()
+{
+    auto vs = val.size();
+
+    std::vector<int32_t> vec(vs);
+    for (size_t i = 0; i < vs; i++)
+    {
+        vec[i] = val[i].as_int32();
+    }
+    data = icu::UnicodeString::fromUTF32(vec.data(), vs);
+    return;
+}
+
+UString::UString(
     const std::vector<UChar> &val
 ) :
     UString()
@@ -128,11 +144,10 @@ UString::UString(
     auto vs = val.size();
 
     std::vector<int32_t> vec(vs);
-    for (size_t i = 0; i != vs; i++)
+    for (size_t i = 0; i < vs; i++)
     {
         vec[i] = val[i].as_int32();
     }
-    //    data = icu::UnicodeString::fromUTF32(reinterpret_cast<int *>(vec.data()));
     data = icu::UnicodeString::fromUTF32(vec.data(), vs);
     return;
 }

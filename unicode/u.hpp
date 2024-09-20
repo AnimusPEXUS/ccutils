@@ -196,9 +196,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         std::string        encoding = "utf-8"
     );
 
-    UString(
-        const std::vector<UChar> &val
-    );
+    UString(const std::vector<UChar> &val);
+    UString(const std::deque<UChar> &val);
 
     ~UString();
 
@@ -283,9 +282,9 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     UString title() const;
     UString swapcase() const;
 
-    UString lstrip(std::vector<UString> chars = {}) const;
-    UString rstrip(std::vector<UString> chars = {}) const;
-    UString strip(std::vector<UString> chars = {}) const;
+    UString lstrip(std::vector<UChar> chars = {}) const;
+    UString rstrip(std::vector<UChar> chars = {}) const;
+    UString strip(std::vector<UChar> chars = {}) const;
 
     std::tuple<UString, UString, UString> partition(UString sep) const;
 
@@ -324,7 +323,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // returns std:string encoded in utf8
     std::string to_string() const;
 
-    std::vector<UChar> vector_UChar() const;
+    std::vector<UChar> to_vector_UChar() const;
+    std::deque<UChar>  to_deque_UChar() const;
 
     UString repr_as_text() const;
 

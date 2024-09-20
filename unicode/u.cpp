@@ -510,7 +510,7 @@ UString UString::expandtabs(std::size_t tabsize) const
 
     auto l = length();
 
-    for (ssize_t i = l; i != -1; i--)
+    for (ssize_t i = l - 1; i > -1; i--)
     {
         auto z = operator[](i);
         if (z == '\t')
@@ -666,18 +666,6 @@ UString UString::capitalize() const
     return ret;
 }
 
-UString UString::upper() const
-{
-    std::vector<UChar> res;
-
-    auto l = length();
-    for (std::size_t i = 0; i < l; i++)
-    {
-        res.push_back(this->operator[](i).upper());
-    }
-    return UString(res);
-}
-
 UString UString::lower() const
 {
     std::vector<UChar> res;
@@ -686,6 +674,18 @@ UString UString::lower() const
     for (std::size_t i = 0; i < l; i++)
     {
         res.push_back(this->operator[](i).lower());
+    }
+    return UString(res);
+}
+
+UString UString::upper() const
+{
+    std::vector<UChar> res;
+
+    auto l = length();
+    for (std::size_t i = 0; i < l; i++)
+    {
+        res.push_back(this->operator[](i).upper());
     }
     return UString(res);
 }
@@ -733,6 +733,53 @@ UString UString::swapcase() const
         ret.push_back(x.isUpper() ? x.lower() : x.upper());
     }
     return ret;
+}
+
+UString UString::lstrip(std::vector<UChar> chars) const
+{
+    auto ret = to_deque_UChar();
+
+restart:
+
+    if (ret.size() != 0)
+    {
+        for (const UChar &i : chars)
+        {
+            if (ret[0] == i)
+            {
+                ret.pop_front();
+                goto restart;
+            }
+        }
+    }
+
+    return ret;
+}
+
+UString UString::rstrip(std::vector<UChar> chars) const
+{
+    auto ret = to_deque_UChar();
+
+restart:
+
+    if (ret.size() != 0)
+    {
+        for (const UChar &i : chars)
+        {
+            if (ret[ret.size() - 1] == i)
+            {
+                ret.pop_back();
+                goto restart;
+            }
+        }
+    }
+
+    return ret;
+}
+
+UString UString::strip(std::vector<UChar> chars) const
+{
+    return lstrip(chars).rstrip(chars);
 }
 
 std::deque<UString> &UString::split(
@@ -841,10 +888,21 @@ std::string UString::to_string() const
     return ret;
 }
 
-std::vector<UChar> UString::vector_UChar() const
+std::vector<UChar> UString::to_vector_UChar() const
 {
     auto               tl = this->length();
     std::vector<UChar> ret(tl);
+    for (size_t i = 0; i != tl; i++)
+    {
+        ret[i] = UChar(data.char32At(i));
+    }
+    return ret;
+}
+
+std::deque<UChar> UString::to_deque_UChar() const
+{
+    auto              tl = this->length();
+    std::deque<UChar> ret(tl);
     for (size_t i = 0; i != tl; i++)
     {
         ret[i] = UChar(data.char32At(i));
