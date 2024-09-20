@@ -1,3 +1,6 @@
+#ifndef WAYROUND_I2P_20240920_174507_380062
+#define WAYROUND_I2P_20240920_174507_380062
+
 #include <chrono>
 #include <functional>
 
@@ -77,3 +80,5 @@ class SteadyClockCachedFunction : public CachedFunction<R, Args...>
 };
 
 } // namespace wayround_i2p::ccutils::utils::cached_function
+
+#endif
