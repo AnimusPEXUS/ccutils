@@ -34,7 +34,10 @@ UChar::UChar(UString val) :
             if (vl != 1)
             {
                 throw wayround_i2p::ccutils::errors::New(
-                    std::format("UChar::UChar(UString val) - invalid `val` size: {}", vl)
+                    std::format(
+                        "UChar::UChar(UString val) - invalid `val` size: {}",
+                        vl
+                    )
                 );
             }
 
@@ -73,32 +76,6 @@ UString UChar::propertiesText() const
     UString ret;
 
     using item01 = std::tuple<UString, std::function<bool()>>;
-
-    /*
-        for (auto &i :
-    std::vector<item01>{
-                 item01(
-        "Alpha",
-    [&]()->bool{
-            return this->isAlpha();
-    },
-                 item01(
-    "Lower",
-    [&]()->bool{
-            return this->isLower();
-    },
-             })
-        {
-            if ((std::get<1>(i))())
-            {
-                if (ret == "")
-                {
-            ret += " ";
-                }
-                ret += std::get<0>(i);
-            }
-        }
-    */
 
     if (this->isAlpha())
     {
@@ -520,6 +497,35 @@ bool UString::endswith(
     return res == end_min_suff_len;
 }
 
+UString UString::expandtabs(std::size_t tabsize) const
+{
+    // todo: maybe use std::vector<UChar>. benchmark needed?
+    UString tab_string;
+    for (std::size_t i = 0; i != tabsize; i++)
+    {
+        tab_string += " ";
+    }
+
+    UString ret;
+
+    auto l = length();
+
+    for (ssize_t i = l; i != -1; i--)
+    {
+        auto z = operator[](i);
+        if (z == '\t')
+        {
+            ret += tab_string;
+        }
+        else
+        {
+            ret += z;
+        }
+    }
+
+    return ret;
+}
+
 ssize_t UString::index(
     UString sub,
     ssize_t start,
@@ -639,35 +645,120 @@ bool UString::isPrint()
     return _isPrint.getCaching();
 }
 
-UString UString::lower() const
+UString UString::capitalize() const
 {
-    std::vector<UChar> res;
-    for (std::size_t i = 0; i != length(); i++)
+    // todo: maybe use std::vector<UChar>. benchmark needed?
+    UString ret;
+
+    auto l = length();
+    if (l == 0)
     {
-        res.push_back(this->operator[](i).lower());
+        return ret;
     }
-    return UString(res);
+
+    ret += operator[](0).upper();
+
+    for (std::size_t i = 1; i < l; i++)
+    {
+        ret += operator[](i).lower();
+    }
+
+    return ret;
 }
 
 UString UString::upper() const
 {
     std::vector<UChar> res;
-    for (std::size_t i = 0; i != length(); i++)
+
+    auto l = length();
+    for (std::size_t i = 0; i < l; i++)
     {
         res.push_back(this->operator[](i).upper());
     }
     return UString(res);
 }
 
-UString UString::title() const
+UString UString::lower() const
 {
-    // todo: check and fix
     std::vector<UChar> res;
-    for (std::size_t i = 0; i != length(); i++)
+
+    auto l = length();
+    for (std::size_t i = 0; i < l; i++)
     {
-        res.push_back(this->operator[](i).title());
+        res.push_back(this->operator[](i).lower());
     }
     return UString(res);
+}
+
+UString UString::title() const
+{
+    // todo: maybe better solution needed
+    // todo: this function now works like string.capwords() in Python.
+    //       maybe rename it to capwords() and write new function to
+    //       be like string.title() in Python
+    std::deque<UString> words;
+    words = split(words, " ");
+
+    auto l = words.size();
+
+    for (std::size_t i = 0; i < l; i++)
+    {
+        words[i] = words[i].capitalize();
+    }
+
+    UString ret;
+
+    auto l_min_1 = l - 1;
+
+    for (std::size_t i = 0; i < l; i++)
+    {
+        ret += words[i];
+        if (i < l_min_1)
+        {
+            ret += UChar(' ');
+        }
+    }
+
+    return ret;
+}
+
+UString UString::swapcase() const
+{
+    std::vector<UChar> ret;
+
+    auto l = length();
+    for (std::size_t i = 0; i != l; i++)
+    {
+        auto x = this->operator[](i);
+        ret.push_back(x.isUpper() ? x.lower() : x.upper());
+    }
+    return ret;
+}
+
+std::deque<UString> &UString::split(
+    std::deque<UString> &ret,
+    UString              sep,
+    ssize_t              maxsplit
+) const
+{
+    ret.resize(0);
+
+    std::size_t sep_len = sep.length();
+
+    ssize_t cur_end = length();
+
+    while (true)
+    {
+        auto ind = rindex(sep, 0, cur_end);
+        if (ind == -1)
+        {
+            ret.push_front(operator[](0, cur_end));
+            return ret;
+        }
+
+        ret.push_front(operator[](ind + sep_len, cur_end));
+        cur_end = ind;
+    }
 }
 
 std::deque<UString> &UString::splitlines(
@@ -675,7 +766,6 @@ std::deque<UString> &UString::splitlines(
     bool                 keepends
 ) const
 {
-    // std::deque<UString> ret;
     ret.resize(0);
 
     auto pattern = wayround_i2p::ccutils::regexp::Pattern::newLineSplit();

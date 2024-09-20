@@ -276,7 +276,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 
   public:
     UString capitalize() const;
-    UString casefold() const;
+    // todo: not implemented. is this really neded? not now atleast
+    // UString casefold() const;
     UString lower() const;
     UString upper() const;
     UString title() const;
@@ -301,9 +302,9 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     UString rjust(std::size_t width, UString fillchar = std::string(" "));
 
     std::deque<UString> &split(
-        std::deque<UString>     &ret,
-        std::unique_ptr<UString> sep,
-        ssize_t                  maxsplit = -1
+        std::deque<UString> &ret,
+        UString              sep,
+        ssize_t              maxsplit = -1
     ) const;
 
     // split string to lines.
