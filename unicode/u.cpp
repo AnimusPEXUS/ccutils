@@ -782,6 +782,137 @@ UString UString::strip(std::vector<UChar> chars) const
     return lstrip(chars).rstrip(chars);
 }
 
+std::tuple<
+    UString,
+    UString,
+    UString>
+    UString::partition(UString sep) const
+{
+    auto pos = index(sep);
+    if (pos == -1)
+    {
+        return {*this, "", ""};
+    }
+    else
+    {
+        return {
+            operator[](0, pos),
+            sep,
+            operator[](pos + sep.length(), length())
+        };
+    }
+}
+
+UString UString::removeprefix(UString prefix)
+{
+    if (startswith(prefix))
+    {
+        return operator[](prefix.length(), length());
+    }
+    else
+    {
+        return *this;
+    }
+}
+
+UString UString::removesuffix(UString suffix)
+{
+    if (endswith(suffix))
+    {
+        return operator[](0, length() - suffix.length());
+    }
+    else
+    {
+        return *this;
+    }
+}
+
+UString UString::replace(
+    UString old_s,
+    UString new_s,
+    ssize_t count
+)
+{
+    if (count < -1)
+    {
+        count = -1;
+    }
+
+    UString ret;
+
+    std::size_t old_s_len = old_s.length();
+
+    ssize_t countdown = count;
+
+    std::size_t next_slice_start = 0;
+
+    while (true)
+    {
+        if (count != -1 && countdown < 0)
+        {
+            break;
+        }
+
+        ssize_t ind = index(old_s);
+        if (ind == -1)
+        {
+            break;
+        }
+
+        ret += operator[](next_slice_start, ind);
+        ret += new_s;
+
+        next_slice_start = ind + old_s_len;
+
+        if (count != -1)
+        {
+            countdown--;
+        }
+    }
+
+    ret += operator[](next_slice_start, length());
+
+    return ret;
+}
+
+UString UString::ljust(std::size_t width, UChar fillchar)
+{
+    auto l = length();
+
+    if (l >= width)
+    {
+        return *this;
+    }
+
+    auto ret = to_deque_UChar();
+
+    while (ret.size() < width)
+    {
+        ret.push_back(fillchar);
+    }
+
+    return ret;
+}
+
+UString UString::rjust(std::size_t width, UChar fillchar)
+{
+    auto l = length();
+
+    if (l >= width)
+    {
+        return *this;
+    }
+
+    auto ret = to_deque_UChar();
+
+    while (ret.size() < width)
+    {
+        ret.push_front(fillchar);
+    }
+
+    return ret;
+}
+
 std::deque<UString> &UString::split(
     std::deque<UString> &ret,
     UString              sep,

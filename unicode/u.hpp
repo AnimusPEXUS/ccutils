@@ -286,10 +286,14 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     UString rstrip(std::vector<UChar> chars = {}) const;
     UString strip(std::vector<UChar> chars = {}) const;
 
-    std::tuple<UString, UString, UString> partition(UString sep) const;
+    std::tuple<
+        UString,
+        UString,
+        UString>
+        partition(UString sep) const;
 
     UString removeprefix(UString prefix);
-    UString removesuffix(UString prefix);
+    UString removesuffix(UString suffix);
 
     UString replace(
         UString old_s,
@@ -297,8 +301,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         ssize_t count = -1
     );
 
-    UString ljust(std::size_t width, UString fillchar = std::string(" "));
-    UString rjust(std::size_t width, UString fillchar = std::string(" "));
+    UString ljust(std::size_t width, UChar fillchar = ' ');
+    UString rjust(std::size_t width, UChar fillchar = ' ');
 
     std::deque<UString> &split(
         std::deque<UString> &ret,
