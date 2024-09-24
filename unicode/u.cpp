@@ -1042,9 +1042,6 @@ std::deque<UString> &UString::splitlines(
     return ret;
 }
 
-// UString UString::substr(std::size_t pos, std::size_t length) const {
-// }
-
 std::string UString::to_string() const
 {
     std::string ret;
@@ -1120,6 +1117,10 @@ UString UString::operator[](ssize_t offset1, ssize_t offset2) const
     if (offset2 < 0)
     {
         offset2 = length() + offset2;
+    }
+    if (offset1 > offset2)
+    {
+        throw wayround_i2p::ccutils::errors::New("invalid offset1:offset2 combination");
     }
     return substr(offset1, offset2 - offset1);
 }
