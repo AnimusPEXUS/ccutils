@@ -208,7 +208,7 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         UChar       fillchar = ' '
     ) const;
 
-    UString count(
+    std::size_t count(
         UString sub,
         ssize_t start = -1,
         ssize_t end   = -1

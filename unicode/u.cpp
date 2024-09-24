@@ -457,6 +457,36 @@ UString UString::center(
     return ret;
 }
 
+std::size_t UString::count(
+    UString sub,
+    ssize_t start,
+    ssize_t end
+) const
+{
+    exception_on_incorrect_start_end(sub, start, end);
+    setup_default_start_end(sub, start, end);
+
+    std::size_t ret = 0;
+    ssize_t     ind = -1;
+
+    ssize_t next_start = start;
+
+    auto sub_len = sub.length();
+
+    while (true)
+    {
+        ind = index(sub, next_start, end);
+        if (ind == -1)
+        {
+            return ret;
+        }
+
+        ret++;
+
+        next_start = ind + sub_len;
+    }
+}
+
 bool UString::startswith(
     UString prefix,
     ssize_t start,
@@ -1012,6 +1042,9 @@ std::deque<UString> &UString::splitlines(
     return ret;
 }
 
+// UString UString::substr(std::size_t pos, std::size_t length) const {
+// }
+
 std::string UString::to_string() const
 {
     std::string ret;
@@ -1069,6 +1102,10 @@ UString UString::repr_as_text() const
 
 UChar UString::operator[](ssize_t offset) const
 {
+    if (offset < 0)
+    {
+        offset = length() + offset;
+    }
     UChar ret(this->data.char32At(offset));
     return ret;
 }
@@ -1076,6 +1113,14 @@ UChar UString::operator[](ssize_t offset) const
 UString UString::operator[](ssize_t offset1, ssize_t offset2) const
 {
     // todo: add parameters sanity check
+    if (offset1 < 0)
+    {
+        offset1 = length() + offset1;
+    }
+    if (offset2 < 0)
+    {
+        offset2 = length() + offset2;
+    }
     return substr(offset1, offset2 - offset1);
 }
 

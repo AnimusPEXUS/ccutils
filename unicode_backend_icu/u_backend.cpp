@@ -166,17 +166,17 @@ UString UString::substr(std::size_t pos, std::size_t length) const
 
 UString UString::operator+(const UString &other) const
 {
-    // todo: optimizations and improvements required here
+    // todo: move this to u.cpp?
+    auto this_data  = to_vector_UChar();
+    auto other_data = other.to_vector_UChar();
 
-    auto od = other.data;
-    auto td = data;
+    this_data.insert(
+        this_data.end(),
+        other_data.begin(),
+        other_data.end()
+    );
 
-    auto x = td.append(od);
-
-    auto z = UString();
-    z.data = x;
-
-    return z;
+    return this_data;
 }
 
 UString &UString::operator+=(const UString &other)

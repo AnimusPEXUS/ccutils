@@ -33,11 +33,11 @@ int main(int argc, char **args)
     params.uri    = "https://github.com/AnimusPEXUS/ccutils";
     params.logger = logger;
 
-    params.AddTest(main_001_i);
-    params.AddTest(main_002_i);
-    params.AddTest(main_003_i);
-    params.AddTest(main_004_i);
-    params.AddTest(main_005_i);
+    params.AddTest(main_std_format_i);
+    params.AddTest(main_string_center_i);
+    params.AddTest(main_string_index_i);
+    params.AddTest(main_string_startswith_i);
+    params.AddTest(main_string_endswith_i);
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
 }

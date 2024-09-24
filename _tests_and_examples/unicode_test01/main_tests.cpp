@@ -5,7 +5,7 @@ using UString = wayround_i2p::ccutils::unicode::UString;
 
 // -----------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_001(
+wayround_i2p::ccutils::tst::TSTFuncResult main_std_format(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -23,15 +23,15 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_001(
     };
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_001_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_std_format_i = {
     .group_name = "main",
-    .test_name  = "001",
-    .func       = main_001
+    .test_name  = "std::format",
+    .func       = main_std_format
 };
 
 // -----------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_002(
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_center(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -63,15 +63,46 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
     return {ok};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_002_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_string_center_i = {
     .group_name = "main",
-    .test_name  = "002",
-    .func       = main_002
+    .test_name  = "string::center",
+    .func       = main_string_center
 };
 
 // -----------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_003(
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_count(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    const auto ex_res1 = UString("abcdef12345test");
+
+    if (ex_res1.count("e") == 2)
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_005_i = {
+    .group_name = "main",
+    .test_name  = "string::count",
+    .func       = main_string_count
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_index(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -144,16 +175,16 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
     return {error_count == 0};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_003_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_string_index_i = {
     .group_name  = "main",
-    .test_name   = "003",
-    .description = "UString index",
-    .func        = main_003
+    .test_name   = "string::index",
+    .description = "",
+    .func        = main_string_index
 };
 
 // -----------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_004(
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_startswith(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -206,16 +237,16 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_004(
     return {error_count == 0};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_004_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_string_startswith_i = {
     .group_name  = "main",
-    .test_name   = "004",
-    .description = "UString startswith",
-    .func        = main_004
+    .test_name   = "string::startswith",
+    .description = "",
+    .func        = main_string_startswith
 };
 
 // -----------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_005(
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_endswith(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -248,9 +279,9 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_005(
     return {error_count == 0};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_005_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_string_endswith_i = {
     .group_name  = "main",
-    .test_name   = "005",
-    .description = "UString endswith",
-    .func        = main_005
+    .test_name   = "string::endswith",
+    .description = "",
+    .func        = main_string_endswith
 };
