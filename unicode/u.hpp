@@ -292,17 +292,17 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         UString>
         partition(UString sep) const;
 
-    UString removeprefix(UString prefix);
-    UString removesuffix(UString suffix);
+    UString removeprefix(UString prefix) const;
+    UString removesuffix(UString suffix) const;
 
     UString replace(
         UString old_s,
         UString new_s,
         ssize_t count = -1
-    );
+    ) const;
 
-    UString ljust(std::size_t width, UChar fillchar = ' ');
-    UString rjust(std::size_t width, UChar fillchar = ' ');
+    UString ljust(std::size_t width, UChar fillchar = ' ') const;
+    UString rjust(std::size_t width, UChar fillchar = ' ') const;
 
     std::deque<UString> &split(
         std::deque<UString> &ret,

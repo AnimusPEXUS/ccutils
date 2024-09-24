@@ -536,24 +536,7 @@ UString UString::expandtabs(std::size_t tabsize) const
         tab_string += " ";
     }
 
-    UString ret;
-
-    auto l = length();
-
-    for (ssize_t i = l - 1; i > -1; i--)
-    {
-        auto z = operator[](i);
-        if (z == '\t')
-        {
-            ret += tab_string;
-        }
-        else
-        {
-            ret += z;
-        }
-    }
-
-    return ret;
+    return replace("\r", tab_string);
 }
 
 ssize_t UString::index(
@@ -833,7 +816,7 @@ std::tuple<
     }
 }
 
-UString UString::removeprefix(UString prefix)
+UString UString::removeprefix(UString prefix) const
 {
     if (startswith(prefix))
     {
@@ -845,7 +828,7 @@ UString UString::removeprefix(UString prefix)
     }
 }
 
-UString UString::removesuffix(UString suffix)
+UString UString::removesuffix(UString suffix) const
 {
     if (endswith(suffix))
     {
@@ -861,7 +844,7 @@ UString UString::replace(
     UString old_s,
     UString new_s,
     ssize_t count
-)
+) const
 {
     if (count < -1)
     {
@@ -905,7 +888,7 @@ UString UString::replace(
     return ret;
 }
 
-UString UString::ljust(std::size_t width, UChar fillchar)
+UString UString::ljust(std::size_t width, UChar fillchar) const
 {
     auto l = length();
 
@@ -924,7 +907,7 @@ UString UString::ljust(std::size_t width, UChar fillchar)
     return ret;
 }
 
-UString UString::rjust(std::size_t width, UChar fillchar)
+UString UString::rjust(std::size_t width, UChar fillchar) const
 {
     auto l = length();
 
