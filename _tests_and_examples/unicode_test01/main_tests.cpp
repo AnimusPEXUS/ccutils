@@ -305,7 +305,6 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_string_expandtabs(
         error_count++;
     }
 
-
     return {error_count == 0};
 }
 
@@ -313,4 +312,56 @@ wayround_i2p::ccutils::tst::TSTInfo main_string_expandtabs_i = {
     .group_name = "main",
     .test_name  = "string::expandtabs",
     .func       = main_string_expandtabs
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_isUpper(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    auto ex_res1 = UString("Some simple text");
+    auto ex_res2 = UString("ALL_UPPER");
+
+    if (!ex_res1.isUpper())
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    if (ex_res2.isUpper())
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    if (ex_res1.upper().isUpper())
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_isUpper_i = {
+    .group_name = "main",
+    .test_name  = "string::isUpper",
+    .func       = main_string_isUpper
 };
