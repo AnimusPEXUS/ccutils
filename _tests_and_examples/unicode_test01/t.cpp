@@ -40,15 +40,13 @@ int main(int argc, char **args)
     params.AddTest(main_string_endswith_i);
     params.AddTest(main_string_expandtabs_i);
     params.AddTest(main_string_index_i);
+    params.AddTest(main_string_upper_isUpper_i);
+    params.AddTest(main_string_capitalize_i);
+    params.AddTest(main_string_title_i);
+    params.AddTest(main_string_strip_i);
+    params.AddTest(main_string_partition_i);
 
     /*
-        params.AddTest(main_string_isUpper_i);
-        params.AddTest(main_string_capitalize_i);
-        params.AddTest(main_string_lower_i);
-        params.AddTest(main_string_upper_i);
-        params.AddTest(main_string_title_i);
-        params.AddTest(main_string_strip_i);
-        params.AddTest(main_string_partition_i);
         params.AddTest(main_string_removeprefix_i);
         params.AddTest(main_string_replace_i);
         params.AddTest(main_string_ljust_i);

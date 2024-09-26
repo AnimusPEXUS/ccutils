@@ -15,6 +15,11 @@ UChar::UChar(std::int32_t val) :
 {
 }
 
+bool UChar::isCased() const
+{
+    return u_hasBinaryProperty(this->chr, UCHAR_CASED);
+}
+
 bool UChar::isAlpha() const
 {
     return u_isalpha(this->chr);

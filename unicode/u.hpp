@@ -122,6 +122,8 @@ class UChar : // public UCharPropertiesI,
     // todo: todo
     //    UCharProperties getAllProperties();
 
+    bool isCased() const;
+
     bool isAlpha() const;
     bool isLower() const;
     bool isUpper() const;
@@ -246,32 +248,18 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     ) const;
 
   public:
-    bool isAlpha();
-    bool isLower();
-    bool isUpper();
-    bool isPunct();
-    bool isDigit();
-    bool isXDigit();
-    bool isAlnum();
-    bool isSpace();
-    bool isBlank();
-    bool isCntrl();
-    bool isGraph();
-    bool isPrint();
-
-  private:
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isAlpha;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isLower;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isUpper;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isPunct;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isDigit;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isXDigit;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isAlnum;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isSpace;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isBlank;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isCntrl;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isGraph;
-    wayround_i2p::ccutils::utils::cached_function::CachedFunction<bool> _isPrint;
+    bool isAlpha() const;
+    bool isLower(bool neglect_caseless_characters = true) const;
+    bool isUpper(bool neglect_caseless_characters = true) const;
+    bool isPunct() const;
+    bool isDigit() const;
+    bool isXDigit() const;
+    bool isAlnum() const;
+    bool isSpace() const;
+    bool isBlank() const;
+    bool isCntrl() const;
+    bool isGraph() const;
+    bool isPrint() const;
 
   public:
     UString capitalize() const;
@@ -282,9 +270,13 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     UString title() const;
     UString swapcase() const;
 
-    UString lstrip(std::vector<UChar> chars = {}) const;
-    UString rstrip(std::vector<UChar> chars = {}) const;
-    UString strip(std::vector<UChar> chars = {}) const;
+    UString lstrip(const std::vector<UChar> &chars) const;
+    UString rstrip(const std::vector<UChar> &chars) const;
+    UString strip(const std::vector<UChar> &chars) const;
+
+    UString lstrip(UString chars = " ") const;
+    UString rstrip(UString chars = " ") const;
+    UString strip(UString chars = " ") const;
 
     std::tuple<
         UString,

@@ -316,7 +316,7 @@ wayround_i2p::ccutils::tst::TSTInfo main_string_expandtabs_i = {
 
 // -----------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_string_isUpper(
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_upper_isUpper(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -324,8 +324,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_string_isUpper(
 {
     std::size_t error_count = 0;
 
-    auto ex_res1 = UString("Some simple text");
-    auto ex_res2 = UString("ALL_UPPER");
+    const auto ex_res1 = UString("Some simple text");
+    const auto ex_res2 = UString("ALL_UPPER");
 
     if (!ex_res1.isUpper())
     {
@@ -360,8 +360,156 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_string_isUpper(
     return {error_count == 0};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_string_isUpper_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_string_upper_isUpper_i = {
     .group_name = "main",
-    .test_name  = "string::isUpper",
-    .func       = main_string_isUpper
+    .test_name  = "string::upper and isUpper",
+    .func       = main_string_upper_isUpper
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_capitalize(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    const auto ex_res1 = UString("some simple text");
+    const auto ex_res2 = UString(" some simple text");
+
+    if (ex_res1.capitalize() == "Some simple text")
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    if (ex_res2.capitalize() == ex_res2)
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_capitalize_i = {
+    .group_name = "main",
+    .test_name  = "string::capitalize",
+    .func       = main_string_capitalize
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_title(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    const auto ex_res1 = UString(" some simple text");
+
+    if (ex_res1.title() == " Some Simple Text")
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_title_i = {
+    .group_name = "main",
+    .test_name  = "string::title",
+    .func       = main_string_title
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_strip(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    const auto ex_res1 = UString(" Some Simple Text ");
+
+    if (ex_res1.strip() == "Some Simple Text")
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    if (ex_res1.strip({' ', 'S', 't'}) == "ome Simple Tex")
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_strip_i = {
+    .group_name = "main",
+    .test_name  = "string::strip",
+    .func       = main_string_strip
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_partition(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    const auto ex_res1 = UString("Some Simple:Text");
+
+    if (auto t = ex_res1.partition(":");
+        std::get<0>(t) == "Some Simple"
+        && std::get<1>(t) == ":"
+        && std::get<2>(t) == "Text")
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_partition_i = {
+    .group_name = "main",
+    .test_name  = "string::partition",
+    .func       = main_string_partition
 };

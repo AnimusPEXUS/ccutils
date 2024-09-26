@@ -77,6 +77,15 @@ UString UChar::propertiesText() const
 
     using item01 = std::tuple<UString, std::function<bool()>>;
 
+    if (this->isCased())
+    {
+        if (ret != "")
+        {
+            ret += " ";
+        }
+        ret += "isCased";
+    }
+
     if (this->isAlpha())
     {
         if (ret != "")
@@ -228,15 +237,42 @@ bool operator<=(
 }
 
 void allcharscheck(
-    UString *s,
+    const UString *s,
     bool (UChar::*member)() const,
     bool &x
 )
 {
     auto l = s->length();
+
     for (std::size_t i = 0; i < l; i++)
     {
-        if (!(((*s)[i]).*member)())
+        UChar c = (*s)[i];
+        if (!((c.*member)()))
+        {
+            x = false;
+            return;
+        }
+    }
+    x = true;
+}
+
+void allcasedcharscheck(
+    const UString *s,
+    bool (UChar::*member)() const,
+    bool &x
+)
+{
+    auto l = s->length();
+
+    for (std::size_t i = 0; i < l; i++)
+    {
+        UChar c = (*s)[i];
+        if (!c.isCased())
+        {
+            continue;
+        }
+
+        if (!((c.*member)()))
         {
             x = false;
             return;
@@ -246,115 +282,7 @@ void allcharscheck(
 }
 
 UString::UString() :
-    data(""),
-    _isAlpha(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isAlpha, x);
-            }
-        )
-    ),
-    _isLower(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isLower, x);
-            }
-        )
-    ),
-    _isUpper(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isUpper, x);
-            }
-        )
-    ),
-    _isPunct(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isPunct, x);
-            }
-        )
-    ),
-    _isDigit(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isDigit, x);
-            }
-        )
-    ),
-    _isXDigit(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isXDigit, x);
-            }
-        )
-    ),
-    _isAlnum(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isAlnum, x);
-            }
-        )
-    ),
-    _isSpace(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isSpace, x);
-            }
-        )
-    ),
-    _isBlank(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isBlank, x);
-            }
-        )
-    ),
-    _isCntrl(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isCntrl, x);
-            }
-        )
-    ),
-    _isGraph(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isGraph, x);
-            }
-        )
-    ),
-    _isPrint(
-        wayround_i2p::ccutils::utils::cached_function::SteadyClockCachedFunction<bool>(
-            last_chage_time_point,
-            [&](bool &x)
-            {
-                allcharscheck(this, &UChar::isPrint, x);
-            }
-        )
-    )
+    data("")
 {
     update_last_chage_time_point();
 }
@@ -598,83 +526,115 @@ ssize_t UString::rindex(
     return index(sub, start, end, true);
 }
 
-bool UString::isAlpha()
+bool UString::isAlpha() const
 {
-    return _isAlpha.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isAlpha, ret);
+    return ret;
 }
 
-bool UString::isLower()
+bool UString::isLower(bool neglect_caseless_characters) const
 {
-    return _isLower.getCaching();
+    bool ret = false;
+    if (neglect_caseless_characters)
+    {
+        allcasedcharscheck(this, &UChar::isLower, ret);
+    }
+    else
+    {
+        allcharscheck(this, &UChar::isLower, ret);
+    }
+    return ret;
 }
 
-bool UString::isUpper()
+bool UString::isUpper(bool neglect_caseless_characters) const
 {
-    return _isUpper.getCaching();
+    bool ret = false;
+    if (neglect_caseless_characters)
+    {
+        allcasedcharscheck(this, &UChar::isUpper, ret);
+    }
+    else
+    {
+        allcharscheck(this, &UChar::isUpper, ret);
+    }
+    return ret;
 }
 
-bool UString::isPunct()
+bool UString::isPunct() const
 {
-    return _isPunct.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isPunct, ret);
+    return ret;
 }
 
-bool UString::isDigit()
+bool UString::isDigit() const
 {
-    return _isDigit.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isDigit, ret);
+    return ret;
 }
 
-bool UString::isXDigit()
+bool UString::isXDigit() const
 {
-    return _isXDigit.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isXDigit, ret);
+    return ret;
 }
 
-bool UString::isAlnum()
+bool UString::isAlnum() const
 {
-    return _isAlnum.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isAlnum, ret);
+    return ret;
 }
 
-bool UString::isSpace()
+bool UString::isSpace() const
 {
-    return _isSpace.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isSpace, ret);
+    return ret;
 }
 
-bool UString::isBlank()
+bool UString::isBlank() const
 {
-    return _isBlank.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isBlank, ret);
+    return ret;
 }
 
-bool UString::isCntrl()
+bool UString::isCntrl() const
 {
-    return _isCntrl.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isCntrl, ret);
+    return ret;
 }
 
-bool UString::isGraph()
+bool UString::isGraph() const
 {
-    return _isGraph.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isGraph, ret);
+    return ret;
 }
 
-bool UString::isPrint()
+bool UString::isPrint() const
 {
-    return _isPrint.getCaching();
+    bool ret = false;
+    allcharscheck(this, &UChar::isPrint, ret);
+    return ret;
 }
 
 UString UString::capitalize() const
 {
-    // todo: maybe use std::vector<UChar>. benchmark needed?
-    UString ret;
+    auto ret = to_vector_UChar();
 
-    auto l = length();
+    auto l = ret.size();
     if (l == 0)
     {
         return ret;
     }
 
-    ret += operator[](0).upper();
-
-    for (std::size_t i = 1; i < l; i++)
-    {
-        ret += operator[](i).lower();
-    }
+    ret[0] = ret[0].upper();
 
     return ret;
 }
@@ -748,7 +708,7 @@ UString UString::swapcase() const
     return ret;
 }
 
-UString UString::lstrip(std::vector<UChar> chars) const
+UString UString::lstrip(const std::vector<UChar> &chars) const
 {
     auto ret = to_deque_UChar();
 
@@ -769,7 +729,7 @@ restart:
     return ret;
 }
 
-UString UString::rstrip(std::vector<UChar> chars) const
+UString UString::rstrip(const std::vector<UChar> &chars) const
 {
     auto ret = to_deque_UChar();
 
@@ -790,9 +750,24 @@ restart:
     return ret;
 }
 
-UString UString::strip(std::vector<UChar> chars) const
+UString UString::strip(const std::vector<UChar> &chars) const
 {
     return lstrip(chars).rstrip(chars);
+}
+
+UString UString::lstrip(UString chars) const
+{
+    return strip(chars.to_vector_UChar());
+}
+
+UString UString::rstrip(UString chars) const
+{
+    return strip(chars.to_vector_UChar());
+}
+
+UString UString::strip(UString chars) const
+{
+    return strip(chars.to_vector_UChar());
 }
 
 std::tuple<
