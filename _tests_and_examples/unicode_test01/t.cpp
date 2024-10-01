@@ -47,14 +47,11 @@ int main(int argc, char **args)
     params.AddTest(main_string_partition_i);
     params.AddTest(main_string_removeprefix_i);
     params.AddTest(main_string_replace_i);
-
-    /*
-        params.AddTest(main_string_ljust_i);
-        params.AddTest(main_string_rjust_i);
-        params.AddTest(main_string_split_i);
-        params.AddTest(main_string_splitlines_i);
-        params.AddTest(main_string_substr_i);
-    */
+    params.AddTest(main_string_ljust_i);
+    params.AddTest(main_string_rjust_i);
+    params.AddTest(main_string_split_i);
+    params.AddTest(main_string_splitlines_i);
+    params.AddTest(main_string_substr_i);
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
 }

@@ -845,7 +845,7 @@ UString UString::replace(
             break;
         }
 
-        ssize_t ind = index(old_s);
+        ssize_t ind = index(old_s, next_slice_start);
         if (ind == -1)
         {
             break;
@@ -911,6 +911,13 @@ std::deque<UString> &UString::split(
     ssize_t              maxsplit
 ) const
 {
+    if (maxsplit < 0)
+    {
+        maxsplit = -1;
+    }
+
+    // todo: maxsplit doesn't work
+
     ret.resize(0);
 
     std::size_t sep_len = sep.length();
@@ -1083,7 +1090,11 @@ UString UString::operator[](ssize_t offset1, ssize_t offset2) const
     if (offset1 > offset2)
     {
         throw wayround_i2p::ccutils::errors::New(
-            "invalid offset1:offset2 combination",
+            std::format(
+                "invalid offset1({}):offset2({}) combination",
+                offset1,
+                offset2
+            ),
             __FILE__,
             __LINE__
         );

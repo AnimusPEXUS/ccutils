@@ -1,3 +1,6 @@
+
+#include <algorithm>
+
 #include <wayround_i2p/ccutils/logger/logger.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
@@ -571,32 +574,41 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_string_replace(
 {
     std::size_t error_count = 0;
 
-    const auto ex_res1 = UString("Some Simple Text");
-    const auto ex_res2 = UString("Some Complex Text");
-    const auto res     = ex_res1.replace("Simple", "Complex");
+    for (const auto &i : std::vector<std::tuple<UString, UString, UString, UString>>{
+             {"Some Simple Text",       "Some Complex Text",        "Simple", "Complex"},
+             {"Some SimpleSimple Text", "Some ComplexComplex Text", "Simple", "Complex"},
+             {"Some SimpleSimple Text", "Who? SimpleSimple Text",   "Some",   "Who?"   }
+    })
+    {
+        const auto ex_res1 = UString(std::get<0>(i));
+        const auto ex_res2 = UString(std::get<1>(i));
+        const auto res     = ex_res1.replace(std::get<2>(i), std::get<3>(i));
 
-    logger->LogSplitLines(
-        wayround_i2p::ccutils::logger::Status,
-        std::format(
-            R"--(
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            std::format(
+                R"--(
 ex_res1                      =  {}
 ex_res2                      =  {}
-replace("Simple", "Complex") == {}
+replace({}, {}) == {}
 )--",
-            ex_res1,
-            ex_res2,
-            res
-        )
-    );
+                ex_res1,
+                ex_res2,
+                std::get<2>(i),
+                std::get<3>(i),
+                res
+            )
+        );
 
-    if (res == ex_res2)
-    {
-        logger->Log(wayround_i2p::ccutils::logger::Success);
-    }
-    else
-    {
-        logger->Log(wayround_i2p::ccutils::logger::Failure);
-        error_count++;
+        if (res == ex_res2)
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Success);
+        }
+        else
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Failure);
+            error_count++;
+        }
     }
 
     return {error_count == 0};
@@ -606,4 +618,275 @@ wayround_i2p::ccutils::tst::TSTInfo main_string_replace_i = {
     .group_name = "main",
     .test_name  = "string::replace",
     .func       = main_string_replace
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_ljust(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    for (const auto &i : std::vector<std::tuple<UString, UString, std::size_t>>{
+             {"Some",  "Some                                                                            ", 80},
+             {"Some ", "Some                                                                            ", 80},
+             {"Some ", "Some ",                                                                            4 },
+    })
+    {
+        const auto ex_res1 = UString(std::get<0>(i));
+        const auto ex_res2 = UString(std::get<1>(i));
+        const auto res     = ex_res1.ljust(std::get<2>(i));
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            std::format(
+                R"--(
+subj         =  "{}"
+expected     =  "{}"
+ljust({})    == "{}"
+)--",
+                ex_res1,
+                ex_res2,
+                std::get<2>(i),
+                res
+            )
+        );
+
+        if (res == ex_res2)
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Success);
+        }
+        else
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Failure);
+            error_count++;
+        }
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_ljust_i = {
+    .group_name = "main",
+    .test_name  = "string::ljust",
+    .func       = main_string_ljust
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_rjust(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    for (const auto &i : std::vector<std::tuple<UString, UString, std::size_t>>{
+             {"Some",  "                                                                            Some", 80},
+             {"Some ", "                                                                           Some ", 80},
+             {"Some ", "Some ",                                                                            4 },
+             {"Some ", " Some ",                                                                           6 }
+    })
+    {
+        const auto ex_res1 = UString(std::get<0>(i));
+        const auto ex_res2 = UString(std::get<1>(i));
+        const auto res     = ex_res1.rjust(std::get<2>(i));
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            std::format(
+                R"--(
+subj         =  "{}"
+expected     =  "{}"
+ljust({})    == "{}"
+)--",
+                ex_res1,
+                ex_res2,
+                std::get<2>(i),
+                res
+            )
+        );
+
+        if (res == ex_res2)
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Success);
+        }
+        else
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Failure);
+            error_count++;
+        }
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_rjust_i = {
+    .group_name = "main",
+    .test_name  = "string::rjust",
+    .func       = main_string_rjust
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_split(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    for (const auto &i : std::vector<std::tuple<UString, std::vector<UString>, UString>>{
+             {"1:2:3:4:5::", {"1", "2", "3", "4", "5", "", ""}, ":"}
+    })
+    {
+        const auto           ex_res1 = std::get<0>(i);
+        std::vector<UString> ex_res2 = std::get<1>(i);
+        std::deque<UString>  res;
+        res = ex_res1.split(res, std::get<2>(i));
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            std::format(
+                R"--(
+subj        =   "{}"
+expected    =   {}
+split({})    ==  {}
+)--",
+                ex_res1,
+                [&ex_res2]() -> UString
+                {
+                    UString ret;
+                    for (const auto &i : ex_res2)
+                    {
+                        ret += std::format("\"{}\",", i);
+                    }
+                    return ret;
+                }(),
+                std::get<2>(i),
+                [&res]() -> UString
+                {
+                    UString ret;
+                    for (const auto &i : res)
+                    {
+                        ret += std::format("\"{}\",", i);
+                    }
+                    return ret;
+                }()
+            )
+        );
+
+        if (
+            res.size() == ex_res2.size()
+            && ([&res, &ex_res2]() -> bool
+                {
+			for (auto i=0; i < res.size(); i++)
+			{
+				if (res[i] != ex_res2[i]) {
+					return false;
+				}
+			} 
+			return true; }()
+            )
+        )
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Success);
+        }
+        else
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Failure);
+            error_count++;
+        }
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_split_i = {
+    .group_name = "main",
+    .test_name  = "string::split",
+    .func       = main_string_split
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_splitlines(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+
+    logger->LogSplitLines(
+        wayround_i2p::ccutils::logger::Success,
+        "logger::LogSplitLines uses UString::splitlines\n"
+        "and it works well"
+    );
+
+    return {true};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_splitlines_i = {
+    .group_name = "main",
+    .test_name  = "string::splitlines",
+    .func       = main_string_splitlines
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_substr(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    for (const auto &i : std::vector<std::tuple<UString, UString, ssize_t, ssize_t>>{
+             {"123test456", "test", 3, 4}
+    })
+    {
+        const auto ex_res1 = std::get<0>(i);
+        const auto ex_res2 = std::get<1>(i);
+        UString    res     = ex_res1.substr(std::get<2>(i), std::get<3>(i));
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            std::format(
+                R"--(
+subj               =  "{}"
+expected           =  "{}"
+substr({}, {})    ==  "{}"
+)--",
+                ex_res1,
+                ex_res2,
+                std::get<2>(i),
+                std::get<3>(i),
+                res
+            )
+        );
+
+        if (res == ex_res2)
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Success);
+        }
+        else
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Failure);
+            error_count++;
+        }
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_substr_i = {
+    .group_name = "main",
+    .test_name  = "string::substr",
+    .func       = main_string_substr
 };
