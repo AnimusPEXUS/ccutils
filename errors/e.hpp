@@ -51,7 +51,7 @@ class BasicStringError : public error
     //    stacktrace_ptr st;
 };
 
-error_ptr New(UString text);
+error_ptr New(UString text, UString file, std::size_t line);
 
 } // namespace wayround_i2p::ccutils::errors
 

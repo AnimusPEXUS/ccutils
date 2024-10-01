@@ -187,7 +187,11 @@ constexpr regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
         switch (mode)
         {
             default:
-                throw wayround_i2p::ccutils::errors::New("invalid mode");
+                throw wayround_i2p::ccutils::errors::New(
+                    "invalid mode",
+                    __FILE__,
+                    __LINE__
+                );
 
             case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr_or_port:
                 port_or_cidr

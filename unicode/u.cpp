@@ -37,7 +37,9 @@ UChar::UChar(UString val) :
                     std::format(
                         "UChar::UChar(UString val) - invalid `val` size: {}",
                         vl
-                    )
+                    ),
+                    __FILE__,
+                    __LINE__
                 );
             }
 
@@ -350,7 +352,9 @@ void UString::exception_on_incorrect_start_end(
                 start,
                 end,
                 txt.length()
-            )
+            ),
+            __FILE__,
+            __LINE__
         );
     }
 }
@@ -1078,7 +1082,11 @@ UString UString::operator[](ssize_t offset1, ssize_t offset2) const
     }
     if (offset1 > offset2)
     {
-        throw wayround_i2p::ccutils::errors::New("invalid offset1:offset2 combination");
+        throw wayround_i2p::ccutils::errors::New(
+            "invalid offset1:offset2 combination",
+            __FILE__,
+            __LINE__
+        );
     }
     return substr(offset1, offset2 - offset1);
 }

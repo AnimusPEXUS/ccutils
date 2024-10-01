@@ -503,7 +503,11 @@ error_ptr IPv4::setFromVector(const std::vector<std::uint8_t> &vec)
 {
     if (vec.size() != 4)
     {
-        return wayround_i2p::ccutils::errors::New("invalid vector size");
+        return wayround_i2p::ccutils::errors::New(
+            "invalid vector size",
+            __FILE__,
+            __LINE__
+        );
     }
 
     for (std::size_t i = 0; i != 4; i++)
@@ -526,12 +530,20 @@ error_ptr IPv4::setFromString(const UString &val)
 
     if (!res->matched)
     {
-        return wayround_i2p::ccutils::errors::New("no match");
+        return wayround_i2p::ccutils::errors::New(
+            "no match",
+            __FILE__,
+            __LINE__
+        );
     }
 
     if (res->match_end != val.length())
     {
-        return wayround_i2p::ccutils::errors::New("no match");
+        return wayround_i2p::ccutils::errors::New(
+            "no match",
+            __FILE__,
+            __LINE__
+        );
     }
 
     std::array<std::uint8_t, 4> tmp;
@@ -542,7 +554,11 @@ error_ptr IPv4::setFromString(const UString &val)
 
         if (!res2)
         {
-            return wayround_i2p::ccutils::errors::New("no match");
+            return wayround_i2p::ccutils::errors::New(
+                "no match",
+                __FILE__,
+                __LINE__
+            );
         }
 
         if (res2->error)
@@ -552,7 +568,11 @@ error_ptr IPv4::setFromString(const UString &val)
 
         if (!res2->matched)
         {
-            return wayround_i2p::ccutils::errors::New("no match");
+            return wayround_i2p::ccutils::errors::New(
+                "no match",
+                __FILE__,
+                __LINE__
+            );
         }
 
         auto x = res2->getMatchedString();
@@ -562,11 +582,19 @@ error_ptr IPv4::setFromString(const UString &val)
         }
         catch (std::invalid_argument const &ex)
         {
-            return wayround_i2p::ccutils::errors::New("invalid_argument");
+            return wayround_i2p::ccutils::errors::New(
+                "invalid_argument",
+                __FILE__,
+                __LINE__
+            );
         }
         catch (std::out_of_range const &ex)
         {
-            return wayround_i2p::ccutils::errors::New("out_of_range");
+            return wayround_i2p::ccutils::errors::New(
+                "out_of_range",
+                __FILE__,
+                __LINE__
+            );
         }
     }
     setFromArray(tmp);
@@ -704,7 +732,11 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint8_t> &vec)
 {
     if (vec.size() != 16)
     {
-        return wayround_i2p::ccutils::errors::New("invalid vector size");
+        return wayround_i2p::ccutils::errors::New(
+            "invalid vector size",
+            __FILE__,
+            __LINE__
+        );
     }
 
     for (std::size_t i = 0; i != 16; i++)
@@ -719,7 +751,11 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint16_t> &vec)
 {
     if (vec.size() != 8)
     {
-        return wayround_i2p::ccutils::errors::New("invalid vector size");
+        return wayround_i2p::ccutils::errors::New(
+            "invalid vector size",
+            __FILE__,
+            __LINE__
+        );
     }
 
     for (std::size_t i = 0; i != 8; i++)
@@ -734,7 +770,11 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint32_t> &vec)
 {
     if (vec.size() != 4)
     {
-        return wayround_i2p::ccutils::errors::New("invalid vector size");
+        return wayround_i2p::ccutils::errors::New(
+            "invalid vector size",
+            __FILE__,
+            __LINE__
+        );
     }
 
     for (std::size_t i = 0; i != 4; i++)
@@ -759,12 +799,20 @@ error_ptr IPv6::setFromString(const UString &text)
 
     if (!res->matched)
     {
-        return wayround_i2p::ccutils::errors::New("no match");
+        return wayround_i2p::ccutils::errors::New(
+            "no match",
+            __FILE__,
+            __LINE__
+        );
     }
 
     if (res->match_end != text.length())
     {
-        return wayround_i2p::ccutils::errors::New("no match");
+        return wayround_i2p::ccutils::errors::New(
+            "no match",
+            __FILE__,
+            __LINE__
+        );
     }
 
     for (auto i : {
@@ -803,7 +851,9 @@ error_ptr IPv6::setFromString(const UString &text)
 
         return wayround_i2p::ccutils::errors::New(
             "parsing error: IPv6_SHORT_GRP_HEX_STR_PATTERN"
-            "|IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN didn't match"
+            "|IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN didn't match",
+            __FILE__,
+            __LINE__
         );
     }
 

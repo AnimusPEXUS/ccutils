@@ -513,3 +513,97 @@ wayround_i2p::ccutils::tst::TSTInfo main_string_partition_i = {
     .test_name  = "string::partition",
     .func       = main_string_partition
 };
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_removeprefix(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    const auto ex_res1 = UString("Some Simple Text");
+    const auto ex_res2 = UString("aaa") + ex_res1;
+    const auto res     = ex_res2.removeprefix("aaa");
+
+    logger->LogSplitLines(
+        wayround_i2p::ccutils::logger::Status,
+        std::format(
+            R"--(
+ex_res1             =  {}
+ex_res2             =  {}
+removeprefix("aaa") == {}
+)--",
+            ex_res1,
+            ex_res2,
+            res
+        )
+    );
+
+    if (res == ex_res1)
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_removeprefix_i = {
+    .group_name = "main",
+    .test_name  = "string::removeprefix",
+    .func       = main_string_removeprefix
+};
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_replace(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    const auto ex_res1 = UString("Some Simple Text");
+    const auto ex_res2 = UString("Some Complex Text");
+    const auto res     = ex_res1.replace("Simple", "Complex");
+
+    logger->LogSplitLines(
+        wayround_i2p::ccutils::logger::Status,
+        std::format(
+            R"--(
+ex_res1                      =  {}
+ex_res2                      =  {}
+replace("Simple", "Complex") == {}
+)--",
+            ex_res1,
+            ex_res2,
+            res
+        )
+    );
+
+    if (res == ex_res2)
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Success);
+    }
+    else
+    {
+        logger->Log(wayround_i2p::ccutils::logger::Failure);
+        error_count++;
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_replace_i = {
+    .group_name = "main",
+    .test_name  = "string::replace",
+    .func       = main_string_replace
+};

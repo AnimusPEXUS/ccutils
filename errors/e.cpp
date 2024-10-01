@@ -41,9 +41,16 @@ stacktrace_ptr BasicStringError::getStacktrace()
 }
 */
 
-error_ptr New(UString text)
+error_ptr New(UString text, UString file, std::size_t line)
 {
-    return error_ptr(dynamic_cast<error *>(new BasicStringError(text)));
+    return error_ptr(dynamic_cast<error *>(
+        new BasicStringError(
+            text,
+            file,
+            line
+        )
+    )
+    );
 }
 
 } // namespace wayround_i2p::ccutils::errors

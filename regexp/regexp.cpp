@@ -11,7 +11,9 @@ error_ptr Pattern::updateParents()
     if (!current_parent_pattern)
     {
         return wayround_i2p::ccutils::errors::New(
-            "couldn't get own ptr (nuts!)"
+            "couldn't get own ptr (nuts!)",
+            __FILE__,
+            __LINE__
         );
     }
 
@@ -125,7 +127,9 @@ Pattern_shared Pattern::setCharRange(UChar char0, UChar char1)
     if (!(char1 >= char0))
     {
         throw wayround_i2p::ccutils::errors::New(
-            "invalid char0/char1 values for Pattern::setCharRange"
+            "invalid char0/char1 values for Pattern::setCharRange",
+            __FILE__,
+            __LINE__
         );
     }
     this->pattern_type = PatternType::CharRange;
@@ -261,10 +265,10 @@ Pattern_shared Pattern::setRepetition(
         default:
             throw wayround_i2p::ccutils::errors::New(
                 std::format(
-                    "invalid pattern_repetition_type value. {}:{}",
-                    __FILE__,
-                    __LINE__
-                )
+                    "invalid pattern_repetition_type value"
+                ),
+                __FILE__,
+                __LINE__
             );
         case PatternRepetitionType::Single:
             setExactCount(1);
@@ -287,11 +291,9 @@ Pattern_shared Pattern::setRepetition(
     }
 
     throw wayround_i2p::ccutils::errors::New(
-        std::format(
-            "unexpected error. {}:{}",
-            __FILE__,
-            __LINE__
-        )
+        "unexpected error",
+        __FILE__,
+        __LINE__
     );
 }
 
@@ -320,7 +322,11 @@ void Pattern::minmax_sanity_exception() const
     {
         if (min > max)
         {
-            throw wayround_i2p::ccutils::errors::New("Pattern min > max");
+            throw wayround_i2p::ccutils::errors::New(
+                "Pattern min > max",
+                __FILE__,
+                __LINE__
+            );
         }
     }
 }
@@ -676,8 +682,6 @@ UString Result::repr_as_text() const
 
 UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 {
-    // todo: use opts
-
     UString subm;
 
     if (opts.submatches)
@@ -864,7 +868,9 @@ const Result_shared match_single(
     {
         ret->error
             = wayround_i2p::ccutils::errors::New(
-                "trying to work outside of subject"
+                "trying to work outside of subject",
+                __FILE__,
+                __LINE__
             );
 
         return ret;
@@ -874,11 +880,9 @@ const Result_shared match_single(
     {
         ret->error
             = wayround_i2p::ccutils::errors::New(
-                std::format(
-                    "invalid `pattern_type` {}:{}",
-                    __FILE__,
-                    __LINE__
-                )
+                "invalid `pattern_type`",
+                __FILE__,
+                __LINE__
             );
 
         return ret;
@@ -892,11 +896,11 @@ const Result_shared match_single(
                 = wayround_i2p::ccutils::errors::New(
                     std::format(
                         "unsupported `pattern_type` ({})"
-                        " <- programming error : fixme: {} {}",
-                        (unsigned char)pattern->pattern_type,
-                        __FILE__,
-                        __LINE__
-                    )
+                        " <- programming error : fixme",
+                        (unsigned char)pattern->pattern_type
+                    ),
+                    __FILE__,
+                    __LINE__
                 );
 
             return ret;
@@ -905,11 +909,9 @@ const Result_shared match_single(
         {
             ret->error
                 = wayround_i2p::ccutils::errors::New(
-                    std::format(
-                        "invalid `pattern_type` {}:{}",
-                        __FILE__,
-                        __LINE__
-                    )
+                    "invalid `pattern_type`",
+                    __FILE__,
+                    __LINE__
                 );
 
             return ret;
@@ -958,11 +960,9 @@ const Result_shared match_single(
                 {
                     ret->error
                         = wayround_i2p::ccutils::errors::New(
-                            std::format(
-                                "programming error - fixme: {} {}",
-                                __FILE__,
-                                __LINE__
-                            )
+                            "programming error - fixme",
+                            __FILE__,
+                            __LINE__
                         );
                     return ret;
                 }
@@ -1045,11 +1045,9 @@ const Result_shared match_single(
                 {
                     ret->error
                         = wayround_i2p::ccutils::errors::New(
-                            std::format(
-                                "programming error - fixme: {} {}",
-                                __FILE__,
-                                __LINE__
-                            )
+                            "programming error - fixme",
+                            __FILE__,
+                            __LINE__
                         );
                     return ret;
                 }
@@ -1107,7 +1105,9 @@ const Result_shared match_single(
             {
                 ret->error
                     = wayround_i2p::ccutils::errors::New(
-                        "there must be exactly 1 value inside of pattern->values"
+                        "there must be exactly 1 value inside of pattern->values",
+                        __FILE__,
+                        __LINE__
                     );
                 return ret;
             }
@@ -1153,7 +1153,9 @@ const Result_shared match_single(
             {
                 ret->error
                     = wayround_i2p::ccutils::errors::New(
-                        "there must be exactly 2 values inside of pattern->values"
+                        "there must be exactly 2 values inside of pattern->values",
+                        __FILE__,
+                        __LINE__
                     );
                 return ret;
             }
@@ -1177,7 +1179,9 @@ const Result_shared match_single(
             {
                 ret->error
                     = wayround_i2p::ccutils::errors::New(
-                        "invalid char range specification"
+                        "invalid char range specification",
+                        __FILE__,
+                        __LINE__
                     );
                 return ret;
             }
@@ -1399,7 +1403,9 @@ const Result_shared match_single(
             if (pattern->subpatterns->size() != 1)
             {
                 ret->error = wayround_i2p::ccutils::errors::New(
-                    "invalid Pattern for 'Not' PatternType: sequence size() != 1"
+                    "invalid Pattern for 'Not' PatternType: sequence size() != 1",
+                    __FILE__,
+                    __LINE__
                 );
                 return ret;
             }
@@ -1548,7 +1554,9 @@ const Result_shared match(
         ret                = Result::create();
         ret->parent_result = parent_result;
         ret->error         = wayround_i2p::ccutils::errors::New(
-            "invalid min/max in pattern"
+            "invalid min/max in pattern",
+            __FILE__,
+            __LINE__
         );
         return ret;
     }
@@ -1600,7 +1608,9 @@ const Result_shared match(
             if (has_max && matched_count > max)
             {
                 throw wayround_i2p::ccutils::errors::New(
-                    "programming error? this should not be happening"
+                    "programming error? this should not be happening",
+                    __FILE__,
+                    __LINE__
                 );
             }
         }

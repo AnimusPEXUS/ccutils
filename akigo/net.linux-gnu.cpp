@@ -14,7 +14,11 @@ std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
     {
         return std::tuple(
             nullptr,
-            wayround_i2p::akigo::errors::New("invalid 'network'")
+            wayround_i2p::akigo::errors::New(
+                "invalid 'network'",
+                __FILE__,
+                __LINE__
+            )
         );
     }
 
@@ -27,7 +31,11 @@ std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
     {
         return std::tuple(
             nullptr,
-            wayround_i2p::akigo::errors::New("couldn't create UNIX socket")
+            wayround_i2p::akigo::errors::New(
+                "couldn't create UNIX socket",
+                __FILE__,
+                __LINE__
+            )
         );
     }
 

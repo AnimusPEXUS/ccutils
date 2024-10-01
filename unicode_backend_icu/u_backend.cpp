@@ -107,7 +107,11 @@ UString::UString(
         return;
     }
 
-    throw wayround_i2p::ccutils::errors::New("invalid 'encoding'");
+    throw wayround_i2p::ccutils::errors::New(
+        "invalid 'encoding'",
+        __FILE__,
+        __LINE__
+    );
 }
 
 UString::UString(
@@ -122,7 +126,11 @@ UString::UString(
         return;
     }
 
-    throw wayround_i2p::ccutils::errors::New("invalid 'encoding'");
+    throw wayround_i2p::ccutils::errors::New(
+        "invalid 'encoding'",
+        __FILE__,
+        __LINE__
+    );
 }
 
 UString::UString(

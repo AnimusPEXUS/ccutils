@@ -17,7 +17,9 @@ error_ptr Remove(ustring name)
     if (int_err != 0)
     {
         return wayround_i2p::akigo::errors::New(
-            ustring("couldn't remove file: ") + name
+            std::format("couldn't remove file: {}", name),
+            __FILE__,
+            __LINE__
         );
     }
 
