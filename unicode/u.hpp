@@ -49,8 +49,19 @@ using error_ptr = std::shared_ptr<error>;
     #error "invalid CCUTILS_UNICODE_BACKEND"
 #endif
 
+/**
+This package is for working with Unicode.
+
+I'm positioning UString/UChar as basic entities to work with text in all
+my projects.
+
+this ccutils/uncode is intended to be portable, so it my seamlessly use
+local unicode libraries and you not need bother this those libraries
+directly.
+*/
 namespace wayround_i2p::ccutils::unicode
 {
+
 using byte_vector = std::vector<std::uint8_t>;
 
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
@@ -78,27 +89,15 @@ enum class UCharCategory : std::uint32_t
     Print      = Unassigned << 13,
 };
 
-/*
-class UCharPropertiesI
-{
-  public:
-    virtual bool isAlpha()  = 0;
-    virtual bool isLower()  = 0;
-    virtual bool isUpper()  = 0;
-    virtual bool isPunct()  = 0;
-    virtual bool isDigit()  = 0;
-    virtual bool isXDigit() = 0;
-    virtual bool isAlnum()  = 0;
-    virtual bool isSpace()  = 0;
-    virtual bool isBlank()  = 0;
-    virtual bool isCntrl()  = 0;
-    virtual bool isGraph()  = 0;
-    virtual bool isPrint()  = 0;
-};
-*/
+/** subpart of UString
+ currently it is for storing separate codepoints.
+ regardless of actual storage type.
 
-class UChar : // public UCharPropertiesI,
-              public wayround_i2p::ccutils::repr::RepresentableAsText
+ for instance, with ICU it's actual storage is icu's UChar32 type.
+ but you as user of ccutils/unicode should not think about
+ it - for you -> single UChar should be equal to single codepoint in your mind.
+*/
+class UChar : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
   public:
     UChar();
@@ -115,6 +114,10 @@ class UChar : // public UCharPropertiesI,
 
     bool checkType(UCharCategory cat) const;
 
+    /**
+     actually you geting codepoint value with this.
+     int32 - because, remember, valid unicode codepoints are 0 to 1114111
+    */
     std::int32_t as_int32() const;
 
     UString repr_as_text() const;
@@ -179,6 +182,14 @@ bool operator<=(
     const UChar &rhs
 );
 
+/**
+ Intention is UString to be as easy and handy to use, as Python 3's string.
+
+ also UString methods are mostly done to be look and feel like Python one's.
+
+ If not specially stated otherwise, behavior different than Python's -
+ should be considered as a bug.
+*/
 class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     // todo: investigate wiser resource usage
@@ -198,7 +209,16 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         std::string        encoding = "utf-8"
     );
 
+    /**
+    sometimes it is better to manipulate vectors and/or deques, than UStrings.
+    so here are easy UString constructors to fast/easy convert those back to UStrings
+    */
     UString(const std::vector<UChar> &val);
+
+    /**
+    sometimes it is better to manipulate vectors and/or deques, than UStrings.
+    so here are easy UString constructors to fast/easy convert those back to UStrings
+    */
     UString(const std::deque<UChar> &val);
 
     ~UString();
