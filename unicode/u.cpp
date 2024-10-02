@@ -1,3 +1,6 @@
+
+// todo: thinking and optimizations required
+
 #include <functional>
 #include <vector>
 
