@@ -385,6 +385,9 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     );
 
   private:
+    // todo: maybe, instead of actual data type, use untyped pointer or std::any here.
+    //       to avaoid macros usage
+
 #if (CCUTILS_UNICODE_BACKEND == icu)
     icu::UnicodeString data;
     icu::UnicodeString getData() const;
