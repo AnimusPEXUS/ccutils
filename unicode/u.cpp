@@ -1089,15 +1089,7 @@ UString UString::operator[](ssize_t offset1, ssize_t offset2) const
     }
     if (offset1 > offset2)
     {
-        throw wayround_i2p::ccutils::errors::New(
-            std::format(
-                "invalid offset1({}):offset2({}) combination",
-                offset1,
-                offset2
-            ),
-            __FILE__,
-            __LINE__
-        );
+        offset2 = offset1;
     }
     return substr(offset1, offset2 - offset1);
 }

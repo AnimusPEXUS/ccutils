@@ -52,6 +52,7 @@ int main(int argc, char **args)
     params.AddTest(main_string_split_i);
     params.AddTest(main_string_splitlines_i);
     params.AddTest(main_string_substr_i);
+    params.AddTest(main_string_operator_int_int_i);
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
 }

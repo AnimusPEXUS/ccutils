@@ -890,3 +890,57 @@ wayround_i2p::ccutils::tst::TSTInfo main_string_substr_i = {
     .test_name  = "string::substr",
     .func       = main_string_substr
 };
+
+// -----------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_string_operator_int_int(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    std::size_t error_count = 0;
+
+    for (const auto &i : std::vector<std::tuple<UString, UString, ssize_t, ssize_t>>{
+             {"123test456", "", 3, -9}
+    })
+    {
+        const auto ex_res1 = std::get<0>(i);
+        const auto ex_res2 = std::get<1>(i);
+        UString    res     = ex_res1.operator[](std::get<2>(i), std::get<3>(i));
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            std::format(
+                R"--(
+subj               =  "{}"
+expected           =  "{}"
+operator[]({}, {})    ==  "{}"
+)--",
+                ex_res1,
+                ex_res2,
+                std::get<2>(i),
+                std::get<3>(i),
+                res
+            )
+        );
+
+        if (res == ex_res2)
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Success);
+        }
+        else
+        {
+            logger->Log(wayround_i2p::ccutils::logger::Failure);
+            error_count++;
+        }
+    }
+
+    return {error_count == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_string_operator_int_int_i = {
+    .group_name = "main",
+    .test_name  = "string::operator_int_int",
+    .func       = main_string_operator_int_int
+};
