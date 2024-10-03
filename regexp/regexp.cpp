@@ -4,6 +4,12 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
+Pattern_shared Pattern::setShortcutResult(bool value)
+{
+    shortcut_result = value;
+    return Pattern_shared(this->own_ptr);
+}
+
 error_ptr Pattern::updateParents()
 {
 
@@ -673,6 +679,16 @@ Result_shared Result::searchSubmatchByPatternName(UString name) const
     }
 
     return nullptr;
+}
+
+Result_shared Result::getShortcutResult(UString name) const
+{
+    auto res = shortcut_results.find(name);
+    if (res == shortcut_results.end())
+    {
+        return nullptr;
+    }
+    return res->second;
 }
 
 UString Result::repr_as_text() const
@@ -1576,6 +1592,32 @@ const Result_shared match(
         if (!ret)
         {
             ret = res;
+
+            if (parent_result && !ret->parent_result)
+            {
+                throw wayround_i2p::ccutils::errors::New(
+                    "parent_result && !ret->parent_result",
+                    __FILE__,
+                    __LINE__
+                );
+            }
+
+            if (pattern->shortcut_result && pattern->name != "")
+            {
+                auto &x = ret->getRootResult()->shortcut_results;
+                if (x.find(pattern->name) != x.end())
+                {
+                    throw wayround_i2p::ccutils::errors::New(
+                        std::format(
+                            "redefining shortcut result key {}",
+                            pattern->name
+                        ),
+                        __FILE__,
+                        __LINE__
+                    );
+                }
+                x[pattern->name] = ret;
+            }
         }
 
         if (res->error)

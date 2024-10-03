@@ -4,6 +4,7 @@
 #include <cassert>
 #include <format>
 #include <functional>
+#include <map>
 #include <vector>
 
 #include <experimental/scope>
@@ -12,28 +13,6 @@
 
 #include <wayround_i2p/ccutils/errors/e.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
-
-// #include <wayround_i2p/ccutils/repr/repr.hpp>
-
-/*
-namespace wayround_i2p::ccutils::unicode
-{
-
-struct UChar;
-class UString;
-
-} // namespace wayround_i2p::ccutils::unicode
-*/
-
-/*
-namespace wayround_i2p::ccutils::errors
-{
-
-class error;
-using error_ptr = std::shared_ptr<error>;
-
-} // namespace wayround_i2p::ccutils::errors
-*/
 
 namespace wayround_i2p::ccutils::regexp
 {
@@ -68,6 +47,12 @@ struct Pattern_repr_as_text_opts
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     UString name; // can be used to get submatch by name
+
+    // if true, result will be placed in special map in search result root,
+    // which can be retrieved using Pattern::getShortcutResult(name)
+    bool shortcut_result = false;
+
+    Pattern_shared setShortcutResult(bool value = true);
 
     PatternType pattern_type;
 
@@ -275,6 +260,9 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     // recurcive search
     Result_shared searchSubmatchByPatternName(UString name) const;
+
+    std::map<UString, Result_shared> shortcut_results;
+    Result_shared                    getShortcutResult(UString name) const;
 
     UString repr_as_text() const;
     UString repr_as_text(const Result_repr_as_text_opts &opts) const;
