@@ -289,7 +289,7 @@ void allcasedcharscheck(
 UString::UString() :
     data("")
 {
-    update_last_chage_time_point();
+    // update_last_chage_time_point();
 }
 
 UString::UString(const UChar &other) :
@@ -1125,10 +1125,12 @@ UString &UString::operator+=(const UChar &&other) const
 }
 */
 
+/*
 void UString::update_last_chage_time_point()
 {
     last_chage_time_point = std::chrono::steady_clock::now();
 }
+*/
 
 UString::operator std::string()
 {

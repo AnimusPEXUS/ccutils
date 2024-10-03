@@ -398,9 +398,9 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     bool is_start_end_correct(UString &txt, ssize_t start, ssize_t end) const;
     void exception_on_incorrect_start_end(UString &txt, ssize_t start, ssize_t end) const;
 
-    std::chrono::time_point<std::chrono::steady_clock> last_chage_time_point;
+    // std::chrono::time_point<std::chrono::steady_clock> last_chage_time_point;
 
-    void update_last_chage_time_point();
+    // void update_last_chage_time_point();
 };
 
 bool operator==(

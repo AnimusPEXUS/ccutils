@@ -493,71 +493,6 @@ wayround_i2p::ccutils::tst::TSTInfo main_006_i = {
 
 // -------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_007(
-    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
-    std::map<std::string, std::any>              &iitm,
-    wayround_i2p::ccutils::logger::LoggerI_shared logger
-)
-{
-    bool ret = false;
-
-    auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
-        iitm["test_subject_001"]
-    );
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::ToDo,
-        "check output, make constant, check against constant"
-    );
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "sending text with 'new lines' via logger->LogSplitLines:"
-    );
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "------------"
-    );
-
-    logger->LogSplitLines(
-        wayround_i2p::ccutils::logger::Status,
-        ts
-    );
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "------------"
-    );
-
-    logger->Log(
-        wayround_i2p::ccutils::logger::Status,
-        "lines were following:"
-    );
-
-    std::deque<wayround_i2p::ccutils::unicode::UString> ts_lines;
-    ts_lines = ts.splitlines(ts_lines);
-
-    for (std::size_t i = 0; i != ts_lines.size(); i++)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Status,
-            std::format("[{}]: '{}'", i, ts_lines[i])
-        );
-    }
-
-    return {false}; // todo: fix this
-}
-
-wayround_i2p::ccutils::tst::TSTInfo main_007_i = {
-    .group_name        = "main",
-    .test_name         = "007",
-    .description_short = "line splitting test 01",
-    .func              = main_007
-};
-
-// -------------------------------------------------
-
 wayround_i2p::ccutils::tst::TSTFuncResult main_008(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
@@ -733,6 +668,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
                 (*res)["4"]->getMatchedString()
             )
         );
+        logger->Log(wayround_i2p::ccutils::logger::Status, "");
         index = res->match_end;
         if (res->match_end == res->match_start)
         {
@@ -752,28 +688,4 @@ wayround_i2p::ccutils::tst::TSTInfo main_009_i = {
     .test_name         = "009",
     .description_short = "ip parsing test #1",
     .func              = main_009
-};
-
-// -------------------------------------------------
-
-wayround_i2p::ccutils::tst::TSTFuncResult main_010(
-    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
-    std::map<std::string, std::any>              &iitm,
-    wayround_i2p::ccutils::logger::LoggerI_shared logger
-)
-{
-
-    logger->LogSplitLines(
-        wayround_i2p::ccutils::logger::Status,
-        ip_addr_test_text.upper()
-    );
-
-    return {true};
-}
-
-wayround_i2p::ccutils::tst::TSTInfo main_010_i = {
-    .group_name        = "main",
-    .test_name         = "010",
-    .description_short = "UString.toUpper()",
-    .func              = main_010
 };
