@@ -10,6 +10,15 @@ Pattern_shared Pattern::setShortcutResult(bool value)
     return Pattern_shared(this->own_ptr);
 }
 
+void appendToSubpatterns(Pattern_shared_deque_shared subpatterns)
+{
+	
+}
+
+void appendToSubpatterns(Pattern_shared_deque subpatterns)
+{
+}
+
 error_ptr Pattern::updateParents()
 {
 

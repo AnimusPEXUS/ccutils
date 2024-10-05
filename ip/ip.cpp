@@ -4,7 +4,7 @@
 namespace wayround_i2p::ccutils::ip
 {
 
-/*
+/* // ends at line 455
 
 std::shared_ptr<IP>
     IP::create()
@@ -548,7 +548,7 @@ error_ptr IPv4::setFromString(const UString &val)
 
     std::array<std::uint8_t, 4> tmp;
 
-    for (unsigned char i = 0; i != 4; i++)
+    for (unsigned char i = 0; i < 4; i++)
     {
         auto res2 = res->searchSubmatchByPatternName(std::to_string(i + 1));
 

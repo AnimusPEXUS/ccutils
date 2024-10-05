@@ -68,7 +68,8 @@ constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
                    ->setName("4")
               }
         )
-              ->setName("IPv4_STR_PATTERN");
+              ->setName("IPv4_STR_PATTERN")
+              ->setShortcutResult();
     return ret;
 }
 
@@ -92,9 +93,36 @@ constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
               }
 
         )
-              ->setName("IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN");
+              ->setName("IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN")
+              ->setShortcutResult();
     return ret;
 }
+
+constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4()
+{
+    auto ret
+        = regexp::Pattern::newSequence(
+              {regexp::Pattern::newSequence(
+                   {regexp::Pattern::newCharIsXDigit()
+                        ->setMinMaxCount(1, 4)
+                        ->setName("number"),
+                    regexp::Pattern::newExactChar(':')
+                        ->setMinMaxCount(1, 1)
+                   }
+               )
+                   ->setMinMaxCount(7, 7)
+                   ->setName("numbers"),
+               regexp::Pattern::newCharIsXDigit()
+                   ->setMinMaxCount(1, 4)
+                   ->setName("8")
+              }
+
+        )
+              ->setName("IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN")
+              ->setShortcutResult();
+    return ret;
+}
+
 
 constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
 {
@@ -116,8 +144,8 @@ constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
                    ->setName("number")
               }
         )
-              ->setName("IPv6_SHORT_GRP_HEX_STR_PATTERN");
-
+              ->setName("IPv6_SHORT_GRP_HEX_STR_PATTERN")
+              ->setShortcutResult();
     return ret;
 }
 
@@ -142,7 +170,8 @@ constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
                    ->unsetMinCount()
               }
         )
-              ->setName("IPv6_STR_PATTERN");
+              ->setName("IPv6_STR_PATTERN")
+              ->setShortcutResult();
     return ret;
 }
 
@@ -155,7 +184,8 @@ constexpr regexp::Pattern_shared IP_STR_PATTERN()
               }
         )
               ->setExactCount(1)
-              ->setName("IP_STR_PATTERN");
+              ->setName("IP_STR_PATTERN")
+              ->setShortcutResult();
     return ret;
 }
 

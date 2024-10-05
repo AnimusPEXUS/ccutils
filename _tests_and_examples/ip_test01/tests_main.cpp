@@ -136,7 +136,7 @@ const std::vector<UString> testing_examples_all = []()
 
 // -----------------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_000(
+wayround_i2p::ccutils::tst::TSTFuncResult main_print_examples(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -153,16 +153,15 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_000(
     return {true};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_000_i = {
-    .group_name        = "main",
-    .test_name         = "000",
-    .description_short = "testing example list",
-    .func              = main_000
+wayround_i2p::ccutils::tst::TSTInfo main_print_examples_i = {
+    .group_name = "main",
+    .test_name  = "print_examples",
+    .func       = main_print_examples
 };
 
 // -----------------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_001(
+wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_tests(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -242,16 +241,114 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_001(
     return {false};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_001_i = {
-    .group_name        = "main",
-    .test_name         = "001",
-    .description_short = "testing ip strings parsing",
-    .func              = main_001
+wayround_i2p::ccutils::tst::TSTInfo main_regexps_tests_i = {
+    .group_name = "main",
+    .test_name  = "regexps_tests",
+    .func       = main_regexps_tests
 };
 
 // -----------------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_002(
+wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_shortcuts_tests(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+
+    for (const auto &i : testing_examples_all)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Status,
+            std::format(" test subject {}", i)
+        );
+
+        auto res = ip::IP_STR_PATTERN()->match(i);
+
+        if (!res)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                "No match"
+            );
+            continue;
+        }
+
+        if (res->error)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                std::format("match error: {}", res->error->Error())
+            );
+            continue;
+        }
+
+        for (
+            const auto &j :
+            std::vector<UString>{
+                "IP_STR_PATTERN",
+                "IPv4_STR_PATTERN",
+                "IPv6_STR_PATTERN",
+                "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN",
+                "IPv6_SHORT_GRP_HEX_STR_PATTERN",
+            }
+        )
+        {
+
+            logger->Log(
+                wayround_i2p::ccutils::logger::Status,
+                std::format(" trying shortcut {}", j)
+            );
+
+            auto res2 = res->getShortcutResult(j);
+
+            if (!res2)
+            {
+                logger->Log(
+                    wayround_i2p::ccutils::logger::Error,
+                    "No match"
+                );
+                continue;
+            }
+
+            if (res2->error)
+            {
+                logger->Log(
+                    wayround_i2p::ccutils::logger::Error,
+                    std::format("match error: {}", res->error->Error())
+                );
+                continue;
+            }
+
+            logger->Log(
+                wayround_i2p::ccutils::logger::Status,
+                std::format("  {}", res2->matched ? "matched" : "dismatched")
+            );
+
+            logger->LogSplitLines(
+                wayround_i2p::ccutils::logger::Status,
+                res2->repr_as_text({true})
+            );
+        }
+
+        logger->Log(
+            wayround_i2p::ccutils::logger::Status,
+            "-----------------------------"
+        );
+    }
+
+    return {false};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_regexps_shortcuts_tests_i = {
+    .group_name = "main",
+    .test_name  = "regexps_shortcuts_tests",
+    .func       = main_regexps_shortcuts_tests
+};
+
+// -----------------------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_IPv4_create(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -284,16 +381,15 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
     return {true};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_002_i = {
-    .group_name        = "main",
-    .test_name         = "002",
-    .description_short = "testing IPv4::createFromString()",
-    .func              = main_002
+wayround_i2p::ccutils::tst::TSTInfo main_IPv4_create_i = {
+    .group_name = "main",
+    .test_name  = "IPv4_create",
+    .func       = main_IPv4_create
 };
 
 // -----------------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_003(
+wayround_i2p::ccutils::tst::TSTFuncResult main_IPv6_create(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -333,9 +429,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003(
     return {true};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_003_i = {
-    .group_name        = "main",
-    .test_name         = "003",
-    .description_short = "testing IPv6::createFromString()",
-    .func              = main_003
+wayround_i2p::ccutils::tst::TSTInfo main_IPv6_create_i = {
+    .group_name = "main",
+    .test_name  = "IPv6_create",
+    .func       = main_IPv6_create
 };

@@ -69,7 +69,14 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     //   OrSequence - 1 or more
     // todo: is this really have to be shared? probably it's not needed anymore.
     // make this Pattern_shared_deque
+    // solution: leave it subpatterns be Pattern_shared_deque_shared -
+    //           this way it's easier to manipulate it outside of Pattern,
+    //           which may be useful.
     Pattern_shared_deque_shared subpatterns;
+    // Pattern_shared_deque subpatterns;
+
+    void appendToSubpatterns(Pattern_shared_deque_shared subpatterns);
+    void appendToSubpatterns(Pattern_shared_deque subpatterns);
 
     Pattern_shared parent_pattern;
 
