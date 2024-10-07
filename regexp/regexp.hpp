@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20240920_174507_394285
-#define WAYROUND_I2P_20240920_174507_394285
+#ifndef WAYROUND_I2P_20241007_110017_769194
+#define WAYROUND_I2P_20241007_110017_769194
 
 #include <cassert>
 #include <format>
@@ -10,6 +10,8 @@
 #include <experimental/scope>
 
 #include <wayround_i2p/ccutils/regexp/regexp_fds_and_enums.hpp>
+
+#include <wayround_i2p/ccutils/utils/concepts.hpp>
 
 #include <wayround_i2p/ccutils/errors/e.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
@@ -44,6 +46,25 @@ struct Pattern_repr_as_text_opts
     }
 };
 
+void copyseq(
+    std::initializer_list<Pattern_shared> val,
+    Pattern_shared_deque                 &target
+);
+
+template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+void copyBeginnableSizableIndexaccessable(
+    const T              &val,
+    Pattern_shared_deque &target
+)
+{
+    target.clear();
+
+    for (auto &i : val)
+    {
+        target.push_back(i);
+    }
+}
+
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     UString name; // can be used to get submatch by name
@@ -72,11 +93,11 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // solution: leave it subpatterns be Pattern_shared_deque_shared -
     //           this way it's easier to manipulate it outside of Pattern,
     //           which may be useful.
-    Pattern_shared_deque_shared subpatterns;
-    // Pattern_shared_deque subpatterns;
+    // Pattern_shared_deque_shared subpatterns;
+    Pattern_shared_deque subpatterns;
 
-    void appendToSubpatterns(Pattern_shared_deque_shared subpatterns);
-    void appendToSubpatterns(Pattern_shared_deque subpatterns);
+    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    void appendToSubpatterns(const T &v);
 
     Pattern_shared parent_pattern;
 
@@ -129,10 +150,24 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Pattern_shared setNot(Pattern_shared subpattern);
 
-    Pattern_shared setOrGroup(Pattern_shared_deque_shared seq);
+    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    Pattern_shared setOrGroup(const T &val)
+    {
+        copyBeginnableSizableIndexaccessable(val, this->subpatterns);
+        this->pattern_type = PatternType::OrGroup;
+        return Pattern_shared(this->own_ptr);
+    }
+
     Pattern_shared setOrGroup(std::initializer_list<Pattern_shared> val);
 
-    Pattern_shared setSequence(Pattern_shared_deque_shared seq);
+    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    Pattern_shared setSequence(const T &val)
+    {
+        copyBeginnableSizableIndexaccessable(val, this->subpatterns);
+        this->pattern_type = PatternType::Sequence;
+        return Pattern_shared(this->own_ptr);
+    }
+
     Pattern_shared setSequence(std::initializer_list<Pattern_shared> val);
 
     Pattern_shared setName(UString value);
@@ -176,10 +211,24 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     static Pattern_shared newNot(Pattern_shared subpattern);
 
-    static Pattern_shared newOrGroup(Pattern_shared_deque_shared seq);
+    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    static Pattern_shared newOrGroup(const T &val)
+    {
+        auto ret = Pattern::create();
+        ret->setOrGroup(val);
+        return ret;
+    }
+
     static Pattern_shared newOrGroup(std::initializer_list<Pattern_shared> val);
 
-    static Pattern_shared newSequence(Pattern_shared_deque_shared seq);
+    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    static Pattern_shared newSequence(const T &val)
+    {
+        auto ret = Pattern::create();
+        ret->setSequence(val);
+        return ret;
+    }
+
     static Pattern_shared newSequence(std::initializer_list<Pattern_shared> val);
 
     static Pattern_shared create();

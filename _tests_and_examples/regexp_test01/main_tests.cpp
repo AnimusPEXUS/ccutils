@@ -500,26 +500,24 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
 )
 {
 
-    auto sequence_for_pattern = wayround_i2p::ccutils::regexp::Pattern_shared_deque_shared(
-        new wayround_i2p::ccutils::regexp::Pattern_shared_deque(
-            {wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
-                 ->setMinMaxCount(1, 3)
-                 ->setName("1"),
-             wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
-             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
-                 ->setMinMaxCount(1, 3)
-                 ->setName("2"),
-             wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
-             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
-                 ->setMinMaxCount(1, 3)
-                 ->setName("3"),
-             wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
-             wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
-                 ->setMinMaxCount(1, 3)
-                 ->setName("4")
-            }
-        )
-    );
+    wayround_i2p::ccutils::regexp::Pattern_shared_deque sequence_for_pattern
+        = {
+            wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                ->setMinMaxCount(1, 3)
+                ->setName("1"),
+            wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
+            wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                ->setMinMaxCount(1, 3)
+                ->setName("2"),
+            wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
+            wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                ->setMinMaxCount(1, 3)
+                ->setName("3"),
+            wayround_i2p::ccutils::regexp::Pattern::newExactChar("."),
+            wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+                ->setMinMaxCount(1, 3)
+                ->setName("4")
+        };
 
     auto pattern = wayround_i2p::ccutils::regexp::Pattern::newSequence(
         sequence_for_pattern

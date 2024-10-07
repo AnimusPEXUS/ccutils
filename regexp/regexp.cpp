@@ -4,19 +4,36 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
+void copyseq(
+    std::initializer_list<Pattern_shared> val,
+    Pattern_shared_deque                 &target
+)
+{
+    // target = new Pattern_shared_deque();
+    target.clear();
+
+    for (auto &i : val)
+    {
+        target.push_back(i);
+    }
+}
+
 Pattern_shared Pattern::setShortcutResult(bool value)
 {
     shortcut_result = value;
     return Pattern_shared(this->own_ptr);
 }
 
-void appendToSubpatterns(Pattern_shared_deque_shared subpatterns)
+template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+void Pattern::appendToSubpatterns(const T &v)
 {
-	
-}
+    auto s = v.size();
 
-void appendToSubpatterns(Pattern_shared_deque subpatterns)
-{
+    // todo: check Pattern type and what it has subpatterns
+    for (std::size_t i = 0; i < s; i++)
+    {
+        subpatterns.push_back(v[i]);
+    }
 }
 
 error_ptr Pattern::updateParents()
@@ -35,12 +52,12 @@ error_ptr Pattern::updateParents()
     std::function<void(Pattern_shared)> recSetParent
         = [&recSetParent](Pattern_shared parent)
     {
-        for (auto &i : *(parent->subpatterns))
+        for (auto &i : parent->subpatterns)
         {
             i->parent_pattern = parent;
         }
 
-        for (auto &i : *(parent->subpatterns))
+        for (auto &i : parent->subpatterns)
         {
             recSetParent(i);
         }
@@ -209,53 +226,22 @@ Pattern_shared Pattern::setCharIsBlank()
 Pattern_shared Pattern::setNot(Pattern_shared subpattern)
 {
     this->pattern_type = PatternType::Not;
-    this->subpatterns  = Pattern_shared_deque_shared(new Pattern_shared_deque());
-    this->subpatterns->push_back(subpattern);
-    return Pattern_shared(this->own_ptr);
-}
-
-void copyseq(
-    std::initializer_list<Pattern_shared> val,
-    Pattern_shared_deque                *&target
-)
-{
-    target = new Pattern_shared_deque();
-
-    for (auto &i : val)
-    {
-        target->push_back(i);
-    }
-}
-
-Pattern_shared Pattern::setOrGroup(Pattern_shared_deque_shared seq)
-{
-    this->pattern_type = PatternType::OrGroup;
-    this->subpatterns  = seq;
+    // this->subpatterns  = Pattern_shared_deque_shared(new Pattern_shared_deque());
+    this->subpatterns.push_back(subpattern);
     return Pattern_shared(this->own_ptr);
 }
 
 Pattern_shared Pattern::setOrGroup(std::initializer_list<Pattern_shared> val)
 {
-    Pattern_shared_deque *t;
-    copyseq(val, t);
+    copyseq(val, this->subpatterns);
     this->pattern_type = PatternType::OrGroup;
-    this->subpatterns  = Pattern_shared_deque_shared(t);
-    return Pattern_shared(this->own_ptr);
-}
-
-Pattern_shared Pattern::setSequence(Pattern_shared_deque_shared seq)
-{
-    this->pattern_type = PatternType::Sequence;
-    this->subpatterns  = seq;
     return Pattern_shared(this->own_ptr);
 }
 
 Pattern_shared Pattern::setSequence(std::initializer_list<Pattern_shared> val)
 {
-    Pattern_shared_deque *t;
-    copyseq(val, t);
+    copyseq(val, this->subpatterns);
     this->pattern_type = PatternType::Sequence;
-    this->subpatterns  = Pattern_shared_deque_shared(t);
     return Pattern_shared(this->own_ptr);
 }
 
@@ -519,24 +505,10 @@ Pattern_shared Pattern::newCharIsBlank()
     return ret;
 }
 
-Pattern_shared Pattern::newOrGroup(Pattern_shared_deque_shared seq)
-{
-    auto ret = Pattern::create();
-    ret->setOrGroup(seq);
-    return ret;
-}
-
 Pattern_shared Pattern::newOrGroup(std::initializer_list<Pattern_shared> val)
 {
     auto ret = Pattern::create();
     ret->setOrGroup(val);
-    return ret;
-}
-
-Pattern_shared Pattern::newSequence(Pattern_shared_deque_shared seq)
-{
-    auto ret = Pattern::create();
-    ret->setSequence(seq);
     return ret;
 }
 
@@ -1425,7 +1397,7 @@ const Result_shared match_single(
 
         case PatternType::Not:
         {
-            if (pattern->subpatterns->size() != 1)
+            if (pattern->subpatterns.size() != 1)
             {
                 ret->error = wayround_i2p::ccutils::errors::New(
                     "invalid Pattern for 'Not' PatternType: sequence size() != 1",
@@ -1435,7 +1407,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            auto tmp0 = pattern->subpatterns->operator[](0);
+            auto tmp0 = pattern->subpatterns.operator[](0);
             auto res  = match(tmp0, subject, start_at, ret);
 
             if (res->error)
@@ -1465,7 +1437,7 @@ const Result_shared match_single(
 
         case PatternType::OrGroup:
         {
-            for (auto &x : *(pattern->subpatterns.get()))
+            for (auto &x : pattern->subpatterns)
             {
                 auto res = match(x, subject, start_at, ret);
 
@@ -1492,7 +1464,7 @@ const Result_shared match_single(
         {
             std::size_t end_tracker = start_at;
 
-            for (auto &x : *(pattern->subpatterns.get()))
+            for (auto &x : pattern->subpatterns)
             {
                 auto res = match(x, subject, end_tracker, ret);
 

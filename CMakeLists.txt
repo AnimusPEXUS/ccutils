@@ -152,6 +152,20 @@ create_ccutils_component(
 )
 
 create_ccutils_component(
+  TARGETNAME ccutils_utils_concepts
+  SUBDIR utils
+
+  SOURCES
+  concepts
+
+  HEADERS
+  concepts
+
+  LIBS_PUB
+)
+
+
+create_ccutils_component(
   TARGETNAME ccutils_errors
   SUBDIR errors
 
