@@ -709,6 +709,46 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_010(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
+
+/**
+# ccutils::regexp must wor the same way as python's
+
+```python3
+import re
+
+r1 = re.compile(r"(\d{4,6})(\d{2})(\d{2})\:(\d{2})(\d{2})(\d{2})")
+
+for i in [ "20242340101:010203",
+             "2024230101:010203",
+             "202420101:010203",
+             "20240101:010203",
+             "2020101:010203"]:
+    res1 = r1.match(i)
+    if (res1 != None):
+        print("+ {}".format(i))
+        print(res1.group(1))
+        print(res1.group(2))
+        print(res1.group(3)) 
+    else:
+        print("- {}".format(i))
+```
+```pre
+- 20242340101:010203
++ 2024230101:010203
+202423
+01
+01
++ 202420101:010203
+20242
+01
+01
++ 20240101:010203
+2024
+01
+01
+- 2020101:010203
+```
+*/
     auto regexp_ip_pattern = wayround_i2p::ccutils::regexp::Pattern::newSequence(
         {wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
              ->setMinMaxCount(4, 6)
