@@ -700,3 +700,109 @@ wayround_i2p::ccutils::tst::TSTInfo main_009_i = {
     .description_short = "ip parsing test #1",
     .func              = main_009
 };
+
+// -------------------------------------------------
+
+wayround_i2p::ccutils::tst::TSTFuncResult main_010(
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
+)
+{
+    auto regexp_ip_pattern = wayround_i2p::ccutils::regexp::Pattern::newSequence(
+        {wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+             ->setMinMaxCount(4, 6)
+             ->setName("1"),
+         wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+             ->setExactCount(2)
+             ->setName("2"),
+         wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+             ->setExactCount(2)
+             ->setName("3"),
+         wayround_i2p::ccutils::regexp::Pattern::newExactChar(':')
+             ->setName("colon"),
+         wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+             ->setExactCount(2)
+             ->setName("4"),
+         wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+             ->setExactCount(2)
+             ->setName("5"),
+         wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
+             ->setExactCount(2)
+             ->setName("6")
+        }
+    );
+
+    int errs = 0;
+    int oks  = 0;
+
+    for (const auto &i : {
+             R"--(20242340101:010203)--",
+             R"--(2024230101:010203)--",
+             R"--(202420101:010203)--",
+             R"--(20240101:010203)--",
+             R"--(2020101:010203)--"
+         })
+    {
+
+        logger->Log(
+            wayround_i2p::ccutils::logger::Status,
+            std::format("   checking: {}", i)
+        );
+
+        auto r1 = regexp_ip_pattern->match(i);
+
+        if (!r1)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                "r1 is null"
+            );
+
+            errs++;
+            continue;
+        }
+
+        if (r1->error)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                std::format("r1->error: {}", r1->error->Error())
+            );
+
+            errs++;
+            continue;
+        }
+
+        if (!r1->matched)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                "!r1->match"
+            );
+
+            errs++;
+            continue;
+        }
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Error,
+            r1->repr_as_text(true)
+        );
+        oks++;
+    }
+
+    logger->Log(
+        wayround_i2p::ccutils::logger::Status,
+        std::format("matches: {}, dismatches: {}", oks, errs)
+    );
+
+    return {errs == 0};
+}
+
+wayround_i2p::ccutils::tst::TSTInfo main_010_i = {
+    .group_name        = "main",
+    .test_name         = "010",
+    .description_short = "ip parsing test #1",
+    .func              = main_010
+};
