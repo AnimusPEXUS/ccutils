@@ -8,6 +8,23 @@
 int main(int argc, char **args)
 {
 
+    std::set_terminate(
+        []() -> void
+        {
+            try
+            {
+                throw;
+            }
+            catch (const wayround_i2p::ccutils::errors::error_ptr &e)
+            {
+                std::cout << "exception: " << e->ErrorLong() << std::endl;
+            }
+
+            std::set_terminate(nullptr);
+            std::terminate();
+        }
+    );
+
     wayround_i2p::ccutils::tst::run_tests_Parameters params;
 
     {
@@ -19,7 +36,7 @@ int main(int argc, char **args)
 
         params.AddTest(main_print_examples_i);
         params.AddTest(main_regexps_tests_i);
-        params.AddTest(main_regexps_shortcuts_tests_i);
+        // params.AddTest(main_regexps_shortcuts_tests_i);
         params.AddTest(main_IPv4_create_i);
         params.AddTest(main_IPv6_create_i);
     }

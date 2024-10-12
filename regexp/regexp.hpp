@@ -51,9 +51,9 @@ void copyseq(
     Pattern_shared_deque                 &target
 );
 
-template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
-void copyBeginnableSizableIndexaccessable(
-    const T              &val,
+template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T1>
+void copyDequeOrVector(
+    const T1             &val,
     Pattern_shared_deque &target
 )
 {
@@ -71,9 +71,11 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     // if true, result will be placed in special map in search result root,
     // which can be retrieved using Pattern::getShortcutResult(name)
-    bool shortcut_result = false;
+    // bool shortcut_result = false;
 
-    Pattern_shared setShortcutResult(bool value = true);
+    // todo: shortcuts mechanics appeared not as convinient as expected
+
+    // Pattern_shared setShortcutResult(bool value = true);
 
     PatternType pattern_type;
 
@@ -96,7 +98,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // Pattern_shared_deque_shared subpatterns;
     Pattern_shared_deque subpatterns;
 
-    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     void appendToSubpatterns(const T &v);
 
     Pattern_shared parent_pattern;
@@ -150,20 +152,20 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Pattern_shared setNot(Pattern_shared subpattern);
 
-    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     Pattern_shared setOrGroup(const T &val)
     {
-        copyBeginnableSizableIndexaccessable(val, this->subpatterns);
+        copyDequeOrVector(val, this->subpatterns);
         this->pattern_type = PatternType::OrGroup;
         return Pattern_shared(this->own_ptr);
     }
 
     Pattern_shared setOrGroup(std::initializer_list<Pattern_shared> val);
 
-    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     Pattern_shared setSequence(const T &val)
     {
-        copyBeginnableSizableIndexaccessable(val, this->subpatterns);
+        copyDequeOrVector(val, this->subpatterns);
         this->pattern_type = PatternType::Sequence;
         return Pattern_shared(this->own_ptr);
     }
@@ -211,7 +213,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     static Pattern_shared newNot(Pattern_shared subpattern);
 
-    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     static Pattern_shared newOrGroup(const T &val)
     {
         auto ret = Pattern::create();
@@ -221,7 +223,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     static Pattern_shared newOrGroup(std::initializer_list<Pattern_shared> val);
 
-    template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     static Pattern_shared newSequence(const T &val)
     {
         auto ret = Pattern::create();
@@ -317,8 +319,10 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     // recurcive search
     Result_shared searchSubmatchByPatternName(UString name) const;
 
+    /*
     std::map<UString, Result_shared> shortcut_results;
     Result_shared                    getShortcutResult(UString name) const;
+    */
 
     UString repr_as_text() const;
     UString repr_as_text(const Result_repr_as_text_opts &opts) const;

@@ -453,8 +453,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_006(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    bool ret = false;
-    auto ts  = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
+    auto ts = std::any_cast<wayround_i2p::ccutils::unicode::UString>(
         iitm["test_subject_003"]
     );
 
@@ -462,6 +461,15 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_006(
     pattern->setMinMaxCount(6, 6);
 
     auto res = wayround_i2p::ccutils::regexp::match(pattern, ts);
+
+    if (!res)
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Error,
+            std::format("match() returned null")
+        );
+        return {false};
+    }
 
     logger->LogSplitLines(
         wayround_i2p::ccutils::logger::Status,
@@ -474,14 +482,19 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_006(
             wayround_i2p::ccutils::logger::Error,
             std::format("error: {}", res->error->Error())
         );
+        return {false};
     }
 
     logger->Log(
         wayround_i2p::ccutils::logger::Status,
         std::format("matched?: {}", res->matched)
     );
+    if (!res->matched)
+    {
+        return {false};
+    }
 
-    return {ret};
+    return {true};
 }
 
 wayround_i2p::ccutils::tst::TSTInfo main_006_i = {

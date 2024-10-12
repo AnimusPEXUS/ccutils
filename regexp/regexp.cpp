@@ -18,13 +18,15 @@ void copyseq(
     }
 }
 
+/*
 Pattern_shared Pattern::setShortcutResult(bool value)
 {
     shortcut_result = value;
     return Pattern_shared(this->own_ptr);
 }
+*/
 
-template <wayround_i2p::ccutils::utils::IsBeginnableSizableIndexaccessable T>
+template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
 void Pattern::appendToSubpatterns(const T &v)
 {
     auto s = v.size();
@@ -662,6 +664,7 @@ Result_shared Result::searchSubmatchByPatternName(UString name) const
     return nullptr;
 }
 
+/*
 Result_shared Result::getShortcutResult(UString name) const
 {
     auto res = shortcut_results.find(name);
@@ -671,6 +674,7 @@ Result_shared Result::getShortcutResult(UString name) const
     }
     return res->second;
 }
+*/
 
 UString Result::repr_as_text() const
 {
@@ -1583,22 +1587,24 @@ const Result_shared match(
                 );
             }
 
-            if (pattern->shortcut_result && pattern->name != "")
-            {
-                auto &x = ret->getRootResult()->shortcut_results;
-                if (x.find(pattern->name) != x.end())
+            /*
+                if (pattern->shortcut_result && pattern->name != "")
                 {
-                    throw wayround_i2p::ccutils::errors::New(
-                        std::format(
-                            "redefining shortcut result key {}",
-                            pattern->name
-                        ),
-                        __FILE__,
-                        __LINE__
-                    );
+                    auto &x = ret->getRootResult()->shortcut_results;
+                    if (x.find(pattern->name) != x.end())
+                    {
+                        throw wayround_i2p::ccutils::errors::New(
+                            std::format(
+                                "redefining shortcut result key {}",
+                                pattern->name
+                            ),
+                            __FILE__,
+                            __LINE__
+                        );
+                    }
+                    x[pattern->name] = ret;
                 }
-                x[pattern->name] = ret;
-            }
+                */
         }
 
         if (res->error)

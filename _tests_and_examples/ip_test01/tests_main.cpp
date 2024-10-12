@@ -249,6 +249,7 @@ wayround_i2p::ccutils::tst::TSTInfo main_regexps_tests_i = {
 
 // -----------------------------------------------------------------
 
+/*
 wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_shortcuts_tests(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
@@ -345,6 +346,7 @@ wayround_i2p::ccutils::tst::TSTInfo main_regexps_shortcuts_tests_i = {
     .test_name  = "regexps_shortcuts_tests",
     .func       = main_regexps_shortcuts_tests
 };
+*/
 
 // -----------------------------------------------------------------
 
