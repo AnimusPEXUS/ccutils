@@ -67,6 +67,10 @@ void copyDequeOrVector(
 
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
+    // this is used for sequencing
+    Pattern_shared prev_sibling;
+    Pattern_shared next_sibling;
+
     UString name; // can be used to get submatch by name
 
     // if true, result will be placed in special map in search result root,
@@ -98,8 +102,21 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // Pattern_shared_deque_shared subpatterns;
     Pattern_shared_deque subpatterns;
 
+    void updateSubpatternsBonds();
+
     template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
-    void appendToSubpatterns(const T &v);
+    void appendToSubpatterns(const T &v)
+    {
+        auto s = v.size();
+
+        // todo: check Pattern type and what it has subpatterns
+        for (std::size_t i = 0; i < s; i++)
+        {
+            subpatterns.push_back(v[i]);
+        }
+
+        updateSubpatternsBonds();
+    }
 
     Pattern_shared parent_pattern;
 
@@ -156,6 +173,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setOrGroup(const T &val)
     {
         copyDequeOrVector(val, this->subpatterns);
+        updateSubpatternsBonds();
         this->pattern_type = PatternType::OrGroup;
         return Pattern_shared(this->own_ptr);
     }
@@ -166,6 +184,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setSequence(const T &val)
     {
         copyDequeOrVector(val, this->subpatterns);
+        updateSubpatternsBonds();
         this->pattern_type = PatternType::Sequence;
         return Pattern_shared(this->own_ptr);
     }

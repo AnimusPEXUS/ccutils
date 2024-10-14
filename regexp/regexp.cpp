@@ -26,46 +26,62 @@ Pattern_shared Pattern::setShortcutResult(bool value)
 }
 */
 
-template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
-void Pattern::appendToSubpatterns(const T &v)
+void Pattern::updateSubpatternsBonds()
 {
-    auto s = v.size();
+    auto this_ptr = this->own_ptr.lock();
 
-    // todo: check Pattern type and what it has subpatterns
-    for (std::size_t i = 0; i < s; i++)
+    for (auto &i : this_ptr->subpatterns)
     {
-        subpatterns.push_back(v[i]);
-    }
-}
-
-error_ptr Pattern::updateParents()
-{
-
-    auto current_parent_pattern = own_ptr.lock();
-    if (!current_parent_pattern)
-    {
-        return wayround_i2p::ccutils::errors::New(
-            "couldn't get own ptr (nuts!)",
-            __FILE__,
-            __LINE__
-        );
+        i->parent_pattern = this_ptr;
     }
 
-    std::function<void(Pattern_shared)> recSetParent
-        = [&recSetParent](Pattern_shared parent)
+    auto subpatterns_size = this_ptr->subpatterns.size();
+
+    switch (subpatterns_size)
     {
-        for (auto &i : parent->subpatterns)
+        case 0:
+            break;
+        case 1:
         {
-            i->parent_pattern = parent;
-        }
+            auto &x = this_ptr->subpatterns[0];
 
-        for (auto &i : parent->subpatterns)
+            x->prev_sibling = nullptr;
+            x->next_sibling = nullptr;
+
+            break;
+        }
+        case 2:
         {
-            recSetParent(i);
-        }
-    };
+            auto &x1 = this_ptr->subpatterns[0];
+            auto &x2 = this_ptr->subpatterns[subpatterns_size - 1];
 
-    return nullptr;
+            x1->prev_sibling = nullptr;
+            x2->next_sibling = nullptr;
+
+            x1->next_sibling = x2;
+            x2->prev_sibling = x1;
+            break;
+        }
+        default:
+        {
+            auto &xf = this_ptr->subpatterns[0];
+            auto &xl = this_ptr->subpatterns[subpatterns_size - 1];
+
+            xf->prev_sibling = nullptr;
+            xl->next_sibling = nullptr;
+
+            xf->next_sibling = this_ptr->subpatterns[1];
+            xl->prev_sibling = this_ptr->subpatterns[subpatterns_size - 2];
+
+            for (std::size_t i = 1; i < subpatterns_size - 1; i++)
+            {
+                auto &z         = this_ptr->subpatterns[i];
+                z->prev_sibling = this_ptr->subpatterns[i - 1];
+                z->next_sibling = this_ptr->subpatterns[i + 1];
+            }
+            break;
+        }
+    }
 }
 
 bool Pattern::isCaseSensitive() const
@@ -236,6 +252,7 @@ Pattern_shared Pattern::setNot(Pattern_shared subpattern)
 Pattern_shared Pattern::setOrGroup(std::initializer_list<Pattern_shared> val)
 {
     copyseq(val, this->subpatterns);
+    updateSubpatternsBonds();
     this->pattern_type = PatternType::OrGroup;
     return Pattern_shared(this->own_ptr);
 }
@@ -243,6 +260,7 @@ Pattern_shared Pattern::setOrGroup(std::initializer_list<Pattern_shared> val)
 Pattern_shared Pattern::setSequence(std::initializer_list<Pattern_shared> val)
 {
     copyseq(val, this->subpatterns);
+    updateSubpatternsBonds();
     this->pattern_type = PatternType::Sequence;
     return Pattern_shared(this->own_ptr);
 }
@@ -1563,7 +1581,6 @@ const Result_shared match(
     }
 
     auto next_start = start_at;
-    // auto last_success_mustch_end = start_at;
 
     while (true)
     {
@@ -1586,25 +1603,6 @@ const Result_shared match(
                     __LINE__
                 );
             }
-
-            /*
-                if (pattern->shortcut_result && pattern->name != "")
-                {
-                    auto &x = ret->getRootResult()->shortcut_results;
-                    if (x.find(pattern->name) != x.end())
-                    {
-                        throw wayround_i2p::ccutils::errors::New(
-                            std::format(
-                                "redefining shortcut result key {}",
-                                pattern->name
-                            ),
-                            __FILE__,
-                            __LINE__
-                        );
-                    }
-                    x[pattern->name] = ret;
-                }
-                */
         }
 
         if (res->error)
