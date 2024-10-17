@@ -8,6 +8,23 @@
 int main(int argc, char **args)
 {
 
+    std::set_terminate(
+        []() -> void
+        {
+            try
+            {
+                throw;
+            }
+            catch (const wayround_i2p::ccutils::errors::error_ptr &e)
+            {
+                std::cout << "exception: " << e->Error() << std::endl;
+            }
+
+            std::set_terminate(nullptr);
+            std::terminate();
+        }
+    );
+
     wayround_i2p::ccutils::tst::run_tests_Parameters params;
 
     {

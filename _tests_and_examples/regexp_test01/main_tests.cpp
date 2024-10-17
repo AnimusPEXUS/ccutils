@@ -580,12 +580,22 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
 
         auto res = pattern->match(i.test_str);
 
+        if (!res)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                "!res"
+            );
+            continue;
+        }
+
         if (res->error)
         {
             logger->Log(
                 wayround_i2p::ccutils::logger::Error,
                 res->error->Error()
             );
+            break;
         }
 
         if (res->matched)
@@ -658,6 +668,20 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
         {
             break;
         }
+
+        if (res->error)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                res->error->Error()
+            );
+            break;
+        }
+
+        // logger->LogSplitLines(
+        //  wayround_i2p::ccutils::logger::Status,
+        //  res->repr_as_text(true)
+        // );
 
         // todo: check for res->error? probably it's a matter of documentation
 

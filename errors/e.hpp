@@ -23,8 +23,7 @@ using UString = wayround_i2p::ccutils::unicode::UString;
 class error : std::exception
 {
   public:
-    virtual UString Error()     = 0;
-    virtual UString ErrorLong() = 0;
+    virtual UString Error() = 0;
 };
 
 using error_ptr = std::shared_ptr<error>;

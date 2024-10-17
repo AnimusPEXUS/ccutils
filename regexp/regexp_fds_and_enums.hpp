@@ -30,6 +30,7 @@ using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 
 struct Pattern;
 using Pattern_shared               = std::shared_ptr<Pattern>;
+using Pattern_weak                 = std::weak_ptr<Pattern>;
 using Pattern_shared_vector        = std::vector<Pattern_shared>;
 using Pattern_shared_deque         = std::deque<Pattern_shared>;
 using Pattern_shared_vector_shared = std::shared_ptr<std::vector<Pattern_shared>>;
@@ -37,6 +38,7 @@ using Pattern_shared_deque_shared  = std::shared_ptr<std::deque<Pattern_shared>>
 
 struct Result;
 using Result_shared        = std::shared_ptr<Result>;
+using Result_weak          = std::weak_ptr<Result>;
 using Result_shared_vector = std::vector<Result_shared>;
 using Result_shared_deque  = std::deque<Result_shared>;
 
@@ -68,9 +70,6 @@ enum class PatternType : unsigned char
     Not,
 
     OrGroup,
-    // AndGroup,
-
-    Sequence,
 };
 
 enum class PatternRepetitionType : unsigned char

@@ -24,13 +24,8 @@ BasicStringError::~BasicStringError()
 
 UString BasicStringError::Error()
 {
-    return text;
-}
-
-UString BasicStringError::ErrorLong()
-{
     return UString(
-        std::format("{}:{} {}", file, line, Error())
+        std::format("{}:{} {}", file, line, text)
     );
 }
 

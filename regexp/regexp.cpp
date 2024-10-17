@@ -26,16 +26,17 @@ Pattern_shared Pattern::setShortcutResult(bool value)
 }
 */
 
-void Pattern::updateSubpatternsBonds()
+void updateBonds(
+    Pattern_shared_deque &v,
+    Pattern_shared        set_parent
+)
 {
-    auto this_ptr = this->own_ptr.lock();
-
-    for (auto &i : this_ptr->subpatterns)
+    for (auto &i : v)
     {
-        i->parent_pattern = this_ptr;
+        i->parent = set_parent;
     }
 
-    auto subpatterns_size = this_ptr->subpatterns.size();
+    auto subpatterns_size = v.size();
 
     switch (subpatterns_size)
     {
@@ -43,19 +44,19 @@ void Pattern::updateSubpatternsBonds()
             break;
         case 1:
         {
-            auto &x = this_ptr->subpatterns[0];
+            auto &x = v[0];
 
-            x->prev_sibling = nullptr;
+            x->prev_sibling.reset();
             x->next_sibling = nullptr;
 
             break;
         }
         case 2:
         {
-            auto &x1 = this_ptr->subpatterns[0];
-            auto &x2 = this_ptr->subpatterns[subpatterns_size - 1];
+            auto &x1 = v[0];
+            auto &x2 = v[subpatterns_size - 1];
 
-            x1->prev_sibling = nullptr;
+            x1->prev_sibling.reset();
             x2->next_sibling = nullptr;
 
             x1->next_sibling = x2;
@@ -64,31 +65,157 @@ void Pattern::updateSubpatternsBonds()
         }
         default:
         {
-            auto &xf = this_ptr->subpatterns[0];
-            auto &xl = this_ptr->subpatterns[subpatterns_size - 1];
+            auto &xf = v[0];
+            auto &xl = v[subpatterns_size - 1];
 
-            xf->prev_sibling = nullptr;
+            xf->prev_sibling.reset();
             xl->next_sibling = nullptr;
 
-            xf->next_sibling = this_ptr->subpatterns[1];
-            xl->prev_sibling = this_ptr->subpatterns[subpatterns_size - 2];
+            xf->next_sibling = v[1];
+            xl->prev_sibling = v[subpatterns_size - 2];
 
             for (std::size_t i = 1; i < subpatterns_size - 1; i++)
             {
-                auto &z         = this_ptr->subpatterns[i];
-                z->prev_sibling = this_ptr->subpatterns[i - 1];
-                z->next_sibling = this_ptr->subpatterns[i + 1];
+                auto &z         = v[i];
+                z->prev_sibling = v[i - 1];
+                z->next_sibling = v[i + 1];
             }
             break;
         }
     }
 }
 
+void Pattern::setSequenceParent(Pattern_shared val)
+{
+    auto x = findFirst();
+    if (!x)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "couldn't get first element in Pattern sequence",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    while (true)
+    {
+        x->parent = val;
+
+        x = x->next_sibling;
+        if (!x)
+        {
+            break;
+        }
+    }
+}
+
+Pattern_shared_deque &Pattern::makeSequenceDeque(Pattern_shared_deque &ret)
+{
+    auto current = own_ptr.lock();
+    ret.resize(0);
+    while (true)
+    {
+        if (current)
+        {
+            ret.push_back(current);
+            current = current->next_sibling;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return ret;
+}
+
+std::size_t Pattern::findSize()
+{
+    auto x = findFirst();
+
+    if (!x)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "fatal error: couldn't find first Pattern in sequence",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    std::size_t ret = 1;
+
+    while (true)
+    {
+        x = x->next_sibling;
+        if (x)
+        {
+            ret++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return ret;
+}
+
+Pattern_shared Pattern::findFirst()
+{
+    if (prev_sibling.expired())
+    {
+        return own_ptr.lock();
+    }
+
+    auto cur = own_ptr.lock();
+    while (true)
+    {
+        auto x = cur->prev_sibling.lock();
+        if (!x)
+        {
+            return cur;
+        }
+        cur = x;
+    }
+}
+
+Pattern_shared Pattern::findLast()
+{
+    if (!next_sibling)
+    {
+        return own_ptr.lock();
+    }
+
+    auto cur = own_ptr.lock();
+    while (true)
+    {
+        auto x = cur->next_sibling;
+        if (!x)
+        {
+            return cur;
+        }
+        cur = x;
+    }
+}
+
+Pattern_shared Pattern::setName(UString value)
+{
+    this->name = value;
+    return Pattern_shared(this->own_ptr);
+}
+
+void Pattern::removeAllSubpatterns()
+{
+    notSubpattern = nullptr;
+    orGroup.clear();
+    subSequence = nullptr;
+}
+
 bool Pattern::isCaseSensitive() const
 {
-    if (parent_pattern && case_sensitive_from_parent)
+    auto p = parent.lock();
+
+    if (p && case_sensitive_from_parent)
     {
-        return parent_pattern->isCaseSensitive();
+        return p->isCaseSensitive();
     }
 
     return case_sensitive;
@@ -243,32 +370,29 @@ Pattern_shared Pattern::setCharIsBlank()
 
 Pattern_shared Pattern::setNot(Pattern_shared subpattern)
 {
-    this->pattern_type = PatternType::Not;
-    // this->subpatterns  = Pattern_shared_deque_shared(new Pattern_shared_deque());
-    this->subpatterns.push_back(subpattern);
-    return Pattern_shared(this->own_ptr);
+    removeAllSubpatterns();
+    this->pattern_type  = PatternType::Not;
+    this->notSubpattern = subpattern;
+    subpattern->parent  = own_ptr.lock();
+    return own_ptr.lock();
 }
 
 Pattern_shared Pattern::setOrGroup(std::initializer_list<Pattern_shared> val)
 {
-    copyseq(val, this->subpatterns);
-    updateSubpatternsBonds();
+    removeAllSubpatterns();
+    copyseq(val, orGroup);
+    for (auto &i : orGroup)
+    {
+        i->parent = this->own_ptr.lock();
+    }
     this->pattern_type = PatternType::OrGroup;
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setSequence(std::initializer_list<Pattern_shared> val)
+Pattern_shared setSubSequence(Pattern_shared sub_sequence)
 {
-    copyseq(val, this->subpatterns);
-    updateSubpatternsBonds();
-    this->pattern_type = PatternType::Sequence;
-    return Pattern_shared(this->own_ptr);
-}
-
-Pattern_shared Pattern::setName(UString value)
-{
-    this->name = value;
-    return Pattern_shared(this->own_ptr);
+    subSequence = sub_sequence;
+    setSequenceParent(own_ptr.lock());
 }
 
 Pattern_shared Pattern::setRepetition(
@@ -534,9 +658,9 @@ Pattern_shared Pattern::newOrGroup(std::initializer_list<Pattern_shared> val)
 
 Pattern_shared Pattern::newSequence(std::initializer_list<Pattern_shared> val)
 {
-    auto ret = Pattern::create();
-    ret->setSequence(val);
-    return ret;
+    Pattern_shared_deque x;
+    copyseq(val, x);
+    return newSequence(x);
 }
 
 Pattern_shared Pattern::create()
@@ -597,6 +721,74 @@ Pattern_shared create()
     return Pattern::create();
 }
 
+std::size_t Result::findSize()
+{
+    auto x = findFirst();
+
+    if (!x)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "fatal error: couldn't find first Pattern in sequence",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    std::size_t ret = 1;
+
+    while (true)
+    {
+        x = x.next_sibling;
+        if (x)
+        {
+            ret++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return ret;
+}
+
+Result_shared Result::findFirst()
+{
+    if (prev_sibling.expired())
+    {
+        return own_ptr.lock();
+    }
+
+    auto cur = own_ptr.lock();
+    while (true)
+    {
+        auto x = cur->prev_sibling.lock();
+        if (!x)
+        {
+            return cur;
+        }
+        cur = x;
+    }
+}
+
+Result_shared Result::findLast()
+{
+    if (!next_sibling)
+    {
+        return own_ptr.lock();
+    }
+
+    auto cur = own_ptr.lock();
+    while (true)
+    {
+        auto x = cur->next_sibling;
+        if (!x)
+        {
+            return cur;
+        }
+        cur = x;
+    }
+}
+
 Result_shared Result::getParentResult()
 {
     return parent_result;
@@ -622,10 +814,26 @@ Result_shared Result::getRootResult()
 
 UString Result::getMatchedString() const
 {
-    return original_subject.substr(
-        this->match_start,
-        this->match_end - this->match_start
-    );
+    auto    ms = this->match_start;
+    auto    l  = original_subject.length();
+    ssize_t s  = this->match_end - this->match_start;
+
+    if (ms > l || ms + s > l || s < 0)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            std::format(
+                "invalid parameters to .substr(): "
+                "start = {}, len = {}. str len = {}",
+                this->match_start,
+                s,
+                l
+            ),
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    return original_subject.substr(ms, s);
 }
 
 std::size_t Result::getSubmatchCount() const
@@ -1419,18 +1627,12 @@ const Result_shared match_single(
 
         case PatternType::Not:
         {
-            if (pattern->subpatterns.size() != 1)
-            {
-                ret->error = wayround_i2p::ccutils::errors::New(
-                    "invalid Pattern for 'Not' PatternType: sequence size() != 1",
-                    __FILE__,
-                    __LINE__
-                );
-                return ret;
-            }
-
-            auto tmp0 = pattern->subpatterns.operator[](0);
-            auto res  = match(tmp0, subject, start_at, ret);
+            auto res = match(
+                pattern->notSubpattern,
+                subject,
+                start_at,
+                ret
+            );
 
             if (res->error)
             {
@@ -1459,7 +1661,7 @@ const Result_shared match_single(
 
         case PatternType::OrGroup:
         {
-            for (auto &x : pattern->subpatterns)
+            for (auto &x : pattern->orGroup)
             {
                 auto res = match(x, subject, start_at, ret);
 
@@ -1476,44 +1678,50 @@ const Result_shared match_single(
                     ret->submatches.push_back(res);
                     return ret;
                 }
+
+                // here is the place for possible future debug upgrade
+                // (storing missmatched results), if thich case the above
+                // `if (res->matched)` doesn't return
             }
 
             ret->matched = false;
             return ret;
         }
 
-        case PatternType::Sequence:
-        {
-            std::size_t end_tracker = start_at;
-
-            for (auto &x : pattern->subpatterns)
-            {
-                auto res = match(x, subject, end_tracker, ret);
-
-                if (res->error)
+            /*
+                case PatternType::Sequence:
                 {
-                    ret->error = res->error;
+                    std::size_t end_tracker = start_at;
+
+                    for (auto &x : pattern->subpatterns)
+                    {
+                        auto res = match(x, subject, end_tracker, ret);
+
+                        if (res->error)
+                        {
+                            ret->error = res->error;
+                            return ret;
+                        }
+
+                        if (res->matched)
+                        {
+                            end_tracker = res->match_end;
+                            ret->submatches.push_back(res);
+                        }
+                        else
+                        {
+                            ret->matched = false;
+                            ret->submatches.clear();
+                            return ret;
+                        }
+                    }
+
+                    ret->matched   = true;
+                    ret->match_end = end_tracker;
+
                     return ret;
                 }
-
-                if (res->matched)
-                {
-                    end_tracker = res->match_end;
-                    ret->submatches.push_back(res);
-                }
-                else
-                {
-                    ret->matched = false;
-                    ret->submatches.clear();
-                    return ret;
-                }
-            }
-
-            ret->matched   = true;
-            ret->match_end = end_tracker;
-
-            return ret;
-        }
+            */
     }
 
     return ret;
@@ -1582,6 +1790,8 @@ const Result_shared match(
 
     auto next_start = start_at;
 
+    bool continue_after_try_next = false;
+
     while (true)
     {
         auto res = match_single(
@@ -1624,12 +1834,12 @@ const Result_shared match(
             if ((greedy)
                 && ((min == 0) || (min != 0 && matched_count >= min)))
             {
-                goto match_and_exit;
+                goto try_next_and_exit;
             }
 
             if (has_max && matched_count == max)
             {
-                goto match_and_exit;
+                goto try_next_and_exit;
             }
 
             if (has_max && matched_count > max)
@@ -1640,6 +1850,8 @@ const Result_shared match(
                     __LINE__
                 );
             }
+
+            goto try_next_and_continue;
         }
         else
         {
@@ -1653,28 +1865,106 @@ const Result_shared match(
                     }
                     else
                     {
-                        goto match_and_exit;
+                        goto try_next_and_exit;
                     }
                 }
                 else
                 {
-                    goto match_and_exit;
+                    goto try_next_and_exit;
                 }
             }
             else
             {
-                goto match_and_exit;
+                goto try_next_and_exit;
             }
         }
 
-        continue;
+    try_next_and_continue:
+    {
+        continue_after_try_next = true;
+        goto try_next;
+    }
+    try_next_and_exit:
+    {
+        continue_after_try_next = false;
+    }
+    try_next:
+    {
+        auto n = pattern->next_sibling;
+        if (n)
+        {
+            auto next_sibling_result = match(
+                n,
+                subject,
+                next_start,
+                nullptr
+            );
+
+            if (!next_sibling_result)
+            {
+                if (continue_after_try_next)
+                {
+                    continue;
+                }
+                else
+                {
+                    goto dismatch_and_exit;
+                }
+            }
+
+            if (next_sibling_result->error)
+            {
+                ret->next_sibling                 = next_sibling_result;
+                next_sibling_result->prev_sibling = ret;
+                goto dismatch_and_exit;
+            }
+
+            if (next_sibling_result->matched)
+            {
+                ret->next_sibling                 = next_sibling_result;
+                next_sibling_result->prev_sibling = ret;
+                goto match_and_exit;
+            }
+            else
+            {
+                if (continue_after_try_next)
+                {
+                    continue;
+                }
+                else
+                {
+                    goto dismatch_and_exit;
+                }
+            }
+        }
+
+        if (continue_after_try_next)
+        {
+            continue;
+        }
+        else
+        {
+            goto match_and_exit;
+        }
+
+        throw wayround_i2p::ccutils::errors::New(
+            "this code should be unreachable. "
+            "it's here of demonstrational purpose",
+            __FILE__,
+            __LINE__
+        );
+    }
     match_and_exit:
+    {
         ret->matched   = true;
         ret->match_end = next_start;
         return ret;
+    }
     dismatch_and_exit:
+    {
         ret->matched = false;
         return ret;
+    }
     }
 
     return ret;

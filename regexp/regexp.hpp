@@ -65,13 +65,50 @@ void copyDequeOrVector(
     }
 }
 
+void updateBonds(Pattern_shared_deque &v, Pattern_shared set_parent);
+
+template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
+Pattern_shared appendPatterns(
+    const T       &v,
+    Pattern_shared pattern,
+    Pattern_shared set_parent
+);
+
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
     // this is used for sequencing
-    Pattern_shared prev_sibling;
+
+    Pattern_weak   parent;
+    Pattern_weak   prev_sibling;
     Pattern_shared next_sibling;
 
-    UString name; // can be used to get submatch by name
+    void setSequenceParent(Pattern_shared val);
+
+    // generate complete deque of current level Patterns
+    // (starting from first one)
+    Pattern_shared_deque &makeSequenceDeque(Pattern_shared_deque &ret);
+
+    // generates deque of all patterns in on curren sequence;
+    // appends values from val;
+    // updates next/prev siblings
+    // returns current Pattern
+    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
+    Pattern_shared appendPatterns(const T &val)
+    {
+        ::wayround_i2p::ccutils::regexp::appendPatterns(
+            val,
+            own_ptr.lock(),
+            parent.lock()
+        );
+        return Pattern_shared(own_ptr);
+    }
+
+    std::size_t    findSize();
+    Pattern_shared findFirst();
+    Pattern_shared findLast();
+
+    UString        name; // can be used to search result sibling by name
+    Pattern_shared setName(UString value);
 
     // if true, result will be placed in special map in search result root,
     // which can be retrieved using Pattern::getShortcutResult(name)
@@ -100,29 +137,14 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     //           this way it's easier to manipulate it outside of Pattern,
     //           which may be useful.
     // Pattern_shared_deque_shared subpatterns;
-    Pattern_shared_deque subpatterns;
+    // Pattern_shared_deque subpatterns;
 
-    void updateSubpatternsBonds();
+    // clears notSubSequence, orGroup and subSequence fields
+    void removeAllSubpatterns();
 
-    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
-    void appendToSubpatterns(const T &v)
-    {
-        auto s = v.size();
-
-        // todo: check Pattern type and what it has subpatterns
-        for (std::size_t i = 0; i < s; i++)
-        {
-            subpatterns.push_back(v[i]);
-        }
-
-        updateSubpatternsBonds();
-    }
-
-    Pattern_shared parent_pattern;
-
-    // match() function uses this function to update parent_pattern fields in all
-    // subpatterns
-    error_ptr updateParents();
+    Pattern_shared       notSubSequence;
+    Pattern_shared_deque orGroup;
+    Pattern_shared       subSequence;
 
     bool case_sensitive_from_parent = true;
 
@@ -172,26 +194,20 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     Pattern_shared setOrGroup(const T &val)
     {
-        copyDequeOrVector(val, this->subpatterns);
-        updateSubpatternsBonds();
+        copyDequeOrVector(val, this->orGroup);
+        for (auto &i : orGroup)
+        {
+            i->prev_sibling.reset();
+            i->next_sibling = nullptr;
+        }
         this->pattern_type = PatternType::OrGroup;
         return Pattern_shared(this->own_ptr);
     }
 
     Pattern_shared setOrGroup(std::initializer_list<Pattern_shared> val);
 
-    template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
-    Pattern_shared setSequence(const T &val)
-    {
-        copyDequeOrVector(val, this->subpatterns);
-        updateSubpatternsBonds();
-        this->pattern_type = PatternType::Sequence;
-        return Pattern_shared(this->own_ptr);
-    }
+    Pattern_shared setSubSequence(Pattern_shared sub_sequence);
 
-    Pattern_shared setSequence(std::initializer_list<Pattern_shared> val);
-
-    Pattern_shared setName(UString value);
     Pattern_shared setRepetition(PatternRepetitionType pattern_repetition_type);
     Pattern_shared setCaseSensitiveFromParent(bool value);
 
@@ -245,8 +261,21 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     static Pattern_shared newSequence(const T &val)
     {
-        auto ret = Pattern::create();
-        ret->setSequence(val);
+        if (val.size() == 0)
+        {
+            throw wayround_i2p::ccutils::errors::New(
+                "`val` MUST BE not empty",
+                __FILE__,
+                __LINE__
+            );
+        }
+        auto                 ret = val[0];
+        Pattern_shared_deque x;
+        for (std::size_t i = 1; i < val.size(); i++)
+        {
+            x.push_back(val[i]);
+        }
+        ret->appendPatterns(x);
         return ret;
     }
 
@@ -304,8 +333,17 @@ struct Result_repr_as_text_opts
 struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
   public:
+    Result_weak   parent;
+    Result_weak   prev_sibling;
+    Result_shared next_sibling;
+
+    std::size_t   findSize();
+    Result_shared findFirst();
+    Result_shared findLast();
+
     error_ptr error;
 
+    // todo: avoid copying
     UString original_subject;
 
     bool matched = false;
@@ -320,9 +358,8 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Pattern_shared corresponding_pattern;
 
-    Result_shared parent_result;
-
-    Result_shared_deque submatches;
+    // here goes orGroup or notSequence result
+    Result_shared_deque submatch;
 
     Result_shared getParentResult();
     Result_shared getRootResult();
@@ -396,6 +433,52 @@ const std::tuple<
         const UString       &subject,
         std::size_t          start_at
     );
+
+template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
+Pattern_shared appendPatterns(
+    const T       &v,
+    Pattern_shared pattern,
+    Pattern_shared set_parent
+)
+{
+    if (!pattern)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "!pattern",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    pattern = pattern->findFirst();
+
+    Pattern_shared_deque x;
+
+    {
+        auto current = pattern;
+        while (true)
+        {
+            if (current)
+            {
+                x.push_back(pattern);
+                current = current->next_sibling;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    for (auto i : v)
+    {
+        x.push_back(i);
+    }
+
+    updateBonds(x, set_parent);
+
+    return pattern;
+}
 
 } // namespace wayround_i2p::ccutils::regexp
 
