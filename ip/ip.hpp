@@ -19,7 +19,7 @@ namespace regexp = wayround_i2p::ccutils::regexp;
 constexpr regexp::Pattern_shared PORT_STR_PATTERN()
 {
     auto ret
-        = regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
             {regexp::Pattern::newExactChar(':'),
              regexp::Pattern::newCharIsDigit()
                  ->setName("number")
@@ -33,7 +33,7 @@ constexpr regexp::Pattern_shared PORT_STR_PATTERN()
 constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
 {
     auto ret
-        = regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
             {regexp::Pattern::newExactChar('/'),
              regexp::Pattern::newCharIsDigit()
                  ->setName("number")
@@ -47,7 +47,7 @@ constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
 constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
 {
     auto ret
-        = regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
               {regexp::Pattern::newCharIsDigit()
                    ->setMinMaxCount(1, 3)
                    ->setName("1"),
@@ -75,8 +75,8 @@ constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
 constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
 {
     auto ret
-        = regexp::Pattern::newSequence(
-              {regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
+              {regexp::Pattern::newGroup(
                    {regexp::Pattern::newCharIsXDigit()
                         ->setMinMaxCount(1, 4)
                         ->setName("number"),
@@ -99,8 +99,8 @@ constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
 constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4()
 {
     auto ret
-        = regexp::Pattern::newSequence(
-              {regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
+              {regexp::Pattern::newGroup(
                    {regexp::Pattern::newCharIsXDigit()
                         ->setMinMaxCount(1, 4)
                         ->setName("number"),
@@ -121,8 +121,8 @@ constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4()
 constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
 {
     auto ret
-        = regexp::Pattern::newSequence(
-              {regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
+              {regexp::Pattern::newGroup(
                    {regexp::Pattern::newCharIsXDigit()
                         ->setMinMaxCount(0, 4)
                         ->setName("number"),
@@ -145,8 +145,8 @@ constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
 constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4()
 {
     auto ret
-        = regexp::Pattern::newSequence(
-              {regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
+              {regexp::Pattern::newGroup(
                    {regexp::Pattern::newCharIsXDigit()
                         ->setMinMaxCount(0, 4)
                         ->setName("number"),
@@ -167,7 +167,7 @@ constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4()
 constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
 {
     auto ret
-        = regexp::Pattern::newSequence(
+        = regexp::Pattern::newGroup(
               {regexp::Pattern::newExactChar('[')
                    ->setMaxCount(1)
                    ->unsetMinCount(),
@@ -270,7 +270,7 @@ constexpr regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
                 break;
         }
 
-        ret = regexp::Pattern::newSequence(
+        ret = regexp::Pattern::newGroup(
             {IP_STR_PATTERN()
                  ->setName("ip"),
              port_or_cidr

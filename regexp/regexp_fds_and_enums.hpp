@@ -70,6 +70,7 @@ enum class PatternType : unsigned char
     Not,
 
     OrGroup,
+    Group
 };
 
 enum class PatternRepetitionType : unsigned char

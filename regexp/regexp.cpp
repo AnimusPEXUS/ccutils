@@ -4,27 +4,7 @@
 namespace wayround_i2p::ccutils::regexp
 {
 
-void copyseq(
-    std::initializer_list<Pattern_shared> val,
-    Pattern_shared_deque                 &target
-)
-{
-    // target = new Pattern_shared_deque();
-    target.clear();
-
-    for (auto &i : val)
-    {
-        target.push_back(i);
-    }
-}
-
-/*
-Pattern_shared Pattern::setShortcutResult(bool value)
-{
-    shortcut_result = value;
-    return Pattern_shared(this->own_ptr);
-}
-*/
+// todo: check functions ordering
 
 void updateBonds(
     Pattern_shared_deque &v,
@@ -128,7 +108,7 @@ Pattern_shared_deque &Pattern::makeSequenceDeque(Pattern_shared_deque &ret)
     return ret;
 }
 
-std::size_t Pattern::findSize()
+std::size_t Pattern::findSize() const
 {
     auto x = findFirst();
 
@@ -158,7 +138,7 @@ std::size_t Pattern::findSize()
     return ret;
 }
 
-Pattern_shared Pattern::findFirst()
+Pattern_shared Pattern::findFirst() const
 {
     if (prev_sibling.expired())
     {
@@ -177,7 +157,7 @@ Pattern_shared Pattern::findFirst()
     }
 }
 
-Pattern_shared Pattern::findLast()
+Pattern_shared Pattern::findLast() const
 {
     if (!next_sibling)
     {
@@ -204,9 +184,9 @@ Pattern_shared Pattern::setName(UString value)
 
 void Pattern::removeAllSubpatterns()
 {
-    notSubpattern = nullptr;
+    notSubPattern = nullptr;
     orGroup.clear();
-    subSequence = nullptr;
+    group = nullptr;
 }
 
 bool Pattern::isCaseSensitive() const
@@ -368,31 +348,33 @@ Pattern_shared Pattern::setCharIsBlank()
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setNot(Pattern_shared subpattern)
+Pattern_shared Pattern::setNot(Pattern_shared notSubPattern)
 {
     removeAllSubpatterns();
     this->pattern_type  = PatternType::Not;
-    this->notSubpattern = subpattern;
-    subpattern->parent  = own_ptr.lock();
+    this->notSubPattern = notSubPattern;
+    this->notSubPattern->setSequenceParent(own_ptr.lock());
     return own_ptr.lock();
 }
 
-Pattern_shared Pattern::setOrGroup(std::initializer_list<Pattern_shared> val)
+Pattern_shared Pattern::setGroup(Pattern_shared group)
 {
     removeAllSubpatterns();
-    copyseq(val, orGroup);
-    for (auto &i : orGroup)
+    this->pattern_type = PatternType::Group;
+    auto first         = group->findFirst();
+    if (!first)
     {
-        i->parent = this->own_ptr.lock();
+        throw wayround_i2p::ccutils::errors::New(
+            std::format(
+                "couldn't find first element in sequence"
+            ),
+            __FILE__,
+            __LINE__
+        );
     }
-    this->pattern_type = PatternType::OrGroup;
-    return Pattern_shared(this->own_ptr);
-}
-
-Pattern_shared setSubSequence(Pattern_shared sub_sequence)
-{
-    subSequence = sub_sequence;
-    setSequenceParent(own_ptr.lock());
+    this->group = first;
+    this->group->setSequenceParent(own_ptr.lock());
+    return own_ptr.lock();
 }
 
 Pattern_shared Pattern::setRepetition(
@@ -651,16 +633,27 @@ Pattern_shared Pattern::newCharIsBlank()
 
 Pattern_shared Pattern::newOrGroup(std::initializer_list<Pattern_shared> val)
 {
+    Pattern_shared_deque x;
+    for (const auto &i : val)
+    {
+        x.push_back(i);
+    }
+
+    return newOrGroup(x);
+}
+
+Pattern_shared Pattern::newGroup(std::initializer_list<Pattern_shared> val)
+{
     auto ret = Pattern::create();
-    ret->setOrGroup(val);
+    ret->setGroup(val);
     return ret;
 }
 
-Pattern_shared Pattern::newSequence(std::initializer_list<Pattern_shared> val)
+Pattern_shared Pattern::newGroup(Pattern_shared val)
 {
-    Pattern_shared_deque x;
-    copyseq(val, x);
-    return newSequence(x);
+    auto ret = Pattern::create();
+    ret->setGroup(val);
+    return ret;
 }
 
 Pattern_shared Pattern::create()
@@ -721,7 +714,7 @@ Pattern_shared create()
     return Pattern::create();
 }
 
-std::size_t Result::findSize()
+std::size_t Result::findSize() const
 {
     auto x = findFirst();
 
@@ -738,7 +731,7 @@ std::size_t Result::findSize()
 
     while (true)
     {
-        x = x.next_sibling;
+        x = x->next_sibling;
         if (x)
         {
             ret++;
@@ -751,7 +744,7 @@ std::size_t Result::findSize()
     return ret;
 }
 
-Result_shared Result::findFirst()
+Result_shared Result::findFirst() const
 {
     if (prev_sibling.expired())
     {
@@ -770,7 +763,7 @@ Result_shared Result::findFirst()
     }
 }
 
-Result_shared Result::findLast()
+Result_shared Result::findLast() const
 {
     if (!next_sibling)
     {
@@ -789,17 +782,105 @@ Result_shared Result::findLast()
     }
 }
 
-Result_shared Result::getParentResult()
+Result_shared Result::findByIndex(std::size_t index) const
 {
-    return parent_result;
+    auto x = findFirst();
+    if (!x)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "can't find first Result in sequence",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    Result_shared ret;
+
+    std::size_t i = 0;
+
+    while (true)
+    {
+        if (i == index)
+        {
+            return x;
+        }
+
+        x = x->next_sibling;
+        if (!x)
+        {
+            return nullptr;
+        }
+        i++;
+    }
 }
 
-Result_shared Result::getRootResult()
+Result_shared Result::findByName(UString name, bool rec) const
+{
+    auto x = findFirst();
+    if (!x)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "can't find first Result in sequence",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    Result_shared ret;
+
+    while (true)
+    {
+        if (x->corresponding_pattern->name == name)
+        {
+            return x;
+        }
+
+        if (rec)
+        {
+            if (subResult)
+            {
+                auto x2 = subResult->findByName(name, true);
+                if (x2)
+                {
+                    return x2;
+                }
+            }
+        }
+
+        x = x->next_sibling;
+        if (!x)
+        {
+            return nullptr;
+        }
+    }
+}
+
+Result_shared Result::findByNameRec(UString name) const
+{
+    return findByName(name, true);
+}
+
+Result_shared Result::operator[](UString name) const
+{
+    return findByName(name, false);
+}
+
+Result_shared Result::operator[](std::size_t index) const
+{
+    return findByIndex(index);
+}
+
+Result_shared Result::getParent()
+{
+    return parent.lock();
+}
+
+Result_shared Result::findRoot()
 {
     Result_shared ret = Result_shared(own_ptr);
     while (true)
     {
-        auto x = ret->getParentResult();
+        auto x = ret->getParent();
         if (x)
         {
             ret = x;
@@ -836,72 +917,6 @@ UString Result::getMatchedString() const
     return original_subject.substr(ms, s);
 }
 
-std::size_t Result::getSubmatchCount() const
-{
-    return submatches.size();
-}
-
-Result_shared Result::getSubmatchByPatternName(UString name) const
-{
-    for (auto i : submatches)
-    {
-        if (i->corresponding_pattern->name == name)
-        {
-            return i;
-        }
-    }
-    return nullptr;
-}
-
-Result_shared Result::getSubmatchByIndex(std::size_t index) const
-{
-    return submatches[index];
-}
-
-Result_shared Result::operator[](UString name) const
-{
-    return getSubmatchByPatternName(name);
-}
-
-Result_shared Result::operator[](std::size_t index) const
-{
-    return getSubmatchByIndex(index);
-}
-
-Result_shared Result::searchSubmatchByPatternName(UString name) const
-{
-    for (auto i : submatches)
-    {
-        if (i->corresponding_pattern->name == name)
-        {
-            return i;
-        }
-    }
-
-    for (auto i : submatches)
-    {
-        auto r = i->searchSubmatchByPatternName(name);
-        if (r != nullptr)
-        {
-            return r;
-        }
-    }
-
-    return nullptr;
-}
-
-/*
-Result_shared Result::getShortcutResult(UString name) const
-{
-    auto res = shortcut_results.find(name);
-    if (res == shortcut_results.end())
-    {
-        return nullptr;
-    }
-    return res->second;
-}
-*/
-
 UString Result::repr_as_text() const
 {
     return repr_as_text(Result_repr_as_text_opts(false));
@@ -909,19 +924,23 @@ UString Result::repr_as_text() const
 
 UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 {
+
     UString subm;
 
-    if (opts.submatches)
+    if (opts.subResults)
     {
-        if (this->submatches.size() == 0)
+        if (!this->subResult)
         {
             subm = "(none)";
         }
         else
         {
+
+            std::size_t subResults_size = this->subResult->findSize();
+
             subm = std::format(
                 "(count: {})\n",
-                this->submatches.size()
+                subResults_size
             );
 
             UString padding = std::format(
@@ -929,10 +948,11 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
                 opts.padding
             );
 
-            std::size_t c = 0;
-            for (const auto &i : submatches)
-            {
+            std::size_t   c = 0;
+            Result_shared i = this->subResult;
 
+            while (i)
+            {
                 auto cpn  = i->corresponding_pattern->name;
                 subm     += std::format(
                     "{}+-- #{} submatch: {}\n",
@@ -946,9 +966,11 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
                 opts2.padding = std::format(
                     "{}{}      ",
                     padding,
-                    (c < this->submatches.size() - 1 ? "|" : " ")
+                    (c < subResults_size - 1 ? "|" : " ")
                 );
                 subm += i->repr_as_text(opts2);
+
+                i = i->next_sibling;
                 c++;
             }
         }
@@ -989,7 +1011,7 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 {0:}|      match_end                 : {7:}
 {0:}|      matched string            : {8:}
 {0:}|      corresponding_pattern     : {9:}
-{0:}|      submatches                : {10:}
+{0:}|      subResults                : {10:}
 {0:}+---- }}{1:})+++",
         opts.padding,
         "\n",
@@ -1001,7 +1023,7 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
         this->match_end,
         (this->matched ? std::format("\"{}\"", this->getMatchedString()) : "(dismatched)"),
         (opts.corresponding_pattern ? corp_patt : "(disabled)"),
-        (opts.submatches ? subm : "(disabled)")
+        (opts.subResults ? subm : "(disabled)")
     );
 
     return ret;
@@ -1085,7 +1107,7 @@ const Result_shared match_single(
 
     ret->original_subject      = subject;
     ret->corresponding_pattern = pattern;
-    ret->parent_result         = parent_result;
+    ret->parent                = parent_result;
     ret->match_start           = start_at;
     ret->match_end             = start_at;
 
@@ -1628,7 +1650,7 @@ const Result_shared match_single(
         case PatternType::Not:
         {
             auto res = match(
-                pattern->notSubpattern,
+                pattern->notSubPattern,
                 subject,
                 start_at,
                 ret
@@ -1654,8 +1676,8 @@ const Result_shared match_single(
                 return ret;
             }
 
-            ret->matched = false;
-            ret->submatches.push_back(res);
+            ret->matched   = false;
+            ret->subResult = res;
             return ret;
         }
 
@@ -1663,7 +1685,12 @@ const Result_shared match_single(
         {
             for (auto &x : pattern->orGroup)
             {
-                auto res = match(x, subject, start_at, ret);
+                auto res = match(
+                    x,
+                    subject,
+                    start_at,
+                    ret
+                );
 
                 if (res->error)
                 {
@@ -1675,53 +1702,52 @@ const Result_shared match_single(
                 {
                     ret->matched   = true;
                     ret->match_end = res->match_end;
-                    ret->submatches.push_back(res);
+                    ret->subResult = res;
                     return ret;
                 }
-
-                // here is the place for possible future debug upgrade
-                // (storing missmatched results), if thich case the above
-                // `if (res->matched)` doesn't return
             }
 
             ret->matched = false;
             return ret;
         }
 
-            /*
-                case PatternType::Sequence:
+        case PatternType::Group:
+        {
+            auto res = match(
+                pattern->group,
+                subject,
+                start_at,
+                ret
+            );
+
+            ret->subResult = res;
+
+            if (res->error)
+            {
+                ret->error = res->error;
+                return ret;
+            }
+
+            if (res->matched)
+            {
+                ret->matched = true;
+                auto last    = res->findLast();
+                if (!last)
                 {
-                    std::size_t end_tracker = start_at;
-
-                    for (auto &x : pattern->subpatterns)
-                    {
-                        auto res = match(x, subject, end_tracker, ret);
-
-                        if (res->error)
-                        {
-                            ret->error = res->error;
-                            return ret;
-                        }
-
-                        if (res->matched)
-                        {
-                            end_tracker = res->match_end;
-                            ret->submatches.push_back(res);
-                        }
-                        else
-                        {
-                            ret->matched = false;
-                            ret->submatches.clear();
-                            return ret;
-                        }
-                    }
-
-                    ret->matched   = true;
-                    ret->match_end = end_tracker;
-
-                    return ret;
+                    throw wayround_i2p::ccutils::errors::New(
+                        "Can't find last Result in sequence",
+                        __FILE__,
+                        __LINE__
+                    );
                 }
-            */
+                ret->match_end = last->match_end;
+            }
+            else
+            {
+                ret->matched = false;
+            }
+            return ret;
+        }
     }
 
     return ret;
@@ -1778,9 +1804,9 @@ const Result_shared match(
 
     if (has_max && has_min && min > max)
     {
-        ret                = Result::create();
-        ret->parent_result = parent_result;
-        ret->error         = wayround_i2p::ccutils::errors::New(
+        ret         = Result::create();
+        ret->parent = parent_result;
+        ret->error  = wayround_i2p::ccutils::errors::New(
             "invalid min/max in pattern",
             __FILE__,
             __LINE__
@@ -1805,7 +1831,7 @@ const Result_shared match(
         {
             ret = res;
 
-            if (parent_result && !ret->parent_result)
+            if (parent_result && ret->parent.expired())
             {
                 throw wayround_i2p::ccutils::errors::New(
                     "parent_result && !ret->parent_result",
@@ -2089,6 +2115,26 @@ const std::tuple<
     }
 
     return std::tuple(ret, ret_err);
+}
+
+Pattern_shared makeSequence(std::initializer_list<Pattern_shared> val)
+{
+    if (val.size() == 0)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "`val` MUST BE not empty",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    Pattern_shared_deque x;
+    for (const auto &i : val)
+    {
+        x.push_back(i);
+    }
+
+    return makeSequence(x);
 }
 
 } // namespace wayround_i2p::ccutils::regexp

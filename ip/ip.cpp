@@ -550,7 +550,7 @@ error_ptr IPv4::setFromString(const UString &val)
 
     for (unsigned char i = 0; i < 4; i++)
     {
-        auto res2 = res->searchSubmatchByPatternName(std::to_string(i + 1));
+        auto res2 = res->findByNameRec(std::to_string(i + 1));
 
         if (!res2)
         {
@@ -820,7 +820,7 @@ error_ptr IPv6::setFromString(const UString &text)
              "IPv6_SHORT_GRP_HEX_STR_PATTERN"
          })
     {
-        auto res2 = res->searchSubmatchByPatternName(i);
+        auto res2 = res->findByNameRec(i);
         if (!res2)
         {
             continue;

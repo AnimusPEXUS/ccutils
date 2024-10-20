@@ -532,7 +532,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
                 ->setName("4")
         };
 
-    auto pattern = wayround_i2p::ccutils::regexp::Pattern::newSequence(
+    auto pattern = wayround_i2p::ccutils::regexp::Pattern::newGroup(
         sequence_for_pattern
     );
 
@@ -604,14 +604,19 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
                 wayround_i2p::ccutils::logger::Success,
                 "matched"
             );
+            auto res_p = res.get();
+            auto ipv1  = res_p->findByNameRec("1");
+            auto ipv2  = res_p->findByNameRec("2");
+            auto ipv3  = res_p->findByNameRec("3");
+            auto ipv4  = res_p->findByNameRec("4");
             logger->Log(
                 wayround_i2p::ccutils::logger::Info,
                 std::format(
                     " 1: {}, 2: {}, 3: {}, 4: {}",
-                    (*res)["1"]->getMatchedString(),
-                    (*res)["2"]->getMatchedString(),
-                    (*res)["3"]->getMatchedString(),
-                    (*res)["4"]->getMatchedString()
+                    ipv1->getMatchedString(),
+                    ipv2->getMatchedString(),
+                    ipv3->getMatchedString(),
+                    ipv4->getMatchedString()
                 )
             );
             matched++;
@@ -678,10 +683,10 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
             break;
         }
 
-        // logger->LogSplitLines(
-        //  wayround_i2p::ccutils::logger::Status,
-        //  res->repr_as_text(true)
-        // );
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            res->repr_as_text(false)
+        );
 
         // todo: check for res->error? probably it's a matter of documentation
 
@@ -693,14 +698,19 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
                 res->match_start
             )
         );
+        auto res_p = res.get();
+        auto ipv1  = res_p->findByNameRec("1");
+        auto ipv2  = res_p->findByNameRec("2");
+        auto ipv3  = res_p->findByNameRec("3");
+        auto ipv4  = res_p->findByNameRec("4");
         logger->Log(
             wayround_i2p::ccutils::logger::Info,
             std::format(
                 "   1: {}, 2: {}, 3: {}, 4: {}",
-                (*res)["1"]->getMatchedString(),
-                (*res)["2"]->getMatchedString(),
-                (*res)["3"]->getMatchedString(),
-                (*res)["4"]->getMatchedString()
+                ipv1->getMatchedString(),
+                ipv2->getMatchedString(),
+                ipv3->getMatchedString(),
+                ipv4->getMatchedString()
             )
         );
         logger->Log(wayround_i2p::ccutils::logger::Status, "");
@@ -773,7 +783,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_010(
     - 2020101:010203
     ```
     */
-    auto regexp_ip_pattern = wayround_i2p::ccutils::regexp::Pattern::newSequence(
+    auto regexp_ip_pattern = wayround_i2p::ccutils::regexp::Pattern::newGroup(
         {wayround_i2p::ccutils::regexp::Pattern::newCharIsDigit()
              ->setMinMaxCount(4, 6)
              ->setName("1"),
@@ -841,7 +851,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_010(
         if (!r1->matched)
         {
             logger->Log(
-                wayround_i2p::ccutils::logger::Error,
+                wayround_i2p::ccutils::logger::Failure,
                 "!r1->match"
             );
 
@@ -850,7 +860,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_010(
         }
 
         logger->LogSplitLines(
-            wayround_i2p::ccutils::logger::Error,
+            wayround_i2p::ccutils::logger::Status,
             r1->repr_as_text(true)
         );
         oks++;
