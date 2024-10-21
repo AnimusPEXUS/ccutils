@@ -177,9 +177,18 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_002(
 
         auto res = wayround_i2p::ccutils::regexp::match(p, ts_u);
 
+        if (!res)
+        {
+            logger->Log(
+                wayround_i2p::ccutils::logger::Error,
+                "match() returned null"
+            );
+            continue;
+        }
+
         logger->LogSplitLines(
             wayround_i2p::ccutils::logger::Status,
-            res->repr_as_text()
+            res->repr_as_text(true)
         );
 
         if (res->error)
@@ -494,6 +503,15 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_006(
         return {false};
     }
 
+    if (res->getMatchedString() != "aaaaaa")
+    {
+        logger->Log(
+            wayround_i2p::ccutils::logger::Error,
+            "test string dismatch"
+        );
+        return {false};
+    }
+
     return {true};
 }
 
@@ -550,10 +568,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
     };
 
     auto test_set = std::vector<main_008_loop_struct>{
-        {"8.8.8.8",    false},
-        {"a.b.c.d",    true },
-        {"8.8.888.8",  false},
-        {"8.8.8888.8", true },
+        {"8.8.8.8",         false},
+        {"a.b.c.d",         true },
+        {"8.8.888.8",       false},
+        {"111.222.333.444", false},
+        {"8.8.8888.8",      true },
     };
 
     for (auto &i : test_set)
@@ -588,6 +607,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_008(
             );
             continue;
         }
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
+            res->repr_as_text(true)
+        );
 
         if (res->error)
         {

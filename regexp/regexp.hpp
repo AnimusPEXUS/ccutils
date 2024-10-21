@@ -38,11 +38,13 @@ using CBFunctionToCheckChar01 = std::function<
 struct Pattern_repr_as_text_opts
 {
     bool    subpatterns = false;
+    bool    siblings    = false;
     UString padding     = "  ";
 
     Pattern_repr_as_text_opts(bool v1)
     {
         subpatterns = v1;
+        siblings    = v1;
     }
 };
 
@@ -81,7 +83,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     // generate complete deque of current level Patterns
     // (starting from first one)
-    Pattern_shared_deque &makeSequenceDeque(Pattern_shared_deque &ret);
+    Pattern_shared_deque &makeSequenceDeque(Pattern_shared_deque &ret) const;
 
     // generates deque of all patterns in on curren sequence;
     // appends values from val;
@@ -316,22 +318,28 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
 struct Result_repr_as_text_opts
 {
-    bool    original_subject      = false;
-    bool    corresponding_pattern = false;
-    bool    subResults            = false;
-    UString padding               = "  ";
+    bool    original_subject                  = false;
+    bool    corresponding_pattern             = false;
+    bool    corresponding_pattern_siblings    = false;
+    bool    corresponding_pattern_subpatterns = false;
+    bool    subResults                        = false;
+    UString padding                           = "  ";
 
     Result_repr_as_text_opts(bool v1)
     {
-        original_subject      = v1;
-        corresponding_pattern = v1;
-        subResults            = v1;
+        original_subject                  = v1;
+        corresponding_pattern             = v1;
+        corresponding_pattern_siblings    = v1;
+        corresponding_pattern_subpatterns = v1;
+        subResults                        = v1;
     }
-    Result_repr_as_text_opts(bool v1, bool v2, bool v3)
+    Result_repr_as_text_opts(bool v1, bool v2, bool v3, bool v4, bool v5)
     {
-        original_subject      = v1;
-        corresponding_pattern = v2;
-        subResults            = v3;
+        original_subject                  = v1;
+        corresponding_pattern             = v2;
+        corresponding_pattern_siblings    = v3;
+        corresponding_pattern_subpatterns = v4;
+        subResults                        = v5;
     }
 };
 
@@ -353,6 +361,8 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     Result_shared operator[](UString name) const;
     // same as findByIndex()
     Result_shared operator[](std::size_t index) const;
+
+    Result_shared_deque &makeSequenceDeque(Result_shared_deque &ret) const;
 
     error_ptr error;
 
@@ -508,6 +518,8 @@ Pattern_shared appendPatterns(
 
     return pattern;
 }
+
+UString PatternTypeString(PatternType v);
 
 } // namespace wayround_i2p::ccutils::regexp
 

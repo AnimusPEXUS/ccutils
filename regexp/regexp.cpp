@@ -89,9 +89,17 @@ void Pattern::setSequenceParent(Pattern_shared val)
     }
 }
 
-Pattern_shared_deque &Pattern::makeSequenceDeque(Pattern_shared_deque &ret)
+Pattern_shared_deque &Pattern::makeSequenceDeque(Pattern_shared_deque &ret) const
 {
-    auto current = own_ptr.lock();
+    auto current = findFirst();
+    if (!current)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "can't findFirst(",
+            __FILE__,
+            __LINE__
+        );
+    }
     ret.resize(0);
     while (true)
     {
@@ -208,36 +216,118 @@ UString Pattern::repr_as_text() const
 
 UString Pattern::repr_as_text(const Pattern_repr_as_text_opts &opts) const
 {
-    // todo: does this return copy? use pointers?
-    // todo: todo
-    UString ret = std::format(
-        R"+++({0:}+---- wayround_i2p::ccutils::regexp::Pattern{{
-{0:}|      name                      : {2:}
-{0:}|      pattern_type              : {3:}
-{0:}|      values                    : {4:}
-{0:}|      case_sensitive_from_parent: {5:}
-{0:}|      case_sensitive            : {6:}
-{0:}|      isCaseSensitive()         : {7:}
-{0:}|      has_min                   : {8:}
-{0:}|      has_max                   : {9:}
-{0:}|      min                       : {10:}
-{0:}|      max                       : {11:}
-{0:}|      greedy                    : {12:}
-{0:}+---- }}{1:})+++",
-        opts.padding,
-        "\n",
-        std::format("\"{}\"", this->name),
-        (int)(this->pattern_type),
-        "",
-        this->case_sensitive_from_parent,
-        this->case_sensitive,
-        this->isCaseSensitive(),
-        this->has_min,
-        this->has_max,
-        this->min,
-        this->max,
-        this->greedy
+    Pattern_shared_deque values;
+
+    if (opts.siblings)
+    {
+        makeSequenceDeque(values);
+    }
+    else
+    {
+        values.push_back(own_ptr.lock());
+    }
+
+    UString sub_padding = std::format(
+        "{}|           ",
+        opts.padding
     );
+
+    auto opts2    = opts;
+    opts2.padding = std::format(
+        "{}{}      ",
+        sub_padding,
+        "|"
+    );
+
+    UString ret = "";
+    for (std::size_t i = 0; i < values.size(); i++)
+    {
+        const auto &ival = values[i];
+
+        UString group_txt    = "";
+        UString or_group_txt = "";
+
+        if (opts.subpatterns)
+        {
+            // group_txt
+
+            if (!ival->group)
+            {
+                group_txt = "(unset)";
+            }
+            else
+            {
+                std::size_t orGroup_size = ival->orGroup.size();
+
+                group_txt += "\n";
+
+                group_txt += ival->group->repr_as_text(opts2);
+            }
+
+            // or_group_txt
+
+            std::size_t orGroup_size = ival->orGroup.size();
+
+            if (orGroup_size == 0)
+            {
+                or_group_txt = "(empty)";
+            }
+            else
+            {
+                or_group_txt = std::format(
+                    "(count: {})\n",
+                    orGroup_size
+                );
+
+                for (std::size_t j = 0; j < orGroup_size; j++)
+                {
+                    or_group_txt += std::format(
+                        "{}+-- #{} group item\n",
+                        sub_padding,
+                        j
+                    );
+                    or_group_txt += ival->orGroup[j]->repr_as_text(opts2);
+                }
+            }
+        }
+
+        ret += std::format(
+            R"+++({0:}+---- sibling #{2:} wayround_i2p::ccutils::regexp::Pattern{{
+{0:}|      name                      : {3:}
+{0:}|      pattern_type              : {4:} ({5:})
+{0:}|      values                    : {6:}
+{0:}|      case_sensitive_from_parent: {7:}
+{0:}|      case_sensitive            : {8:}
+{0:}|      isCaseSensitive()         : {9:}
+{0:}|      has_min                   : {10:}
+{0:}|      has_max                   : {11:}
+{0:}|      min                       : {12:}
+{0:}|      max                       : {13:}
+{0:}|      greedy                    : {14:}
+{0:}|      notSubPattern             : {15:}
+{0:}|      orGroup                   : {16:}
+{0:}|      group                     : {17:}
+{0:}+---- }}{1:})+++",
+            opts.padding,
+            "\n",
+            (opts.siblings ? std::to_string(i) : "xx"),
+            std::format("\"{}\"", ival->name),
+            (int)(ival->pattern_type),
+            wayround_i2p::ccutils::regexp::PatternTypeString(ival->pattern_type),
+            "",
+            ival->case_sensitive_from_parent,
+            ival->case_sensitive,
+            ival->isCaseSensitive(),
+            ival->has_min,
+            ival->has_max,
+            ival->min,
+            ival->max,
+            ival->greedy,
+            (!opts.subpatterns ? "(disabled)" : (!ival->notSubPattern ? "(unset)" : ival->notSubPattern->repr_as_text(opts))),
+            (!opts.subpatterns ? "(disabled)" : or_group_txt),
+            (!opts.subpatterns ? "(disabled)" : group_txt)
+        );
+    }
 
     return ret;
 }
@@ -870,6 +960,33 @@ Result_shared Result::operator[](std::size_t index) const
     return findByIndex(index);
 }
 
+Result_shared_deque &Result::makeSequenceDeque(Result_shared_deque &ret) const
+{
+    auto current = findFirst();
+    if (!current)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "can't findFirst(",
+            __FILE__,
+            __LINE__
+        );
+    }
+    ret.resize(0);
+    while (true)
+    {
+        if (current)
+        {
+            ret.push_back(current);
+            current = current->next_sibling;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return ret;
+}
+
 Result_shared Result::getParent()
 {
     return parent.lock();
@@ -924,107 +1041,119 @@ UString Result::repr_as_text() const
 
 UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 {
+    Result_shared_deque values;
 
-    UString subm;
+    makeSequenceDeque(values);
 
-    if (opts.subResults)
+    UString sub_padding = std::format(
+        "{}|           ",
+        opts.padding
+    );
+
+    UString ret;
+    for (std::size_t i = 0; i < values.size(); i++)
     {
-        if (!this->subResult)
+        const auto &ival = values[i];
+
+        UString subm = "";
+
+        if (opts.subResults)
         {
-            subm = "(none)";
-        }
-        else
-        {
-
-            std::size_t subResults_size = this->subResult->findSize();
-
-            subm = std::format(
-                "(count: {})\n",
-                subResults_size
-            );
-
-            UString padding = std::format(
-                "{}|           ",
-                opts.padding
-            );
-
-            std::size_t   c = 0;
-            Result_shared i = this->subResult;
-
-            while (i)
+            if (!ival->subResult)
             {
-                auto cpn  = i->corresponding_pattern->name;
-                subm     += std::format(
-                    "{}+-- #{} submatch: {}\n",
-                    padding,
-                    c,
-                    (cpn != "" ?
-                             std::format("\"{}\"", cpn) :
-                             "(unnamed)")
-                );
-                auto opts2    = opts;
-                opts2.padding = std::format(
-                    "{}{}      ",
-                    padding,
-                    (c < subResults_size - 1 ? "|" : " ")
-                );
-                subm += i->repr_as_text(opts2);
+                subm = "(none)";
+            }
+            else
+            {
 
-                i = i->next_sibling;
-                c++;
+                std::size_t subResults_size = ival->subResult->findSize();
+
+                subm = std::format(
+                    "(count: {})\n",
+                    subResults_size
+                );
+
+                std::size_t   c = 0;
+                Result_shared i = ival->subResult;
+
+                while (i)
+                {
+                    auto cpn  = i->corresponding_pattern->name;
+                    subm     += std::format(
+                        "{}+-- #{} submatch: {}\n",
+                        sub_padding,
+                        c,
+                        (cpn != "" ?
+                                 std::format("\"{}\"", cpn) :
+                                 "(unnamed)")
+                    );
+                    auto opts2    = opts;
+                    opts2.padding = std::format(
+                        "{}{}      ",
+                        sub_padding,
+                        (c < subResults_size - 1 ? "|" : " ")
+                    );
+                    subm += i->repr_as_text(opts2);
+
+                    i = i->next_sibling;
+                    c++;
+                }
             }
         }
-    }
 
-    UString corp_patt;
+        UString corp_patt;
 
-    if (opts.corresponding_pattern)
-    {
-        if (!this->corresponding_pattern)
+        if (opts.corresponding_pattern)
         {
-            subm = "(absent: and this is wrong!)";
-        }
-        else
-        {
-            corp_patt       = "\n";
-            UString padding = std::format(
-                "{}|           ",
-                opts.padding
-            );
+            if (!ival->corresponding_pattern)
+            {
+                subm = "(absent: and this is wrong!)";
+            }
+            else
+            {
+                corp_patt       = "\n";
+                UString padding = std::format(
+                    "{}|           ",
+                    opts.padding
+                );
 
-            auto opts2    = Pattern_repr_as_text_opts(false);
-            opts2.padding = std::format(
-                "{}|      ",
-                padding
-            );
-            corp_patt += this->corresponding_pattern->repr_as_text(opts2);
+                auto opts2        = Pattern_repr_as_text_opts(true);
+                opts2.subpatterns = opts.corresponding_pattern_subpatterns;
+                opts2.siblings    = false;
+                opts2.padding     = std::format(
+                    "{}|      ",
+                    padding
+                );
+                corp_patt += ival->corresponding_pattern->repr_as_text(opts2);
+            }
         }
-    }
 
-    UString ret = std::format(
-        R"+++({0:}+---- wayround_i2p::ccutils::regexp::Result{{
-{0:}|      error?                    : {2:}
-{0:}|      original_subject          : {3:}
-{0:}|      matched?                  : {4:}
-{0:}|      matched_repetitions_count : {5:}
-{0:}|      match_start               : {6:}
-{0:}|      match_end                 : {7:}
-{0:}|      matched string            : {8:}
-{0:}|      corresponding_pattern     : {9:}
-{0:}|      subResults                : {10:}
+        ret += std::format(
+            R"+++({0:}+---- sibling #{2:} wayround_i2p::ccutils::regexp::Result{{
+{0:}|      error?                    : {3:}
+{0:}|      original_subject          : {4:}
+{0:}|      matched?                  : {5:}
+{0:}|      matched_repetitions_count : {6:}
+{0:}|      match_start               : {7:}
+{0:}|      match_end                 : {8:}
+{0:}|      matched string            : {9:}
+{0:}|      corresponding_pattern     : {10:}
+{0:}|      subResults                : {11:}
 {0:}+---- }}{1:})+++",
-        opts.padding,
-        "\n",
-        this->error ? this->error->Error() : "(no error)",
-        opts.original_subject ? this->original_subject : "(disabled)",
-        this->matched,
-        this->matched_repetitions_count,
-        this->match_start,
-        this->match_end,
-        (this->matched ? std::format("\"{}\"", this->getMatchedString()) : "(dismatched)"),
-        (opts.corresponding_pattern ? corp_patt : "(disabled)"),
-        (opts.subResults ? subm : "(disabled)")
-    );
+            opts.padding,
+            "\n",
+            i,
+            ival->error ? ival->error->Error() : "(no error)",
+            opts.original_subject ? ival->original_subject : "(disabled)",
+            ival->matched,
+            ival->matched_repetitions_count,
+            ival->match_start,
+            ival->match_end,
+            (ival->matched ? std::format("\"{}\"", ival->getMatchedString()) : "(dismatched)"),
+            (opts.corresponding_pattern ? corp_patt : "(disabled)"),
+            (opts.subResults ? subm : "(disabled)")
+        );
+    }
 
     return ret;
 }
@@ -1814,12 +1943,17 @@ const Result_shared match(
         return ret;
     }
 
+    Result_shared first_matched_next;
+    Result_shared last_matched_next;
+
     auto next_start = start_at;
 
     bool continue_after_try_next = false;
 
     while (true)
     {
+        auto next_pattern = pattern->next_sibling;
+
         auto res = match_single(
             pattern,
             subject,
@@ -1853,143 +1987,152 @@ const Result_shared match(
 
             next_start = ret->match_end = res->match_end;
 
-            // todo: detect if greedy but matching
-            // global pattern if matching here more than min?
-            // pass next pattern to this function and try match-searching?
-
-            if ((greedy)
-                && ((min == 0) || (min != 0 && matched_count >= min)))
-            {
-                goto try_next_and_exit;
-            }
-
             if (has_max && matched_count == max)
             {
-                goto try_next_and_exit;
-            }
-
-            if (has_max && matched_count > max)
-            {
-                throw wayround_i2p::ccutils::errors::New(
-                    "programming error? this should not be happening",
-                    __FILE__,
-                    __LINE__
-                );
-            }
-
-            goto try_next_and_continue;
-        }
-        else
-        {
-            if (has_min)
-            {
-                if (min != 0)
+                if (next_pattern)
                 {
-                    if (matched_count < min)
-                    {
-                        goto dismatch_and_exit;
-                    }
-                    else
-                    {
-                        goto try_next_and_exit;
-                    }
+                    goto try_next_and_summarize_next;
                 }
                 else
                 {
-                    goto try_next_and_exit;
+                    goto summarize_main;
+                }
+            }
+
+            if (has_min && matched_count < min)
+            {
+                goto just_continue;
+            }
+
+            if (next_pattern)
+            {
+                goto try_next_and_continue;
+            }
+            else
+            {
+                goto just_continue;
+            }
+        }
+        else
+        {
+            if (has_min && min != 0 && matched_count < min)
+            {
+                if (next_pattern)
+                {
+                    goto summarize_next;
+                }
+                else
+                {
+                    goto summarize_main;
                 }
             }
             else
             {
-                goto try_next_and_exit;
+                if (next_pattern)
+                {
+                    goto try_next_and_summarize_next;
+                }
+                else
+                {
+                    goto summarize_main;
+                }
             }
         }
+
+    just_continue:
+    {
+        continue;
+    }
 
     try_next_and_continue:
     {
         continue_after_try_next = true;
         goto try_next;
     }
-    try_next_and_exit:
+
+    try_next_and_summarize_next:
     {
         continue_after_try_next = false;
+        goto try_next;
     }
+
     try_next:
     {
-        auto n = pattern->next_sibling;
-        if (n)
+        auto next_sibling_result = match(
+            next_pattern,
+            subject,
+            next_start,
+            nullptr
+        );
+
+        if (!next_sibling_result)
         {
-            auto next_sibling_result = match(
-                n,
-                subject,
-                next_start,
-                nullptr
+            ret->error = wayround_i2p::ccutils::errors::New(
+                "match() on next sibling returned null",
+                __FILE__,
+                __LINE__
             );
+            return ret;
+        }
 
-            if (!next_sibling_result)
+        if (next_sibling_result->error)
+        {
+            // todo: is this correct error passing/returning?
+            ret->next_sibling                 = next_sibling_result;
+            next_sibling_result->prev_sibling = ret;
+            ret->error                        = next_sibling_result->error;
+            return ret;
+        }
+
+        if (next_sibling_result->matched)
+        {
+            if (!first_matched_next)
             {
-                if (continue_after_try_next)
-                {
-                    continue;
-                }
-                else
-                {
-                    goto dismatch_and_exit;
-                }
+                first_matched_next = next_sibling_result;
             }
+            last_matched_next = next_sibling_result;
 
-            if (next_sibling_result->error)
+            if (continue_after_try_next)
             {
-                ret->next_sibling                 = next_sibling_result;
-                next_sibling_result->prev_sibling = ret;
-                goto dismatch_and_exit;
-            }
-
-            if (next_sibling_result->matched)
-            {
-                ret->next_sibling                 = next_sibling_result;
-                next_sibling_result->prev_sibling = ret;
-                goto match_and_exit;
+                continue;
             }
             else
             {
-                if (continue_after_try_next)
-                {
-                    continue;
-                }
-                else
-                {
-                    goto dismatch_and_exit;
-                }
+                goto summarize_next;
             }
-        }
-
-        if (continue_after_try_next)
-        {
-            continue;
         }
         else
         {
-            goto match_and_exit;
+            goto summarize_next;
         }
+    }
 
-        throw wayround_i2p::ccutils::errors::New(
-            "this code should be unreachable. "
-            "it's here of demonstrational purpose",
-            __FILE__,
-            __LINE__
-        );
-    }
-    match_and_exit:
+    summarize_next:
     {
-        ret->matched   = true;
-        ret->match_end = next_start;
-        return ret;
+        if (!first_matched_next && !last_matched_next)
+        {
+            ret->matched = false;
+        }
+        else
+        {
+            Result_shared x;
+            if (greedy)
+            {
+                x = (first_matched_next ? first_matched_next : last_matched_next);
+            }
+            else
+            {
+                x = (last_matched_next ? last_matched_next : first_matched_next);
+            }
+            ret->match_end    = x->match_start;
+            ret->next_sibling = x;
+            x->prev_sibling   = ret;
+        }
     }
-    dismatch_and_exit:
+
+    summarize_main:
     {
-        ret->matched = false;
-        return ret;
+        break;
     }
     }
 
@@ -2135,6 +2278,66 @@ Pattern_shared makeSequence(std::initializer_list<Pattern_shared> val)
     }
 
     return makeSequence(x);
+}
+
+UString PatternTypeString(PatternType v)
+{
+    switch (v)
+    {
+        default:
+            throw wayround_i2p::ccutils::errors::New(
+                "unsupported value",
+                __FILE__,
+                __LINE__
+            );
+        case PatternType::Invalid:
+            return "Invalid";
+
+        case PatternType::TextStart:
+            return "TextStart";
+        case PatternType::TextEnd:
+            return "TextEnd";
+        case PatternType::LineStart:
+            return "LineStart";
+        case PatternType::LineEnd:
+            return "LineEnd";
+
+        case PatternType::LineSplit:
+            return "LineSplit";
+
+        case PatternType::ExactChar:
+            return "ExactChar";
+        case PatternType::CharRange:
+            return "CharRange";
+
+        case PatternType::AnyChar:
+            return "AnyChar";
+
+        case PatternType::CharIsAlpha:
+            return "CharIsAlpha";
+        case PatternType::CharIsLower:
+            return "CharIsLower";
+        case PatternType::CharIsUpper:
+            return "CharIsUpper";
+        case PatternType::CharIsPunct:
+            return "CharIsPunct";
+        case PatternType::CharIsDigit:
+            return "CharIsDigit";
+        case PatternType::CharIsXDigit:
+            return "CharIsXDigit";
+        case PatternType::CharIsSpace:
+            return "CharIsSpace";
+        case PatternType::CharIsBlank:
+            return "CharIsBlank";
+
+        case PatternType::Not:
+            return "Not";
+
+        case PatternType::OrGroup:
+            return "OrGroup";
+        case PatternType::Group:
+            return "Group";
+    }
 }
 
 } // namespace wayround_i2p::ccutils::regexp
