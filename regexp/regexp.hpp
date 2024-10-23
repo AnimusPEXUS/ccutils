@@ -190,13 +190,12 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     Pattern_shared setOrGroup(const T &val)
     {
-        removeAllSubpatterns();
         this->pattern_type = PatternType::OrGroup;
+        removeAllSubpatterns();
         copyDequeOrVector(val, orGroup);
         auto x = own_ptr.lock();
         for (auto &i : orGroup)
         {
-            // todo: those requires thinking
             i->prev_sibling.reset();
             // i->next_sibling = nullptr;
             i->parent = x;
@@ -204,23 +203,13 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
         return own_ptr.lock();
     }
 
-    Pattern_shared setGroup(std::initializer_list<Pattern_shared> val)
-    {
-        Pattern_shared_deque x;
-        for (const auto &i : val)
-        {
-            x.push_back(i);
-        }
-
-        return setGroup(x);
-    }
+    Pattern_shared setGroup(std::initializer_list<Pattern_shared> val);
 
     template <wayround_i2p::ccutils::utils::IsDequeOrVectorOfType<Pattern_shared> T>
     Pattern_shared setGroup(const T &val)
     {
         auto seq = makeSequence(val);
         setGroup(seq);
-        seq->setSequenceParent(own_ptr.lock());
         return own_ptr.lock();
     }
 
@@ -296,7 +285,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
         const Result_shared parent_result = nullptr
     );
 
-    const Result_shared search(
+    const Result_shared find(
         const UString &subject,
         std::size_t    start_at = 0,
         bool           backward = false
@@ -371,6 +360,7 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     bool matched = false;
 
+    // todo: restore this
     std::size_t matched_repetitions_count = 0;
 
     std::size_t match_start = 0;
@@ -420,7 +410,7 @@ const Result_shared match(
     const Result_shared  parent_result = nullptr
 );
 
-const Result_shared search(
+const Result_shared find(
     const Pattern_shared pattern,
     const UString       &subject,
     std::size_t          start_at = 0,

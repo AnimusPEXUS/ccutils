@@ -440,16 +440,25 @@ Pattern_shared Pattern::setCharIsBlank()
 
 Pattern_shared Pattern::setNot(Pattern_shared notSubPattern)
 {
+    this->pattern_type = PatternType::Not;
     removeAllSubpatterns();
-    this->pattern_type  = PatternType::Not;
     this->notSubPattern = notSubPattern;
     this->notSubPattern->setSequenceParent(own_ptr.lock());
     return own_ptr.lock();
 }
 
+Pattern_shared Pattern::setGroup(std::initializer_list<Pattern_shared> val)
+{
+    Pattern_shared_deque x;
+    for (const auto &i : val)
+    {
+        x.push_back(i);
+    }
+    return setGroup(x);
+}
+
 Pattern_shared Pattern::setGroup(Pattern_shared group)
 {
-    removeAllSubpatterns();
     this->pattern_type = PatternType::Group;
     auto first         = group->findFirst();
     if (!first)
@@ -462,6 +471,7 @@ Pattern_shared Pattern::setGroup(Pattern_shared group)
             __LINE__
         );
     }
+    removeAllSubpatterns();
     this->group = first;
     this->group->setSequenceParent(own_ptr.lock());
     return own_ptr.lock();
@@ -770,13 +780,13 @@ const Result_shared Pattern::match(
     );
 }
 
-const Result_shared Pattern::search(
+const Result_shared Pattern::find(
     const UString &subject,
     std::size_t    start_at,
     bool           backward
 )
 {
-    return wayround_i2p::ccutils::regexp::search(
+    return wayround_i2p::ccutils::regexp::find(
         Pattern_shared(this->own_ptr),
         subject,
         start_at,
@@ -1244,55 +1254,34 @@ const Result_shared match_single(
 
     if (start_at > subject_length)
     {
-        ret->error
-            = wayround_i2p::ccutils::errors::New(
-                "trying to work outside of subject",
-                __FILE__,
-                __LINE__
-            );
-
-        return ret;
-    }
-
-    if (pattern->pattern_type == PatternType::Invalid)
-    {
-        ret->error
-            = wayround_i2p::ccutils::errors::New(
-                "invalid `pattern_type`",
-                __FILE__,
-                __LINE__
-            );
-
-        return ret;
+        throw wayround_i2p::ccutils::errors::New(
+            "trying to work outside of subject",
+            __FILE__,
+            __LINE__
+        );
     }
 
     switch (pattern->pattern_type)
     {
         default:
         {
-            ret->error
-                = wayround_i2p::ccutils::errors::New(
-                    std::format(
-                        "unsupported `pattern_type` ({})"
-                        " <- programming error : fixme",
-                        (unsigned char)pattern->pattern_type
-                    ),
-                    __FILE__,
-                    __LINE__
-                );
-
-            return ret;
+            throw wayround_i2p::ccutils::errors::New(
+                std::format(
+                    "unsupported `pattern_type` ({})"
+                    " <- programming error : fixme",
+                    (unsigned char)pattern->pattern_type
+                ),
+                __FILE__,
+                __LINE__
+            );
         }
         case PatternType::Invalid:
         {
-            ret->error
-                = wayround_i2p::ccutils::errors::New(
-                    "invalid `pattern_type`",
-                    __FILE__,
-                    __LINE__
-                );
-
-            return ret;
+            throw wayround_i2p::ccutils::errors::New(
+                "invalid `pattern_type`",
+                __FILE__,
+                __LINE__
+            );
         }
         case PatternType::TextStart:
         {
@@ -1336,13 +1325,11 @@ const Result_shared match_single(
             {
                 default:
                 {
-                    ret->error
-                        = wayround_i2p::ccutils::errors::New(
-                            "programming error - fixme",
-                            __FILE__,
-                            __LINE__
-                        );
-                    return ret;
+                    throw wayround_i2p::ccutils::errors::New(
+                        "programming error - fixme",
+                        __FILE__,
+                        __LINE__
+                    );
                 }
                 case 1:
                 {
@@ -1421,13 +1408,11 @@ const Result_shared match_single(
             {
                 default:
                 {
-                    ret->error
-                        = wayround_i2p::ccutils::errors::New(
-                            "programming error - fixme",
-                            __FILE__,
-                            __LINE__
-                        );
-                    return ret;
+                    throw wayround_i2p::ccutils::errors::New(
+                        "programming error - fixme",
+                        __FILE__,
+                        __LINE__
+                    );
                 }
                 case 0:
                 {
@@ -1778,6 +1763,8 @@ const Result_shared match_single(
 
         case PatternType::Not:
         {
+            // todo: check what lineend checking is working
+
             auto res = match(
                 pattern->notSubPattern,
                 subject,
@@ -1812,6 +1799,8 @@ const Result_shared match_single(
 
         case PatternType::OrGroup:
         {
+            // todo: check what lineend checking is working
+
             for (auto &x : pattern->orGroup)
             {
                 auto res = match(
@@ -1842,6 +1831,8 @@ const Result_shared match_single(
 
         case PatternType::Group:
         {
+            // todo: check what lineend checking is working
+
             auto res = match(
                 pattern->group,
                 subject,
@@ -1889,12 +1880,15 @@ const Result_shared match(
     const Result_shared  parent_result
 )
 {
-    Result_shared ret = nullptr;
+    const auto next_pattern = pattern->next_sibling;
 
-    std::size_t matched_count = 0;
+    Result_shared ret;
+
+    std::size_t single_matched_count = 0;
+    std::size_t single_tries_count   = 0;
 
     auto ex01 = std::experimental::scope_exit(
-        [&ret, &matched_count]()
+        [&ret, &single_matched_count]()
         {
             assert(ret);
 
@@ -1905,7 +1899,7 @@ const Result_shared match(
 
             if (ret->matched)
             {
-                ret->matched_repetitions_count = matched_count;
+                ret->matched_repetitions_count = single_matched_count;
             }
             else
             {
@@ -1915,21 +1909,11 @@ const Result_shared match(
         }
     );
 
-    auto has_min = pattern->has_min;
-    auto min     = pattern->min;
-    auto has_max = pattern->has_max;
-    auto max     = pattern->max;
-    auto greedy  = pattern->greedy;
-
-    if (!has_max)
-    {
-        max = 0;
-    }
-
-    if (!has_min)
-    {
-        min = 0;
-    }
+    const auto has_min = pattern->has_min;
+    const auto min     = (!has_min ? 0 : pattern->min);
+    const auto has_max = pattern->has_max;
+    const auto max     = (!has_max ? 0 : pattern->max);
+    const auto greedy  = pattern->greedy;
 
     if (has_max && has_min && min > max)
     {
@@ -1952,93 +1936,96 @@ const Result_shared match(
 
     while (true)
     {
-        auto next_pattern = pattern->next_sibling;
+        { // don't allow using `res` after `if (res->matched)` block
+            auto res = match_single(
+                pattern,
+                subject,
+                next_start,
+                parent_result
+            );
+            single_tries_count++;
 
-        auto res = match_single(
-            pattern,
-            subject,
-            next_start,
-            parent_result
-        );
-
-        if (!ret)
-        {
-            ret = res;
-
-            if (parent_result && ret->parent.expired())
+            if (!ret)
             {
-                throw wayround_i2p::ccutils::errors::New(
-                    "parent_result && !ret->parent_result",
-                    __FILE__,
-                    __LINE__
-                );
+                ret = res;
+
+                if (parent_result && res->parent.expired())
+                {
+                    throw wayround_i2p::ccutils::errors::New(
+                        "parent_result && res->parent.expired()",
+                        __FILE__,
+                        __LINE__
+                    );
+                }
             }
-        }
 
-        if (res->error)
-        {
-            ret->error = res->error;
-            return ret;
-        }
-
-        if (res->matched)
-        {
-            matched_count++;
-
-            next_start = ret->match_end = res->match_end;
-
-            if (has_max && matched_count == max)
+            if (res->error)
             {
+                ret->error = res->error;
+                return ret;
+            }
+
+            if (res->matched)
+            {
+                single_matched_count++;
+
+                next_start = ret->match_end = res->match_end;
+
+                if (has_max && single_tries_count == max)
+                {
+                    if (next_pattern)
+                    {
+                        goto try_next_and_summarize;
+                    }
+                    else
+                    {
+                        ret->matched = true;
+                        goto summarize;
+                    }
+                }
+
+                if (has_min && single_tries_count < min)
+                {
+                    goto just_continue;
+                }
+
                 if (next_pattern)
                 {
-                    goto try_next_and_summarize_next;
+                    goto try_next_and_continue;
                 }
                 else
                 {
-                    goto summarize_main;
-                }
-            }
-
-            if (has_min && matched_count < min)
-            {
-                goto just_continue;
-            }
-
-            if (next_pattern)
-            {
-                goto try_next_and_continue;
-            }
-            else
-            {
-                goto just_continue;
-            }
-        }
-        else
-        {
-            if (has_min && min != 0 && matched_count < min)
-            {
-                if (next_pattern)
-                {
-                    goto summarize_next;
-                }
-                else
-                {
-                    goto summarize_main;
+                    goto just_continue;
                 }
             }
             else
             {
-                if (next_pattern)
+                if (!has_min || min == 0)
                 {
-                    goto try_next_and_summarize_next;
+                    if (single_tries_count == 1 && single_matched_count == 0)
+                    {
+                        if (next_pattern)
+                        {
+                            goto try_next_and_summarize;
+                        }
+                        else
+                        {
+                            ret->matched = true;
+                            goto summarize;
+                        }
+                    }
+                    else
+                    {
+                        ret->matched = false;
+                        goto summarize;
+                    }
                 }
                 else
                 {
-                    goto summarize_main;
+                    goto summarize;
                 }
             }
         }
-
     just_continue:
     {
         continue;
@@ -2050,7 +2037,7 @@ const Result_shared match(
         goto try_next;
     }
 
-    try_next_and_summarize_next:
+    try_next_and_summarize:
     {
         continue_after_try_next = false;
         goto try_next;
@@ -2058,11 +2045,20 @@ const Result_shared match(
 
     try_next:
     {
+        if (!next_pattern)
+        {
+            wayround_i2p::ccutils::errors::New(
+                "execution should not get here if not next_pattern",
+                __FILE__,
+                __LINE__
+            );
+        }
+
         auto next_sibling_result = match(
             next_pattern,
             subject,
             next_start,
-            nullptr
+            parent_result
         );
 
         if (!next_sibling_result)
@@ -2089,49 +2085,49 @@ const Result_shared match(
             if (!first_matched_next)
             {
                 first_matched_next = next_sibling_result;
+                if (greedy)
+                {
+                    goto summarize;
+                }
             }
             last_matched_next = next_sibling_result;
+        }
 
-            if (continue_after_try_next)
-            {
-                continue;
-            }
-            else
-            {
-                goto summarize_next;
-            }
+        if (continue_after_try_next)
+        {
+            continue;
         }
         else
         {
-            goto summarize_next;
+            goto summarize;
         }
     }
 
-    summarize_next:
+    summarize:
     {
-        if (!first_matched_next && !last_matched_next)
+        if (next_pattern)
         {
-            ret->matched = false;
-        }
-        else
-        {
-            Result_shared x;
-            if (greedy)
+            if (!first_matched_next && !last_matched_next)
             {
-                x = (first_matched_next ? first_matched_next : last_matched_next);
+                ret->matched = false;
             }
             else
             {
-                x = (last_matched_next ? last_matched_next : first_matched_next);
+                Result_shared x;
+                if (greedy)
+                {
+                    x = first_matched_next;
+                }
+                else
+                {
+                    x = last_matched_next;
+                }
+                ret->matched      = true;
+                ret->next_sibling = x;
+                x->prev_sibling   = ret;
+                ret->match_end    = ret->next_sibling->match_start;
             }
-            ret->match_end    = x->match_start;
-            ret->next_sibling = x;
-            x->prev_sibling   = ret;
         }
-    }
-
-    summarize_main:
-    {
         break;
     }
     }
@@ -2139,7 +2135,7 @@ const Result_shared match(
     return ret;
 }
 
-const Result_shared search(
+const Result_shared find(
     const Pattern_shared pattern,
     const UString       &subject,
     std::size_t          start_at,
@@ -2148,7 +2144,7 @@ const Result_shared search(
 {
     // todo: add overlap prevention option?
 
-    Result_shared ret = nullptr;
+    Result_shared ret;
 
     auto ex01 = std::experimental::scope_exit(
         [&ret]()
@@ -2179,16 +2175,16 @@ const Result_shared search(
             break;
         }
 
-        auto match_res = match_single(pattern, subject, i);
-        if (match_res->error)
+        auto res = match(pattern, subject, i);
+        if (res->error)
         {
-            ret = match_res;
+            ret = res;
             return ret;
         }
 
-        if (match_res->matched)
+        if (res->matched)
         {
-            ret = match_res;
+            ret = res;
             return ret;
         }
 
@@ -2230,7 +2226,7 @@ const std::tuple<
             break;
         }
 
-        auto search_res = search(pattern, subject, i);
+        auto search_res = find(pattern, subject, i);
         if (!search_res)
         { /* which means: "not found" (which is different from "not matched") */
             break;

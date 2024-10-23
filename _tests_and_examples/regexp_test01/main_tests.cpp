@@ -691,7 +691,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_009(
 
     while (true)
     {
-        auto res = regexp_ip_pattern->search(ip_addr_test_text, index);
+        auto res = regexp_ip_pattern->find(ip_addr_test_text, index);
 
         if (!res)
         {
