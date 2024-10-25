@@ -4,54 +4,94 @@
 
 ccutils is collection of C++ tools. I'm going to use it in my projects.
 
-Mainly those are shortcuts and life enchancers.
+## namely
 
-### namely
+<table>
 
-#### errors
-
+<tr>
+<td>errors</td>
+<td>
 Defines error (and error_ptr) type, which is like in Go. I decided to use it in 
-all ccutils, so it's out of akigo.
+all ccutils.
+</td>
+</tr>
 
-### unicode
+<tr>
+<td>unicode</td>
+<td>
+Unicode support. Unified interface to some unicode libraries. currently only ICU supported
+</td>
+</tr>
 
-This is unification layer for working with various Unicode backends. 
-So it's pluggable. Currently only ICU supported. But I plan to write my own
-set of tools for Unicode, includingly codepoint database.
+<tr>
+<td>regexp</td>
+<td>
+regexp engine to work with unicode strings.
+</td>
+</tr>
 
-#### regexp
-
-regexp engine to work with unicode strings. 
-ccutils/unicode and ccutils/unicode depends on each other.
-
-#### ip
-
+<tr>
+<td>ip</td>
+<td>
 It's the tool for parsing and formatting IP (v4/v6) address strings and working
 with their values.
+</td>
+</tr>
 
-#### logger
-
+<tr>
+<td>logger</td>
+<td>
 WIP. currently is lightweight logging facility. in future it should be pluggable 
-and should be able to log into modern logging services.
+and should be able to integrate with modern logging systems.
+</td>
+</tr>
 
-#### posix_tools
-
+<tr>
+<td>posix_tools</td>
+<td>
 WIP. this is just a shortcut for POSIX utilities.
+</td>
+</tr>
 
-#### repr
+<tr>
+<td>repr</td>
+<td>
+Interface for requesting human-readable data representation.
+</td>
+</tr>
 
-This is supposed to be like in PHP
+<tr>
+<td>akigo</td>
+<td>
+Some Golang vibe to C++. As I migrate from Golang, I missing some convinient
+parts of it in C++.
+</td>
+</tr>
 
-#### akigo
-
-WIP. Should add some Golang vibe to C++.
-
-#### worker01
-
+<tr>
+<td>worker01</td>
+<td>
 This is tool for more comfy creation and handling of tasks/routines.
+</td>
+</tr>
 
-#### test_suite_tool
+<tr>
+<td>test_suite_tool</td>
+<td>
+This tool is for creating test suites. 
+You can see it in action under [testing subdirectory](./_tests_and_examples).
+</td>
+</tr>
 
-Is tool for creating test suites. At this point, while I'm developing regexp
-module, you can see how test_suite_tool is used in 
-[subdirectory](_tests_and_examples/regexp_test01) directory.
+<!--
+
+
+<tr>
+<td></td>
+<td>
+</td>
+</tr>
+
+-->
+
+</table>
