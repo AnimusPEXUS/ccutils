@@ -17,7 +17,7 @@ int main(int argc, char **args)
             }
             catch (const wayround_i2p::ccutils::errors::error_ptr &e)
             {
-                std::cout << "exception: " << e->ErrorLong() << std::endl;
+                std::cout << "exception: " << e->Error() << std::endl;
             }
 
             std::set_terminate(nullptr);

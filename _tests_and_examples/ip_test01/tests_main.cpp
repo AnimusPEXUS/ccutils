@@ -228,7 +228,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_tests(
 
             logger->LogSplitLines(
                 wayround_i2p::ccutils::logger::Status,
-                res->repr_as_text({true})
+                res->repr_as_text(false)
             );
         }
 
@@ -328,7 +328,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_shortcuts_tests(
 
             logger->LogSplitLines(
                 wayround_i2p::ccutils::logger::Status,
-                res2->repr_as_text({true})
+                res2->repr_as_text(false)
             );
         }
 
