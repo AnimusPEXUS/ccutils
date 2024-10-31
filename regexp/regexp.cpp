@@ -930,7 +930,7 @@ Result_shared Result::findByName(UString name, bool rec) const
 
     while (true)
     {
-        if (x->corresponding_pattern->name == name)
+        if (x->getName() == name)
         {
             return x;
         }
@@ -997,12 +997,25 @@ Result_shared_deque &Result::makeSequenceDeque(Result_shared_deque &ret) const
     return ret;
 }
 
-Result_shared Result::getParent()
+UString Result::getName() const
+{
+    if (!corresponding_pattern)
+    {
+        throw wayround_i2p::ccutils::errors::New(
+            "Result::getName(): !corresponding_pattern",
+            __FILE__,
+            __LINE__
+        );
+    }
+    return corresponding_pattern->name;
+}
+
+Result_shared Result::getParent() const
 {
     return parent.lock();
 }
 
-Result_shared Result::findRoot()
+Result_shared Result::findRoot() const
 {
     Result_shared ret = Result_shared(own_ptr);
     while (true)
@@ -1088,7 +1101,7 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
 
                 while (i)
                 {
-                    auto cpn  = i->corresponding_pattern->name;
+                    auto cpn  = i->getName();
                     subm     += std::format(
                         "{}+-- #{} submatch: {}\n",
                         sub_padding,

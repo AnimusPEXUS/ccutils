@@ -16,6 +16,12 @@ using UString   = wayround_i2p::ccutils::unicode::UString;
 
 namespace regexp = wayround_i2p::ccutils::regexp;
 
+inline bool check_val_fits_1_byte(long long val);
+inline bool check_val_fits_2_bytes(long long val);
+
+// todo: those regexps were made before ccutisl::regexp got repetitions fix
+//       so they may be incorrect or unoptimised
+
 constexpr regexp::Pattern_shared PORT_STR_PATTERN()
 {
     auto ret
@@ -30,6 +36,11 @@ constexpr regexp::Pattern_shared PORT_STR_PATTERN()
     return ret;
 }
 
+std::tuple<std::uint16_t, error_ptr>
+    getNumberFrom_PORT_STR_PATTERN_Result(
+        const regexp::Result_shared res
+    );
+
 constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
 {
     auto ret
@@ -43,6 +54,11 @@ constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
         );
     return ret;
 }
+
+std::tuple<std::uint16_t, error_ptr>
+    getNumberFrom_CIDR_STR_PATTERN_Result(
+        const regexp::Result_shared res
+    );
 
 constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
 {
@@ -71,6 +87,11 @@ constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
               ->setName("IPv4_STR_PATTERN");
     return ret;
 }
+
+error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
+    const regexp::Result_shared  res,
+    std::array<std::uint8_t, 4> &ret
+);
 
 constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
 {
@@ -132,7 +153,8 @@ constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
                    }
                )
                    ->setMinCount(1)
-                   ->setMaxCount(8),
+                   ->setMaxCount(8)
+                   ->setName("numbers"),
                regexp::Pattern::newCharIsXDigit()
                    ->setMinMaxCount(0, 4)
                    ->setName("number")
@@ -188,6 +210,24 @@ constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
               ->setName("IPv6_STR_PATTERN");
     return ret;
 }
+
+error_ptr getNumbersFromShort_IPv6_STR_PATTERN_Result(
+    const regexp::Result_shared   res,
+    std::array<std::uint8_t, 16> &ret,
+    bool                         &ipv4_comb
+);
+
+error_ptr getNumbersFromLong_IPv6_STR_PATTERN_Result(
+    const regexp::Result_shared   res,
+    std::array<std::uint8_t, 16> &ret,
+    bool                         &ipv4_comb
+);
+
+error_ptr getIPBytesFrom_IPv6_STR_PATTERN_Result(
+    const regexp::Result_shared   res,
+    std::array<std::uint8_t, 16> &ret,
+    bool                         &ipv4_comb
+);
 
 constexpr regexp::Pattern_shared IP_STR_PATTERN()
 {

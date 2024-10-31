@@ -345,6 +345,7 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Result_shared findByIndex(std::size_t index) const;
     Result_shared findByName(UString name, bool rec = false) const;
+    // todo: ensure recurcive search prioritizes flat search closer to recursion start
     Result_shared findByNameRec(UString name) const;
     // same as findByName()
     Result_shared operator[](UString name) const;
@@ -370,14 +371,15 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     std::size_t match_end = 0;
 
     Pattern_shared corresponding_pattern;
+    UString        getName() const;
 
     // single field enough for Not, OrGroup and SubPattern pattern types
     Result_shared subResult;
 
-    Result_shared getParent();
+    Result_shared getParent() const;
 
     // find first pattern of first level sequence
-    Result_shared findRoot();
+    Result_shared findRoot() const;
 
     UString getMatchedString() const;
 
@@ -510,6 +512,62 @@ Pattern_shared appendPatterns(
 }
 
 UString PatternTypeString(PatternType v);
+
+///
+// it maybe tedious to write checks for Result_shared everywhere,
+// so here you have a shortcut, which checks for you:
+// #. res on nullptr,
+// #. res->error
+// #. have option to return error if res->dismatched
+template <bool not_res_is_error, bool dismatch_is_error>
+error_ptr ResultRoutineCheck(
+    Result_shared res,
+    UString       file,
+    std::size_t   line
+)
+{
+    if constexpr (not_res_is_error)
+    {
+        if (!res)
+        {
+            return wayround_i2p::ccutils::errors::New(
+                "Result_shared is nullptr",
+                file,
+                line
+            );
+        }
+    }
+    else
+    {
+        if (!res)
+        {
+            return nullptr;
+        }
+    }
+
+    if (res->error)
+    {
+        return wayround_i2p::ccutils::errors::New(
+            std::format("Result_shared is error: {}", res->error->Error()),
+            file,
+            line
+        );
+    }
+
+    if constexpr (dismatch_is_error)
+    {
+        if (!res->matched)
+        {
+            return wayround_i2p::ccutils::errors::New(
+                "dismatched",
+                file,
+                line
+            );
+        }
+    }
+
+    return nullptr;
+}
 
 } // namespace wayround_i2p::ccutils::regexp
 
