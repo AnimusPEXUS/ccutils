@@ -916,6 +916,12 @@ Result_shared Result::findByIndex(std::size_t index) const
 
 Result_shared Result::findByName(UString name, bool rec) const
 {
+    // todo: ensure recurcive search prioritizes flat search closer
+    //       to recursion start.
+    // note: 2024-11-01 - added some more flattiness, but it's not enough:
+    //       better to keep track for depth level somehow - may be
+    //       use passthrough pointer in recursion
+
     auto x = findFirst();
     if (!x)
     {
@@ -928,6 +934,8 @@ Result_shared Result::findByName(UString name, bool rec) const
 
     Result_shared ret;
 
+    Result_shared_deque subresults;
+
     while (true)
     {
         if (x->getName() == name)
@@ -937,27 +945,55 @@ Result_shared Result::findByName(UString name, bool rec) const
 
         if (rec)
         {
-            if (subResult)
+            if (x->subResult)
             {
-                auto x2 = subResult->findByName(name, true);
-                if (x2)
-                {
-                    return x2;
-                }
+                subresults.push_back(x->subResult);
             }
         }
 
         x = x->next_sibling;
         if (!x)
         {
-            return nullptr;
+            break;
         }
     }
+
+    if (rec)
+    {
+        while (!subresults.empty())
+        {
+            const auto i = subresults.front();
+
+            auto x2 = i->findByName(name, true);
+            if (x2)
+            {
+                return x2;
+            }
+
+            subresults.pop_front();
+        }
+    }
+
+    return nullptr;
 }
 
 Result_shared Result::findByNameRec(UString name) const
 {
     return findByName(name, true);
+}
+
+Result_shared Result::findByPath(std::initializer_list<UString> path) const
+{
+    Result_shared x = own_ptr.lock();
+    for (const auto &i : path)
+    {
+        if (!x)
+        {
+            return nullptr;
+        }
+        x = x->findByName(i, false);
+    }
+    return x;
 }
 
 Result_shared Result::operator[](UString name) const

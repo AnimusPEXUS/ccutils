@@ -345,8 +345,8 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Result_shared findByIndex(std::size_t index) const;
     Result_shared findByName(UString name, bool rec = false) const;
-    // todo: ensure recurcive search prioritizes flat search closer to recursion start
     Result_shared findByNameRec(UString name) const;
+    Result_shared findByPath(std::initializer_list<UString> path) const;
     // same as findByName()
     Result_shared operator[](UString name) const;
     // same as findByIndex()
