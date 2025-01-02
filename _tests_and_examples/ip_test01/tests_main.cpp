@@ -403,9 +403,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IPv6_create(
             wayround_i2p::ccutils::logger::Status,
             std::format("subject: {}", i)
         );
-        auto ip_res = wayround_i2p::ccutils::ip::IPv6::createFromString(i);
-        auto res    = std::get<0>(ip_res);
-        auto err    = std::get<1>(ip_res);
+        auto [res, err] = wayround_i2p::ccutils::ip::IPv6::createFromString(i);
         if (err != nullptr)
         {
             logger->Log(

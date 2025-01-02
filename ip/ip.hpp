@@ -1,6 +1,7 @@
 #ifndef WAYROUND_I2P_20241007_110017_746804
 #define WAYROUND_I2P_20241007_110017_746804
 
+#include <bit>
 #include <cstring>
 #include <format>
 
@@ -88,6 +89,10 @@ constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
     return ret;
 }
 
+// note: this returns bytes in order of writing - from left to right.
+//       so 192.168.1.2 returned as ret[0] == 192, ret[1] == 168 and 1 and 2
+//       for ret[2] and ret[3] respectively.
+//       user of this function should reorder bytes manually.
 error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
     const regexp::Result_shared  res,
     std::array<std::uint8_t, 4> &ret
@@ -143,24 +148,49 @@ constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
 {
     auto ret
         = regexp::Pattern::newGroup(
-              {regexp::Pattern::newGroup(
-                   {regexp::Pattern::newCharIsXDigit()
-                        ->setMinMaxCount(0, 4)
-                        ->setName("number"),
-                    regexp::Pattern::newExactChar(':')
-                        ->setMinCount(1)
-                        ->setMaxCount(2)
-                   }
-               )
-                   ->setMinCount(1)
-                   ->setMaxCount(8)
-                   ->setName("numbers"),
-               regexp::Pattern::newCharIsXDigit()
-                   ->setMinMaxCount(0, 4)
-                   ->setName("number")
+              {
+                  regexp::Pattern::newGroup(
+                      {regexp::Pattern::newGroup(
+                           {regexp::Pattern::newCharIsXDigit()
+                                ->setMinMaxCount(0, 4)
+                                ->setName("number"),
+                            regexp::Pattern::newExactChar(':')
+                                ->setExactCount(1)
+                           }
+                       )
+                           ->unsetMinCount()
+                           ->unsetMaxCount(),
+                       regexp::Pattern::newCharIsXDigit()
+                           ->setMinMaxCount(0, 4)
+                           ->setName("number")
+                      }
+                  )
+                      ->setName("first half"),
+                  regexp::Pattern::newExactChar(':')
+                      ->setExactCount(2)
+                      ->setName("column pair"),
+                  regexp::Pattern::newGroup(
+                      {regexp::Pattern::newCharIsXDigit()
+                           ->setMinMaxCount(0, 4)
+                           ->setName("number"),
+                       regexp::Pattern::newGroup(
+                           {regexp::Pattern::newCharIsXDigit()
+                                ->setMinMaxCount(0, 4)
+                                ->setName("number"),
+                            regexp::Pattern::newExactChar(':')
+                                ->setExactCount(1)
+                           }
+                       )
+                           ->unsetMinCount()
+                           ->unsetMaxCount()
+                      }
+                  )
+                      ->setName("first half"),
+
               }
         )
               ->setName("IPv6_SHORT_GRP_HEX_STR_PATTERN");
+
     return ret;
 }
 
@@ -201,7 +231,8 @@ constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
                     IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4(),
                     IPv6_SHORT_GRP_HEX_STR_PATTERN()
                    }
-               ),
+               )
+                   ->setName("IPv6_STR_PATTERN_OR_GROUP"),
                regexp::Pattern::newExactChar(']')
                    ->setMaxCount(1)
                    ->unsetMinCount()
@@ -211,21 +242,11 @@ constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
     return ret;
 }
 
-error_ptr getNumbersFromShort_IPv6_STR_PATTERN_Result(
-    const regexp::Result_shared   res,
-    std::array<std::uint8_t, 16> &ret,
-    bool                         &ipv4_comb
-);
-
-error_ptr getNumbersFromLong_IPv6_STR_PATTERN_Result(
-    const regexp::Result_shared   res,
-    std::array<std::uint8_t, 16> &ret,
-    bool                         &ipv4_comb
-);
-
+// note: this returns uint16s in order of writing - from left to right.
+//       if parsed ipv6 was shortened, missing bytes will be zeroed.
 error_ptr getIPBytesFrom_IPv6_STR_PATTERN_Result(
     const regexp::Result_shared   res,
-    std::array<std::uint8_t, 16> &ret,
+    std::array<std::uint16_t, 8> &ret,
     bool                         &ipv4_comb
 );
 
@@ -335,10 +356,12 @@ class IPv4
     static IPv4_shared                        createFromArray(const std::array<std::uint8_t, 4> &arr);
     static std::tuple<IPv4_shared, error_ptr> createFromVector(const std::vector<std::uint8_t> &vec);
     static std::tuple<IPv4_shared, error_ptr> createFromString(const UString &val);
+    static std::tuple<IPv4_shared, error_ptr> createFromParsedString(const regexp::Result_shared &res);
 
     void      setFromArray(const std::array<std::uint8_t, 4> &arr);
     error_ptr setFromVector(const std::vector<std::uint8_t> &vec);
     error_ptr setFromString(const UString &val);
+    error_ptr setFromParsedString(const regexp::Result_shared &res);
 
     UString                     toString() const;
     std::array<std::uint8_t, 4> toArray() const;
@@ -375,7 +398,7 @@ class IPv6
     static IPv6_shared                        createFromArray(const std::array<std::uint8_t, 16> &arr);
     static IPv6_shared                        createFromArray(const std::array<std::uint16_t, 8> &arr);
     static IPv6_shared                        createFromArray(const std::array<std::uint32_t, 4> &arr);
-    static IPv6_shared                        createFromArray(const IPv6_array &arr);
+    // static IPv6_shared                        createFromArray(const IPv6_array &arr);
     static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint8_t> &vec);
     static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint16_t> &vec);
     static std::tuple<IPv6_shared, error_ptr> createFromVector(const std::vector<std::uint32_t> &vec);
@@ -384,19 +407,21 @@ class IPv6
     void      setFromArray(const std::array<std::uint8_t, 16> &arr);
     void      setFromArray(const std::array<std::uint16_t, 8> &arr);
     void      setFromArray(const std::array<std::uint32_t, 4> &arr);
-    void      setFromArray(const IPv6_array &arr);
+    // void      setFromArray(const IPv6_array &arr);
     error_ptr setFromVector(const std::vector<std::uint8_t> &vec);
     error_ptr setFromVector(const std::vector<std::uint16_t> &vec);
     error_ptr setFromVector(const std::vector<std::uint32_t> &vec);
     error_ptr setFromString(const UString &text);
 
-    IPv6_array                 toArray() const;
-    std::vector<std::uint8_t>  toVector8() const;
-    std::vector<std::uint16_t> toVector16() const;
-    std::vector<std::uint32_t> toVector32() const;
-    UString                    toString() const;
-    UString                    toStringLong() const;
-    UString                    toStringShort() const;
+    std::array<std::uint8_t, 16> &toArray8(std::array<std::uint8_t, 16> &arr) const;
+    std::array<std::uint16_t, 8> &toArray16(std::array<std::uint16_t, 8> &arr) const;
+    std::array<std::uint32_t, 4> &toArray32(std::array<std::uint32_t, 4> &arr) const;
+    std::vector<std::uint8_t>    &toVector8(std::vector<std::uint8_t> &vec) const;
+    std::vector<std::uint16_t>   &toVector16(std::vector<std::uint16_t> &vec) const;
+    std::vector<std::uint32_t>   &toVector32(std::vector<std::uint32_t> &vec) const;
+    UString                       toString() const;
+    UString                       toStringLong() const;
+    UString                       toStringShort() const;
 
     void        setIPv4Comb(bool val = true);
     void        setIPv4Comb(const IPv4_shared &comb_part);

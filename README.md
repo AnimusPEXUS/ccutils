@@ -105,6 +105,16 @@ ccutils is collection of C++ tools. I'm going to use it in my projects.
 	<td>stable for now</td>
 </tr>
 
+<tr>
+	<td>fint</td>
+	<td>
+		wip. 
+		Flexible Int manipulation utilities. provides new 'smart' integer type
+		to work with integers of arbitrary size.
+	</td>
+	<td>stable for now</td>
+</tr>
+
 <!--
 
 <tr>

@@ -117,6 +117,7 @@ error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
     std::array<std::uint8_t, 4> &ret
 )
 {
+    // todo: optimizations needed? function code is messy!
     auto err = regexp::ResultRoutineCheck<true, true>(
         res,
         __FILE__,
@@ -127,9 +128,38 @@ error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
         return err;
     }
 
+    if (!res->matched)
+    {
+        return wayround_i2p::ccutils::errors::New(
+            "dismatch",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    auto res3 = res->findByName("IPv4_STR_PATTERN");
+    err       = regexp::ResultRoutineCheck<true, true>(
+        res3,
+        __FILE__,
+        __LINE__
+    );
+    if (err)
+    {
+        return err;
+    }
+
+    if (!res3->matched)
+    {
+        return wayround_i2p::ccutils::errors::New(
+            "dismatch",
+            __FILE__,
+            __LINE__
+        );
+    }
+
     for (unsigned char i = 0; i < 4; i++)
     {
-        auto res2 = res->findByNameRec(std::to_string(i + 1));
+        auto res2 = res3->findByNameRec(std::to_string(i + 1));
 
         err = regexp::ResultRoutineCheck<true, true>(
             res2,
@@ -144,12 +174,12 @@ error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
         auto x = res2->getMatchedString();
         try
         {
-            ret[i] = std::stoi(x);
+            ret[i] = std::stoul(x);
         }
         catch (std::invalid_argument const &ex)
         {
             return wayround_i2p::ccutils::errors::New(
-                "invalid_argument",
+                "std::stoi : invalid_argument",
                 __FILE__,
                 __LINE__
             );
@@ -157,7 +187,7 @@ error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
         catch (std::out_of_range const &ex)
         {
             return wayround_i2p::ccutils::errors::New(
-                "out_of_range",
+                "std::stoi : out_of_range",
                 __FILE__,
                 __LINE__
             );
@@ -166,43 +196,133 @@ error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
     return nullptr;
 }
 
-error_ptr getNumbersFromShort_IPv6_STR_PATTERN_Result(
-    const regexp::Result_shared   res,
-    std::array<std::uint8_t, 16> &ret,
-    bool                         &ipv4_comb
-)
-{
-    throw wayround_i2p::ccutils::errors::New(
-        "todo",
-        __FILE__,
-        __LINE__
-    );
-}
-
-error_ptr getNumbersFromLong_IPv6_STR_PATTERN_Result(
-    const regexp::Result_shared   res,
-    std::array<std::uint8_t, 16> &ret,
-    bool                         &ipv4_comb
-)
-{
-    throw wayround_i2p::ccutils::errors::New(
-        "todo",
-        __FILE__,
-        __LINE__
-    );
-}
-
 error_ptr getIPBytesFrom_IPv6_STR_PATTERN_Result(
     const regexp::Result_shared   res,
-    std::array<std::uint8_t, 16> &ret,
+    std::array<std::uint16_t, 8> &ret,
     bool                         &ipv4_comb
 )
 {
-    throw wayround_i2p::ccutils::errors::New(
-        "todo",
+    auto err = regexp::ResultRoutineCheck<true, true>(
+        res,
         __FILE__,
         __LINE__
     );
+    if (err)
+    {
+        return err;
+    }
+
+    if (!res->matched)
+    {
+        return wayround_i2p::ccutils::errors::New(
+            "dismatch",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    std::cout << res->repr_as_text(true) << std::endl;
+
+    auto res_or_group = res->findByNameRec("IPv6_STR_PATTERN_OR_GROUP");
+
+    err = regexp::ResultRoutineCheck<true, true>(
+        res_or_group,
+        __FILE__,
+        __LINE__
+    );
+    if (err)
+    {
+        return err;
+    }
+
+    if (!res_or_group->matched)
+    {
+        return wayround_i2p::ccutils::errors::New(
+            "dismatch",
+            __FILE__,
+            __LINE__
+        );
+    }
+
+    auto ms = res_or_group->getMatchedString();
+
+    std::deque<UString> ms_spl;
+    ms.split(ms_spl, ":");
+
+    // unsigned char index_of_last_ipv6_int = 7;
+    unsigned char ipv6_ints_count = 8;
+    ipv4_comb                     = false;
+
+    auto res_comb = res->findByName("IPv4_STR_PATTERN");
+    if (res_comb)
+    {
+        ipv4_comb       = true;
+        // index_of_last_ipv6_int = 5;
+        ipv6_ints_count = 6;
+    }
+
+    if (ipv4_comb)
+    {
+        union
+        {
+            std::array<std::uint16_t, 2> ipv6_bytes;
+            std::array<std::uint8_t, 4>  ipv4_bytes;
+        };
+
+        err = getIPBytesFrom_IPv4_STR_PATTERN_Result(res_comb, ipv4_bytes);
+        if (err)
+        {
+            return err;
+        }
+
+        ret[6] = ipv6_bytes[0];
+        ret[7] = ipv6_bytes[1];
+    }
+
+    bool                       is_short    = false;
+    unsigned char              short_index = 0;
+    decltype(ms_spl)::iterator short_index_itr;
+    for (short_index = 0; short_index < ipv6_ints_count; short_index++)
+    {
+        if (ms_spl[short_index] == "")
+        {
+            is_short        = true;
+            short_index_itr = ms_spl.begin() + short_index;
+            break;
+        }
+    }
+
+    if (is_short)
+    {
+        while (ms_spl.size() != ipv6_ints_count)
+        {
+            short_index_itr = ms_spl.insert(short_index_itr, "");
+        }
+    }
+
+    decltype(ms_spl)::iterator index_itr = ms_spl.begin();
+    for (unsigned char i = 0; i < ipv6_ints_count; i++)
+    {
+        UString val_str = *index_itr;
+        if (val_str == "")
+        {
+            val_str = "0";
+        }
+
+        std::cout << "std::stoul(" << val_str << ")" << "\n";
+
+        std::uint16_t val_int = std::stoul(val_str.to_string(), nullptr, 16);
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            val_int = std::byteswap(val_int);
+        }
+
+        ret[i] = val_int;
+
+        index_itr++;
+    }
+
+    return nullptr;
 }
 
 IPv4_shared IPv4::create()
@@ -246,6 +366,18 @@ std::tuple<IPv4_shared, error_ptr> IPv4::createFromString(const UString &val)
     return {ret, nullptr};
 }
 
+std::tuple<IPv4_shared, error_ptr> IPv4::createFromParsedString(const regexp::Result_shared &res)
+{
+    auto ret = IPv4::create();
+    auto err = ret->setFromParsedString(res);
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {ret, nullptr};
+}
+
 ///
 // (in text form, smaller value is on the right)
 // 192.168.0.1
@@ -270,7 +402,7 @@ error_ptr IPv4::setFromVector(const std::vector<std::uint8_t> &vec)
         );
     }
 
-    for (std::size_t i = 0; i != 4; i++)
+    for (unsigned char i = 0; i < 4; i++)
     {
         buff[i] = vec[i];
     }
@@ -281,17 +413,36 @@ error_ptr IPv4::setFromVector(const std::vector<std::uint8_t> &vec)
 // see setFromArray() for format explanation
 error_ptr IPv4::setFromString(const UString &val)
 {
-    std::array<uint8_t, 4> tmp;
 
     auto pat = IPv4_STR_PATTERN();
     auto res = pat->match(val);
+
+    auto err = setFromParsedString(res);
+    if (err)
+    {
+        return err;
+    }
+
+    return nullptr;
+}
+
+error_ptr IPv4::setFromParsedString(const regexp::Result_shared &res)
+{
+    std::array<std::uint8_t, 4> tmp;
+    std::array<std::uint8_t, 4> tmp2;
 
     auto err = getIPBytesFrom_IPv4_STR_PATTERN_Result(res, tmp);
     if (err)
     {
         return err;
     }
-    setFromArray(tmp);
+
+    for (unsigned char i = 0; i < 4; i++)
+    {
+        tmp2[i] = tmp[3 - i];
+    }
+
+    setFromArray(tmp2);
     return nullptr;
 }
 
@@ -308,7 +459,7 @@ std::array<std::uint8_t, 4> IPv4::toArray() const
 std::vector<std::uint8_t> IPv4::toVector() const
 {
     std::vector<std::uint8_t> ret(4);
-    for (std::size_t i = 0; i != 4; i++)
+    for (unsigned char i = 0; i < 4; i++)
     {
         ret[i] = buff[i];
     }
@@ -344,12 +495,14 @@ IPv6_shared IPv6::createFromArray(const std::array<std::uint16_t, 8> &arr)
     return ret;
 }
 
+/*
 IPv6_shared IPv6::createFromArray(const IPv6_array &arr)
 {
     auto ret = IPv6::create();
     ret->setFromArray(arr);
     return ret;
 }
+*/
 
 IPv6_shared IPv6::createFromArray(const std::array<std::uint32_t, 4> &arr)
 {
@@ -407,20 +560,46 @@ void IPv6::setFromArray(const std::array<std::uint8_t, 16> &arr)
     buff.b8 = arr;
 }
 
+// note: endianness of ints must be local. function converts endiannes manually if needed
 void IPv6::setFromArray(const std::array<std::uint16_t, 8> &arr)
 {
-    buff.b16 = arr;
+    if constexpr (std::endian::native == std::endian::little)
+    {
+        std::array<std::uint16_t, 8> new_arr;
+        for (unsigned char i = 0; i < 8; i++)
+        {
+            buff.b16[i] = std::byteswap(arr[i]);
+        }
+    }
+    else
+    {
+        buff.b16 = arr;
+    }
 }
 
+// note: endianness of ints must be local. function converts endiannes manually if needed
 void IPv6::setFromArray(const std::array<std::uint32_t, 4> &arr)
 {
-    buff.b32 = arr;
+    if constexpr (std::endian::native == std::endian::little)
+    {
+        std::array<std::uint32_t, 4> new_arr;
+        for (unsigned char i = 0; i < 4; i++)
+        {
+            buff.b32[i] = std::byteswap(arr[i]);
+        }
+    }
+    else
+    {
+        buff.b32 = arr;
+    }
 }
 
+/*
 void IPv6::setFromArray(const IPv6_array &arr)
 {
     buff = arr;
 }
+*/
 
 error_ptr IPv6::setFromVector(const std::vector<std::uint8_t> &vec)
 {
@@ -433,7 +612,7 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint8_t> &vec)
         );
     }
 
-    for (std::size_t i = 0; i != 16; i++)
+    for (unsigned char i = 0; i != 16; i++)
     {
         buff.b8[i] = vec[i];
     }
@@ -452,9 +631,16 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint16_t> &vec)
         );
     }
 
-    for (std::size_t i = 0; i != 8; i++)
+    for (unsigned char i = 0; i != 8; i++)
     {
-        buff.b16[i] = vec[i];
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            buff.b16[i] = std::byteswap(vec[i]);
+        }
+        else
+        {
+            buff.b16[i] = vec[i];
+        }
     }
 
     return nullptr;
@@ -471,9 +657,16 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint32_t> &vec)
         );
     }
 
-    for (std::size_t i = 0; i != 4; i++)
+    for (unsigned char i = 0; i < 4; i++)
     {
-        buff.b32[i] = vec[i];
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            buff.b32[i] = std::byteswap(vec[i]);
+        }
+        else
+        {
+            buff.b32[i] = vec[i];
+        }
     }
 
     return nullptr;
@@ -481,7 +674,8 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint32_t> &vec)
 
 error_ptr IPv6::setFromString(const UString &text)
 {
-    std::array<std::uint8_t, 16> tmp;
+    std::array<std::uint16_t, 8> tmp;
+    std::array<std::uint16_t, 8> tmp2;
 
     auto pat = IPv6_STR_PATTERN();
     auto res = pat->match(text);
@@ -491,43 +685,103 @@ error_ptr IPv6::setFromString(const UString &text)
     {
         return err;
     }
+
+    for (unsigned char i = 0; i < 8; i++)
+    {
+        tmp2[i] = tmp[7 - i];
+    }
+
     setFromArray(tmp);
     return nullptr;
 }
 
+/*
 IPv6_array IPv6::toArray() const
 {
     return buff;
 }
+*/
 
-std::vector<std::uint8_t> IPv6::toVector8() const
+std::array<std::uint8_t, 16> &IPv6::toArray8(std::array<std::uint8_t, 16> &arr) const
 {
-    std::vector<std::uint8_t> ret(16);
-    for (std::size_t i = 0; i < 16; i++)
+    for (unsigned char i = 0; i < 16; i++)
     {
-        ret[i] = buff.b8[i];
+        arr[i] = buff.b8[i];
     }
-    return ret;
+    return arr;
 }
 
-std::vector<std::uint16_t> IPv6::toVector16() const
+std::array<std::uint16_t, 8> &IPv6::toArray16(std::array<std::uint16_t, 8> &arr) const
 {
-    std::vector<std::uint16_t> ret(8);
-    for (std::size_t i = 0; i < 8; i++)
+    for (unsigned char i = 0; i < 8; i++)
     {
-        ret[i] = buff.b16[i];
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            arr[i] = std::byteswap(buff.b16[i]);
+        }
+        else
+        {
+            arr[i] = buff.b16[i];
+        }
     }
-    return ret;
+    return arr;
 }
 
-std::vector<std::uint32_t> IPv6::toVector32() const
+std::array<std::uint32_t, 4> &IPv6::toArray32(std::array<std::uint32_t, 4> &arr) const
 {
-    std::vector<std::uint32_t> ret(4);
-    for (std::size_t i = 0; i < 4; i++)
+    for (unsigned char i = 0; i < 4; i++)
     {
-        ret[i] = buff.b32[i];
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            arr[i] = std::byteswap(buff.b32[i]);
+        }
+        else
+        {
+            arr[i] = buff.b32[i];
+        }
     }
-    return ret;
+    return arr;
+}
+
+std::vector<std::uint8_t> &IPv6::toVector8(std::vector<std::uint8_t> &vec) const
+{
+    for (unsigned char i = 0; i < 16; i++)
+    {
+        vec[i] = buff.b8[i];
+    }
+    return vec;
+}
+
+std::vector<std::uint16_t> &IPv6::toVector16(std::vector<std::uint16_t> &vec) const
+{
+    for (unsigned char i = 0; i < 8; i++)
+    {
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            vec[i] = std::byteswap(buff.b16[i]);
+        }
+        else
+        {
+            vec[i] = buff.b16[i];
+        }
+    }
+    return vec;
+}
+
+std::vector<std::uint32_t> &IPv6::toVector32(std::vector<std::uint32_t> &vec) const
+{
+    for (unsigned char i = 0; i < 4; i++)
+    {
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            vec[i] = std::byteswap(buff.b32[i]);
+        }
+        else
+        {
+            vec[i] = buff.b32[i];
+        }
+    }
+    return vec;
 }
 
 UString IPv6::toString() const
@@ -538,14 +792,21 @@ UString IPv6::toString() const
 UString IPv6::toStringLong() const
 {
     UString ret;
-    for (std::size_t i = 0; i < 8; i++)
+
+    for (unsigned char i = 0; i < 8; i++)
     {
-        ret += std::format("{:x}", buff.b16[i]);
+        auto z = buff.b16[7 - i];
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            z = std::byteswap(z);
+        }
+        ret += std::format("{:04x}", z);
         if (i < 7)
         {
             ret += ":";
         }
     }
+
     return ret;
 }
 
@@ -563,9 +824,7 @@ UString IPv6::toStringShort() const
         bool        zeroes_slice_started = false;
         std::size_t zeroes_slice_i       = -1;
 
-        // todo: check this is correct in different endianneses
-
-        for (std::size_t i = 0; i < 8; i++)
+        for (unsigned char i = 0; i < 8; i++)
         {
             if (buff.b16[i] == 0)
             {
@@ -610,8 +869,6 @@ UString IPv6::toStringShort() const
 
     UString ret;
 
-    // todo: check this is correct in different endianneses
-
     {
         for (
             std::size_t i = 0;
@@ -619,8 +876,15 @@ UString IPv6::toStringShort() const
             i++
         )
         {
-            ret += std::vformat("{:x}", std::make_format_args(buff.b16[i]));
-            ret += ":";
+            auto z = buff.b16[i];
+
+            if constexpr (std::endian::native == std::endian::little)
+            {
+                z = std::byteswap(z);
+            }
+
+            ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
+            ret = UString(":") + ret;
         }
 
         for (
@@ -629,8 +893,15 @@ UString IPv6::toStringShort() const
             i++
         )
         {
-            ret += ":";
-            ret += std::vformat("{:x}", std::make_format_args(buff.b16[i]));
+            auto z = buff.b16[i];
+
+            if constexpr (std::endian::native == std::endian::little)
+            {
+                z = std::byteswap(z);
+            }
+
+            ret = UString(":") + ret;
+            ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
         }
     }
     return ret;
@@ -644,7 +915,7 @@ void IPv6::setIPv4Comb(bool val)
 void IPv6::setIPv4Comb(const IPv4_shared &comb_part)
 {
     auto arr = comb_part->toArray();
-    for (std::size_t i = 0; i != 4; i++)
+    for (unsigned char i = 0; i < 4; i++)
     {
         buff.b8[i + 12] = arr[i];
     }
@@ -658,7 +929,7 @@ bool IPv6::isIPv4Comb() const
 IPv4_shared IPv6::getIPv4Comb() const
 {
     std::array<std::uint8_t, 4> arr;
-    for (std::size_t i = 0; i != 4; i++)
+    for (unsigned char i = 0; i < 4; i++)
     {
         arr[i] = buff.b8[i + 12];
     }
