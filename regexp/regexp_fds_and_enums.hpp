@@ -86,9 +86,9 @@ const std::tuple<
     const Result_shared_deque,
     wayround_i2p::ccutils::errors::error_ptr>
     findAll(
-        const Pattern_shared pattern,
-        const UString       &subject,
-        std::size_t          start_at = 0
+        const Pattern_shared     pattern,
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at = 0
     );
 
 // Pattern_shared create(PatternType type);

@@ -289,7 +289,18 @@ void allcasedcharscheck(
 UString::UString() :
     data("")
 {
-    // update_last_chage_time_point();
+}
+
+/*
+UString::UString(UString other) :
+    data(other->data)
+{
+}
+*/
+
+UString::UString(const UString &other) :
+    data(other.data)
+{
 }
 
 UString::UString(const UChar &other) :
@@ -952,7 +963,7 @@ std::deque<UString> &UString::splitlines(
 
     auto search_res = wayround_i2p::ccutils::regexp::findAll(
         pattern,
-        *this
+        std::shared_ptr<UString>(new UString(*this))
     );
 
     auto search_res_deque      = std::get<0>(search_res);

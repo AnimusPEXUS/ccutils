@@ -280,23 +280,23 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     static Pattern_shared create();
 
     const Result_shared match(
-        const UString      &subject,
-        std::size_t         start_at      = 0,
-        const Result_shared parent_result = nullptr
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at      = 0,
+        const Result_shared      parent_result = nullptr
     );
 
     const Result_shared find(
-        const UString &subject,
-        std::size_t    start_at = 0,
-        bool           backward = false
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at = 0,
+        bool                     backward = false
     );
 
     const std::tuple<
         const Result_shared_deque,
         wayround_i2p::ccutils::errors::error_ptr>
         findAll(
-            const UString &subject,
-            std::size_t    start_at = 0
+            std::shared_ptr<UString> subject,
+            std::size_t              start_at = 0
         );
 
   private:
@@ -357,7 +357,7 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     error_ptr error;
 
     // todo: avoid copying
-    UString original_subject;
+    std::shared_ptr<UString> original_subject;
 
     bool matched = false;
 
@@ -397,44 +397,54 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
 // ignores repetition and greediness settings and does basic match.
 // this is internal function. users should use match() function/
 const Result_shared match_single(
-    const Pattern_shared pattern,
-    const UString       &subject,
-    std::size_t          start_at      = 0,
-    const Result_shared  parent_result = nullptr
+    const Pattern_shared     pattern,
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at      = 0,
+    const Result_shared      parent_result = nullptr
 );
 
 // adds repetition and greediness checks layer above match_single.
 // optional parent_result is used for backreference expressions.
 const Result_shared match(
-    const Pattern_shared pattern,
-    const UString       &subject,
-    std::size_t          start_at      = 0,
-    const Result_shared  parent_result = nullptr
+    const Pattern_shared     pattern,
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at      = 0,
+    const Result_shared      parent_result = nullptr
 );
 
 const Result_shared find(
-    const Pattern_shared pattern,
-    const UString       &subject,
-    std::size_t          start_at = 0,
-    bool                 backward = false
+    const Pattern_shared     pattern,
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at = 0,
+    bool                     backward = false
 );
 
 const std::tuple<
     const Result_shared_deque,
     wayround_i2p::ccutils::errors::error_ptr>
     findAll(
-        const Pattern_shared pattern,
-        const UString       &subject,
-        std::size_t          start_at
+        const Pattern_shared     pattern,
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at
     );
+
+bool isTextEnd(
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at
+);
+
+bool isLineEnd(
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at
+);
 
 std::tuple<
     bool,  // true = yes
     size_t // length of split (for one of "\r\n", "\n", "\n\r")
     >
     isLineSplit(
-        const UString &subject,
-        std::size_t    start_at = 0
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at = 0
     );
 
 ///

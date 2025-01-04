@@ -6,17 +6,53 @@ namespace wayround_i2p::ccutils::ip
 
 inline bool check_val_fits_1_byte(long long val)
 {
-    return (val >= 0 && val <= 255);
+    return (val >= 0 && val <= 0xff);
 }
 
 inline bool check_val_fits_2_bytes(long long val)
 {
-    return (val >= 0 && val <= 65535);
+    return (val >= 0 && val <= 0xffff);
 }
 
-std::tuple<std::uint16_t, error_ptr> getNumberFrom_PORT_STR_PATTERN_Result(
-    const regexp::Result_shared res
-)
+error_ptr
+    getValueFrom_PORT_STR_PATTERN_Result(
+        bool                        port_1_cidr_0,
+        const regexp::Result_shared res,
+        bool                       &has_value,
+        std::uint16_t              &value
+    )
+{
+    return getValueFrom_port_or_cidr_STR_PATTERN_Result(
+        true,
+        res,
+        has_value,
+        value
+    );
+}
+
+error_ptr
+    getValueFrom_CIDR_STR_PATTERN_Result(
+        bool                        port_1_cidr_0,
+        const regexp::Result_shared res,
+        bool                       &has_value,
+        std::uint16_t              &value
+    )
+{
+    return getValueFrom_port_or_cidr_STR_PATTERN_Result(
+        false,
+        res,
+        has_value,
+        value
+    );
+}
+
+error_ptr
+    getValueFrom_port_or_cidr_STR_PATTERN_Result(
+        bool                        port_1_cidr_0,
+        const regexp::Result_shared res,
+        bool                       &has_value,
+        std::uint16_t              &value
+    )
 {
     auto err = regexp::ResultRoutineCheck<true, true>(
         res,
@@ -25,96 +61,69 @@ std::tuple<std::uint16_t, error_ptr> getNumberFrom_PORT_STR_PATTERN_Result(
     );
     if (err)
     {
-        return {0, err};
+        return err;
     }
 
-    auto num     = res->findByNameRec("number");
-    auto num_str = num->getMatchedString();
+    auto res_VALUE_STR_PATTERN = res->findByNameRec(
+        (port_1_cidr_0 ? "PORT_STR_PATTERN" : "CIDR_STR_PATTERN")
+    );
 
-    int x = 0;
-
-    try
-    {
-        x = std::stoi(num_str);
-    }
-    catch (const std::exception &e)
-    {
-        return {
-            0,
-            wayround_i2p::ccutils::errors::New(
-                std::format("std::stoi error: {}", e.what()),
-                __FILE__,
-                __LINE__
-            )
-        };
-    }
-
-    if (!check_val_fits_2_bytes(x))
-    {
-        return {
-            0,
-            wayround_i2p::ccutils::errors::New(
-                "!res - port value too high",
-                __FILE__,
-                __LINE__
-            )
-        };
-    }
-    return {x, nullptr};
-}
-
-std::tuple<std::uint16_t, error_ptr> getNumberFrom_CIDR_STR_PATTERN_Result(
-    const regexp::Result_shared res
-)
-{
-    auto err = regexp::ResultRoutineCheck<true, true>(
-        res,
+    err = regexp::ResultRoutineCheck<true, true>(
+        res_VALUE_STR_PATTERN,
         __FILE__,
         __LINE__
     );
     if (err)
     {
-        return {0, err};
+        return err;
     }
 
-    auto num     = res->findByNameRec("number");
-    auto num_str = num->getMatchedString();
+    auto res_number = res_VALUE_STR_PATTERN->findByNameRec("number");
 
-    int x = 0;
+    err = regexp::ResultRoutineCheck<true, true>(
+        res_number,
+        __FILE__,
+        __LINE__
+    );
+    if (err)
+    {
+        return err;
+    }
+
+    auto res_number_str = res_number->getMatchedString();
+
+    long long x = 0;
 
     try
     {
-        x = std::stoi(num_str);
+        x = std::stoll(res_number_str);
     }
     catch (const std::exception &e)
     {
-        return {
-            0,
-            wayround_i2p::ccutils::errors::New(
-                std::format("std::stoi error: {}", e.what()),
-                __FILE__,
-                __LINE__
-            )
-        };
+        return wayround_i2p::ccutils::errors::New(
+            std::format("std::stoul error: {}", e.what()),
+            __FILE__,
+            __LINE__
+        );
     }
 
     if (!check_val_fits_2_bytes(x))
     {
-        return {
-            0,
-            wayround_i2p::ccutils::errors::New(
-                "!res - port value too high",
-                __FILE__,
-                __LINE__
-            )
-        };
+        return wayround_i2p::ccutils::errors::New(
+            "!res - value too large",
+            __FILE__,
+            __LINE__
+        );
     }
-    return {x, nullptr};
+
+    value = x;
+
+    return nullptr;
 }
 
-error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
+error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
     const regexp::Result_shared  res,
-    std::array<std::uint8_t, 4> &ret
+    std::array<std::uint8_t, 4> &ipv4
 )
 {
     // todo: optimizations needed? function code is messy!
@@ -174,7 +183,7 @@ error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
         auto x = res2->getMatchedString();
         try
         {
-            ret[i] = std::stoul(x);
+            ipv4[3 - i] = std::stoul(x);
         }
         catch (std::invalid_argument const &ex)
         {
@@ -193,13 +202,17 @@ error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
             );
         }
     }
+
+    // todo: add cidr and port retrieval
+
     return nullptr;
 }
 
-error_ptr getIPBytesFrom_IPv6_STR_PATTERN_Result(
+error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
     const regexp::Result_shared   res,
-    std::array<std::uint16_t, 8> &ret,
-    bool                         &ipv4_comb
+    std::array<std::uint16_t, 8> &ipv6,
+    bool                         &ipv6_short,
+    bool                         &ipv6_v4_comb
 )
 {
     auto err = regexp::ResultRoutineCheck<true, true>(
@@ -249,59 +262,70 @@ error_ptr getIPBytesFrom_IPv6_STR_PATTERN_Result(
     std::deque<UString> ms_spl;
     ms.split(ms_spl, ":");
 
-    // unsigned char index_of_last_ipv6_int = 7;
-    unsigned char ipv6_ints_count = 8;
-    ipv4_comb                     = false;
+    ipv6_v4_comb = false;
 
-    auto res_comb = res->findByName("IPv4_STR_PATTERN");
+    auto res_comb = res->findByNameRec("IPv4_STR_PATTERN");
     if (res_comb)
     {
-        ipv4_comb       = true;
-        // index_of_last_ipv6_int = 5;
-        ipv6_ints_count = 6;
+        ipv6_v4_comb = true;
     }
 
-    if (ipv4_comb)
+    if (ipv6_v4_comb)
     {
         union
         {
-            std::array<std::uint16_t, 2> ipv6_bytes;
+            std::array<std::uint16_t, 2> ipv6_ints;
             std::array<std::uint8_t, 4>  ipv4_bytes;
         };
 
-        err = getIPBytesFrom_IPv4_STR_PATTERN_Result(res_comb, ipv4_bytes);
+        err = getValuesFrom_IPv4_STR_PATTERN_Result(res_comb, ipv4_bytes);
         if (err)
         {
             return err;
         }
 
-        ret[6] = ipv6_bytes[0];
-        ret[7] = ipv6_bytes[1];
+        ipv6[0] = ipv6_ints[0];
+        ipv6[1] = ipv6_ints[1];
     }
 
-    bool                       is_short    = false;
-    unsigned char              short_index = 0;
+    ipv6_short = false;
+
     decltype(ms_spl)::iterator short_index_itr;
-    for (short_index = 0; short_index < ipv6_ints_count; short_index++)
+
+    // determine if input string is shortened ipv6
+    for (
+        unsigned char short_index = (ipv6_v4_comb ? 1 : 0);
+        short_index < (ipv6_v4_comb ? 7 : 8);
+        short_index++
+    )
     {
         if (ms_spl[short_index] == "")
         {
-            is_short        = true;
+            ipv6_short      = true;
             short_index_itr = ms_spl.begin() + short_index;
             break;
         }
     }
 
-    if (is_short)
+    if (ipv6_short)
     {
-        while (ms_spl.size() != ipv6_ints_count)
+        while (ms_spl.size() != (ipv6_v4_comb ? 7 : 8))
         {
             short_index_itr = ms_spl.insert(short_index_itr, "");
         }
     }
 
     decltype(ms_spl)::iterator index_itr = ms_spl.begin();
-    for (unsigned char i = 0; i < ipv6_ints_count; i++)
+    if (ipv6_v4_comb)
+    {
+        index_itr++;
+    }
+
+    for (
+        unsigned char i = (ipv6_v4_comb ? 7 : 8);
+        i != 0;
+        i--
+    )
     {
         UString val_str = *index_itr;
         if (val_str == "")
@@ -309,15 +333,9 @@ error_ptr getIPBytesFrom_IPv6_STR_PATTERN_Result(
             val_str = "0";
         }
 
-        std::cout << "std::stoul(" << val_str << ")" << "\n";
-
         std::uint16_t val_int = std::stoul(val_str.to_string(), nullptr, 16);
-        if constexpr (std::endian::native == std::endian::little)
-        {
-            val_int = std::byteswap(val_int);
-        }
 
-        ret[i] = val_int;
+        ipv6[(ipv6_v4_comb ? 6 : 7) - i] = val_int;
 
         index_itr++;
     }
@@ -415,7 +433,7 @@ error_ptr IPv4::setFromString(const UString &val)
 {
 
     auto pat = IPv4_STR_PATTERN();
-    auto res = pat->match(val);
+    auto res = pat->match(std::shared_ptr<UString>(new UString(val)));
 
     auto err = setFromParsedString(res);
     if (err)
@@ -429,20 +447,14 @@ error_ptr IPv4::setFromString(const UString &val)
 error_ptr IPv4::setFromParsedString(const regexp::Result_shared &res)
 {
     std::array<std::uint8_t, 4> tmp;
-    std::array<std::uint8_t, 4> tmp2;
 
-    auto err = getIPBytesFrom_IPv4_STR_PATTERN_Result(res, tmp);
+    auto err = getValuesFrom_IPv4_STR_PATTERN_Result(res, tmp);
     if (err)
     {
         return err;
     }
 
-    for (unsigned char i = 0; i < 4; i++)
-    {
-        tmp2[i] = tmp[3 - i];
-    }
-
-    setFromArray(tmp2);
+    setFromArray(tmp);
     return nullptr;
 }
 
@@ -675,20 +687,29 @@ error_ptr IPv6::setFromVector(const std::vector<std::uint32_t> &vec)
 error_ptr IPv6::setFromString(const UString &text)
 {
     std::array<std::uint16_t, 8> tmp;
-    std::array<std::uint16_t, 8> tmp2;
 
     auto pat = IPv6_STR_PATTERN();
-    auto res = pat->match(text);
+    auto res = pat->match(
+        std::shared_ptr<UString>(
+            new UString(text)
+        )
+    );
 
-    auto err = getIPBytesFrom_IPv6_STR_PATTERN_Result(res, tmp, ipv4_comb);
+    // todo: continue here
+
+    res = nullptr;
+
+    bool ipv6_short = false;
+
+    auto err = getValuesFrom_IPv6_STR_PATTERN_Result(
+        res,
+        tmp,
+        ipv6_short,
+        ipv4_comb
+    );
     if (err)
     {
         return err;
-    }
-
-    for (unsigned char i = 0; i < 8; i++)
-    {
-        tmp2[i] = tmp[7 - i];
     }
 
     setFromArray(tmp);
@@ -938,6 +959,10 @@ IPv4_shared IPv6::getIPv4Comb() const
 
 IPv6::IPv6()
 {
+    for (unsigned char i = 0; i < 16; i++)
+    {
+        buff.b8[i] = 0;
+    }
 }
 
 IPv6::~IPv6()

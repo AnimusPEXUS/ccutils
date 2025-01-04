@@ -210,7 +210,9 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_tests(
                 }
             */
 
-            auto res = (std::get<0>(j))()->match(i);
+            auto res = (std::get<0>(j))()->match(
+                std::shared_ptr<UString>(new UString(i))
+            );
 
             if (res->error)
             {

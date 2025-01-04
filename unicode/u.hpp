@@ -198,6 +198,10 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
   public:
     UString();
 
+    // UString(UString other);
+
+    UString(const UString &other);
+
     UString(const UChar &other);
 
     UString(

@@ -767,9 +767,9 @@ Pattern_shared Pattern::create()
 }
 
 const Result_shared Pattern::match(
-    const UString      &subject,
-    std::size_t         start_at,
-    const Result_shared parent_result
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at,
+    const Result_shared      parent_result
 )
 {
     return wayround_i2p::ccutils::regexp::match(
@@ -781,9 +781,9 @@ const Result_shared Pattern::match(
 }
 
 const Result_shared Pattern::find(
-    const UString &subject,
-    std::size_t    start_at,
-    bool           backward
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at,
+    bool                     backward
 )
 {
     return wayround_i2p::ccutils::regexp::find(
@@ -798,8 +798,8 @@ const std::tuple<
     const Result_shared_deque,
     wayround_i2p::ccutils::errors::error_ptr>
     Pattern::findAll(
-        const UString &subject,
-        std::size_t    start_at
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at
     )
 {
     return wayround_i2p::ccutils::regexp::findAll(
@@ -1072,7 +1072,7 @@ Result_shared Result::findRoot() const
 UString Result::getMatchedString() const
 {
     auto    ms = this->match_start;
-    auto    l  = original_subject.length();
+    auto    l  = original_subject->length();
     ssize_t s  = this->match_end - this->match_start;
 
     if (ms > l || ms + s > l || s < 0)
@@ -1090,7 +1090,7 @@ UString Result::getMatchedString() const
         );
     }
 
-    return original_subject.substr(ms, s);
+    return original_subject->substr(ms, s);
 }
 
 UString Result::repr_as_text() const
@@ -1203,7 +1203,7 @@ UString Result::repr_as_text(const Result_repr_as_text_opts &opts) const
             "\n",
             i,
             ival->error ? ival->error->Error() : "(no error)",
-            opts.original_subject ? ival->original_subject : "(disabled)",
+            opts.original_subject ? *ival->original_subject : "(disabled)",
             ival->matched,
             ival->matched_repetitions_count,
             ival->match_start,
@@ -1225,8 +1225,8 @@ Result_shared Result::create()
 }
 
 bool isTextEnd(
-    const UString &subject,
-    std::size_t    start_at
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at
 )
 {
     auto pattern = Pattern::newTextEnd();
@@ -1238,8 +1238,8 @@ bool isTextEnd(
 }
 
 bool isLineEnd(
-    const UString &subject,
-    std::size_t    start_at
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at
 )
 {
     auto pattern = Pattern::newLineEnd();
@@ -1254,8 +1254,8 @@ std::tuple<
     bool,
     size_t>
     isLineSplit(
-        const UString &subject,
-        std::size_t    start_at
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at
     )
 {
     auto pattern = Pattern::newLineSplit();
@@ -1268,10 +1268,10 @@ std::tuple<
 
 // todo: this function is too large and complex. maybe it should be splitup
 const Result_shared match_single(
-    const Pattern_shared pattern,
-    const UString       &subject,
-    std::size_t          start_at,
-    const Result_shared  parent_result
+    const Pattern_shared     pattern,
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at,
+    const Result_shared      parent_result
 )
 {
     // todo: separate pattern sanity checks to inprove performance?
@@ -1299,7 +1299,7 @@ const Result_shared match_single(
     ret->match_start           = start_at;
     ret->match_end             = start_at;
 
-    const auto subject_length = subject.length();
+    const auto subject_length = subject->length();
 
     if (start_at > subject_length)
     {
@@ -1450,7 +1450,7 @@ const Result_shared match_single(
         {
             ret->matched = false;
 
-            auto substr   = subject.substr(start_at, 2);
+            auto substr   = subject->substr(start_at, 2);
             auto substr_l = substr.length();
 
             switch (substr_l)
@@ -1543,7 +1543,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            auto subj_char = subject[start_at];
+            auto subj_char = (*subject)[start_at];
 
             if (!pattern->isCaseSensitive())
             {
@@ -1604,7 +1604,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            auto subj_char = subject[start_at];
+            auto subj_char = (*subject)[start_at];
 
             if (!pattern->isCaseSensitive())
             {
@@ -1649,7 +1649,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isAlpha())
+            if ((*subject)[start_at].isAlpha())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1670,7 +1670,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isLower())
+            if ((*subject)[start_at].isLower())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1691,7 +1691,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isUpper())
+            if ((*subject)[start_at].isUpper())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1712,7 +1712,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isPunct())
+            if ((*subject)[start_at].isPunct())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1733,7 +1733,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isDigit())
+            if ((*subject)[start_at].isDigit())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1754,7 +1754,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isXDigit())
+            if ((*subject)[start_at].isXDigit())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1775,7 +1775,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isSpace())
+            if ((*subject)[start_at].isSpace())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1796,7 +1796,7 @@ const Result_shared match_single(
                 return ret;
             }
 
-            if (subject[start_at].isBlank())
+            if ((*subject)[start_at].isBlank())
             {
                 ret->matched     = true;
                 ret->match_start = start_at;
@@ -1923,10 +1923,10 @@ const Result_shared match_single(
 }
 
 const Result_shared match(
-    const Pattern_shared pattern,
-    const UString       &subject,
-    std::size_t          start_at,
-    const Result_shared  parent_result
+    const Pattern_shared     pattern,
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at,
+    const Result_shared      parent_result
 )
 {
     const auto next_pattern = pattern->next_sibling;
@@ -2185,10 +2185,10 @@ const Result_shared match(
 }
 
 const Result_shared find(
-    const Pattern_shared pattern,
-    const UString       &subject,
-    std::size_t          start_at,
-    bool                 backward
+    const Pattern_shared     pattern,
+    std::shared_ptr<UString> subject,
+    std::size_t              start_at,
+    bool                     backward
 )
 {
     // todo: add overlap prevention option?
@@ -2213,7 +2213,7 @@ const Result_shared find(
         }
     );
 
-    auto subject_length = subject.length();
+    auto subject_length = subject->length();
 
     std::size_t i = start_at;
 
@@ -2254,9 +2254,9 @@ const std::tuple<
     const Result_shared_deque,
     wayround_i2p::ccutils::errors::error_ptr>
     findAll(
-        const Pattern_shared pattern,
-        const UString       &subject,
-        std::size_t          start_at
+        const Pattern_shared     pattern,
+        std::shared_ptr<UString> subject,
+        std::size_t              start_at
     )
 {
     // todo: add overlap prevention option?
@@ -2264,7 +2264,7 @@ const std::tuple<
     Result_shared_deque                      ret;
     wayround_i2p::ccutils::errors::error_ptr ret_err = nullptr;
 
-    auto subject_length = subject.length();
+    auto subject_length = subject->length();
 
     std::size_t i = start_at;
 

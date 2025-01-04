@@ -27,39 +27,31 @@ constexpr regexp::Pattern_shared PORT_STR_PATTERN()
 {
     auto ret
         = regexp::Pattern::newGroup(
-            {regexp::Pattern::newExactChar(':'),
-             regexp::Pattern::newCharIsDigit()
-                 ->setName("number")
-                 ->setMinCount(1)
-                 ->unsetMaxCount()
-            }
-        );
+              {regexp::Pattern::newExactChar(':'),
+               regexp::Pattern::newCharIsDigit()
+                   ->setName("number")
+                   ->setMinCount(1)
+                   ->unsetMaxCount()
+              }
+        )
+              ->setName("PORT_STR_PATTERN");
     return ret;
 }
-
-std::tuple<std::uint16_t, error_ptr>
-    getNumberFrom_PORT_STR_PATTERN_Result(
-        const regexp::Result_shared res
-    );
 
 constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
 {
     auto ret
         = regexp::Pattern::newGroup(
-            {regexp::Pattern::newExactChar('/'),
-             regexp::Pattern::newCharIsDigit()
-                 ->setName("number")
-                 ->setMinCount(1)
-                 ->unsetMaxCount()
-            }
-        );
+              {regexp::Pattern::newExactChar('/'),
+               regexp::Pattern::newCharIsDigit()
+                   ->setName("number")
+                   ->setMinCount(1)
+                   ->unsetMaxCount()
+              }
+        )
+              ->setName("CIDR_STR_PATTERN");
     return ret;
 }
-
-std::tuple<std::uint16_t, error_ptr>
-    getNumberFrom_CIDR_STR_PATTERN_Result(
-        const regexp::Result_shared res
-    );
 
 constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
 {
@@ -88,15 +80,6 @@ constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
               ->setName("IPv4_STR_PATTERN");
     return ret;
 }
-
-// note: this returns bytes in order of writing - from left to right.
-//       so 192.168.1.2 returned as ret[0] == 192, ret[1] == 168 and 1 and 2
-//       for ret[2] and ret[3] respectively.
-//       user of this function should reorder bytes manually.
-error_ptr getIPBytesFrom_IPv4_STR_PATTERN_Result(
-    const regexp::Result_shared  res,
-    std::array<std::uint8_t, 4> &ret
-);
 
 constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
 {
@@ -242,14 +225,6 @@ constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
     return ret;
 }
 
-// note: this returns uint16s in order of writing - from left to right.
-//       if parsed ipv6 was shortened, missing bytes will be zeroed.
-error_ptr getIPBytesFrom_IPv6_STR_PATTERN_Result(
-    const regexp::Result_shared   res,
-    std::array<std::uint16_t, 8> &ret,
-    bool                         &ipv4_comb
-);
-
 constexpr regexp::Pattern_shared IP_STR_PATTERN()
 {
     regexp::Pattern_shared ret
@@ -283,8 +258,7 @@ constexpr regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
 
     if (mode == IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_only)
     {
-        ret = IP_STR_PATTERN()
-                  ->setName("ip");
+        ret = IP_STR_PATTERN()->setName("ip");
     }
     else
     {
@@ -342,6 +316,63 @@ constexpr regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
 
     return ret;
 }
+
+error_ptr
+    getValueFrom_PORT_STR_PATTERN_Result(
+        bool                        port_1_cidr_0,
+        const regexp::Result_shared res,
+        bool                       &has_value,
+        std::uint16_t              &value
+    );
+
+error_ptr
+    getValueFrom_CIDR_STR_PATTERN_Result(
+        bool                        port_1_cidr_0,
+        const regexp::Result_shared res,
+        bool                       &has_value,
+        std::uint16_t              &value
+    );
+
+error_ptr
+    getValueFrom_port_or_cidr_STR_PATTERN_Result(
+        bool                        port_1_cidr_0,
+        const regexp::Result_shared res,
+        bool                       &has_value,
+        std::uint16_t              &value
+    );
+
+// 192.168.0.1 -> res[0]=1, res[1]=0, res[2]=168, res[3]=192
+error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
+    const regexp::Result_shared  res,
+    std::array<std::uint8_t, 4> &ipv4
+);
+
+// 0123:4567:89ab:cdef:0123:4567:89ab:cdef -> 
+//	res[0]=cdef, res[1]=89ab, res[2]=4567 etc.
+//   note: resulting ints are localized to local endianness using std::bytesswap
+//         so 0123 on littleendian systems becomes 2301
+error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
+    const regexp::Result_shared   res,
+    std::array<std::uint16_t, 8> &ipv6,
+    bool                         &ipv6_short,
+    bool                         &ipv6_v4_comb
+);
+
+// integers in ipv6 array converted to local endianness.
+// lowest index of ip arrays contains lowest ip parts.
+error_ptr getValuesFrom_IP_AND_CIDR_OR_PORT_STR_PATTERN_ip_and_opt_cidr_or_port_Result(
+    const regexp::Result_shared   res,
+    bool                         &is_ipv4,
+    bool                         &is_ipv6,
+    std::array<std::uint8_t, 4>  &ipv4,
+    std::array<std::uint16_t, 8> &ipv6,
+    bool                         &ipv6_short,
+    bool                         &ipv6_v4_comb,
+    bool                         &has_cidr,
+    std::uint16_t                &cidr,
+    bool                         &has_port,
+    std::uint16_t                &port
+);
 
 class IPv4;
 
