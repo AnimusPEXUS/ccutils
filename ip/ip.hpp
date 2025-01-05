@@ -23,220 +23,15 @@ inline bool check_val_fits_2_bytes(long long val);
 // todo: those regexps were made before ccutisl::regexp got repetitions fix
 //       so they may be incorrect or unoptimised
 
-constexpr regexp::Pattern_shared PORT_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newExactChar(':'),
-               regexp::Pattern::newCharIsDigit()
-                   ->setName("number")
-                   ->setMinCount(1)
-                   ->unsetMaxCount()
-              }
-        )
-              ->setName("PORT_STR_PATTERN");
-    return ret;
-}
-
-constexpr regexp::Pattern_shared CIDR_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newExactChar('/'),
-               regexp::Pattern::newCharIsDigit()
-                   ->setName("number")
-                   ->setMinCount(1)
-                   ->unsetMaxCount()
-              }
-        )
-              ->setName("CIDR_STR_PATTERN");
-    return ret;
-}
-
-constexpr regexp::Pattern_shared IPv4_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newCharIsDigit()
-                   ->setMinMaxCount(1, 3)
-                   ->setName("1"),
-               regexp::Pattern::newExactChar('.')
-                   ->setMinMaxCount(1, 1),
-               regexp::Pattern::newCharIsDigit()
-                   ->setMinMaxCount(1, 3)
-                   ->setName("2"),
-               regexp::Pattern::newExactChar('.')
-                   ->setMinMaxCount(1, 1),
-               regexp::Pattern::newCharIsDigit()
-                   ->setMinMaxCount(1, 3)
-                   ->setName("3"),
-               regexp::Pattern::newExactChar('.')
-                   ->setMinMaxCount(1, 1),
-               regexp::Pattern::newCharIsDigit()
-                   ->setMinMaxCount(1, 3)
-                   ->setName("4")
-              }
-        )
-              ->setName("IPv4_STR_PATTERN");
-    return ret;
-}
-
-constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newGroup(
-                   {regexp::Pattern::newCharIsXDigit()
-                        ->setMinMaxCount(1, 4)
-                        ->setName("number"),
-                    regexp::Pattern::newExactChar(':')
-                        ->setMinMaxCount(1, 1)
-                   }
-               )
-                   ->setMinMaxCount(7, 7)
-                   ->setName("numbers"),
-               regexp::Pattern::newCharIsXDigit()
-                   ->setMinMaxCount(1, 4)
-                   ->setName("8")
-              }
-
-        )
-              ->setName("IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN");
-    return ret;
-}
-
-constexpr regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newGroup(
-                   {regexp::Pattern::newCharIsXDigit()
-                        ->setMinMaxCount(1, 4)
-                        ->setName("number"),
-                    regexp::Pattern::newExactChar(':')
-                        ->setMinMaxCount(1, 1)
-                   }
-               )
-                   ->setMinMaxCount(6, 6)
-                   ->setName("numbers"),
-               IPv4_STR_PATTERN()
-              }
-
-        )
-              ->setName("IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4");
-    return ret;
-}
-
-constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {
-                  regexp::Pattern::newGroup(
-                      {regexp::Pattern::newGroup(
-                           {regexp::Pattern::newCharIsXDigit()
-                                ->setMinMaxCount(0, 4)
-                                ->setName("number"),
-                            regexp::Pattern::newExactChar(':')
-                                ->setExactCount(1)
-                           }
-                       )
-                           ->unsetMinCount()
-                           ->unsetMaxCount(),
-                       regexp::Pattern::newCharIsXDigit()
-                           ->setMinMaxCount(0, 4)
-                           ->setName("number")
-                      }
-                  )
-                      ->setName("first half"),
-                  regexp::Pattern::newExactChar(':')
-                      ->setExactCount(2)
-                      ->setName("column pair"),
-                  regexp::Pattern::newGroup(
-                      {regexp::Pattern::newCharIsXDigit()
-                           ->setMinMaxCount(0, 4)
-                           ->setName("number"),
-                       regexp::Pattern::newGroup(
-                           {regexp::Pattern::newCharIsXDigit()
-                                ->setMinMaxCount(0, 4)
-                                ->setName("number"),
-                            regexp::Pattern::newExactChar(':')
-                                ->setExactCount(1)
-                           }
-                       )
-                           ->unsetMinCount()
-                           ->unsetMaxCount()
-                      }
-                  )
-                      ->setName("first half"),
-
-              }
-        )
-              ->setName("IPv6_SHORT_GRP_HEX_STR_PATTERN");
-
-    return ret;
-}
-
-constexpr regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newGroup(
-                   {regexp::Pattern::newCharIsXDigit()
-                        ->setMinMaxCount(0, 4)
-                        ->setName("number"),
-                    regexp::Pattern::newExactChar(':')
-                        ->setMinCount(1)
-                        ->setMaxCount(2)
-                   }
-               )
-                   ->setMinCount(1)
-                   ->setMaxCount(6),
-               IPv4_STR_PATTERN()
-              }
-        )
-              ->setName("IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4");
-    return ret;
-}
-
-constexpr regexp::Pattern_shared IPv6_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newExactChar('[')
-                   ->setMaxCount(1)
-                   ->unsetMinCount(),
-               regexp::Pattern::newOrGroup(
-                   {/* long 2 byte */
-                    IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN(),
-                    IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4(),
-                    /* short */
-                    IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4(),
-                    IPv6_SHORT_GRP_HEX_STR_PATTERN()
-                   }
-               )
-                   ->setName("IPv6_STR_PATTERN_OR_GROUP"),
-               regexp::Pattern::newExactChar(']')
-                   ->setMaxCount(1)
-                   ->unsetMinCount()
-              }
-        )
-              ->setName("IPv6_STR_PATTERN");
-    return ret;
-}
-
-constexpr regexp::Pattern_shared IP_STR_PATTERN()
-{
-    regexp::Pattern_shared ret
-        = regexp::Pattern::newOrGroup(
-              {IPv4_STR_PATTERN(),
-               IPv6_STR_PATTERN()
-              }
-        )
-              ->setExactCount(1)
-              ->setName("IP_STR_PATTERN");
-    return ret;
-}
+regexp::Pattern_shared PORT_STR_PATTERN();
+regexp::Pattern_shared CIDR_STR_PATTERN();
+regexp::Pattern_shared IPv4_STR_PATTERN();
+regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN();
+regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4();
+regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN();
+regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4();
+regexp::Pattern_shared IPv6_STR_PATTERN();
+regexp::Pattern_shared IP_STR_PATTERN();
 
 enum class IP_AND_CIDR_OR_PORT_STR_PATTERN_mode : unsigned char
 {
@@ -249,73 +44,9 @@ enum class IP_AND_CIDR_OR_PORT_STR_PATTERN_mode : unsigned char
     ip_only
 };
 
-constexpr regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
+regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
     IP_AND_CIDR_OR_PORT_STR_PATTERN_mode mode
-)
-{
-    regexp::Pattern_shared ret;
-    regexp::Pattern_shared port_or_cidr;
-
-    if (mode == IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_only)
-    {
-        ret = IP_STR_PATTERN()->setName("ip");
-    }
-    else
-    {
-        switch (mode)
-        {
-            default:
-                throw wayround_i2p::ccutils::errors::New(
-                    "invalid mode",
-                    __FILE__,
-                    __LINE__
-                );
-
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr_or_port:
-                port_or_cidr
-                    = regexp::Pattern::newOrGroup(
-                          {PORT_STR_PATTERN(),
-                           CIDR_STR_PATTERN()
-                          }
-                    )
-                          ->setExactCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr:
-                port_or_cidr = CIDR_STR_PATTERN()->setExactCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_port:
-                port_or_cidr = PORT_STR_PATTERN()->setExactCount(1);
-                break;
-
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr_or_port:
-                port_or_cidr
-                    = regexp::Pattern::newOrGroup(
-                          {PORT_STR_PATTERN(),
-                           CIDR_STR_PATTERN()
-                          }
-                    )
-                          ->unsetMinCount()
-                          ->setMaxCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr:
-                port_or_cidr = CIDR_STR_PATTERN()->unsetMinCount()->setMaxCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_port:
-                port_or_cidr = PORT_STR_PATTERN()->unsetMinCount()->setMaxCount(1);
-                break;
-        }
-
-        ret = regexp::Pattern::newGroup(
-            {IP_STR_PATTERN()
-                 ->setName("ip"),
-             port_or_cidr
-                 ->setName("port_or_cidr")
-            }
-        );
-    }
-
-    return ret;
-}
+);
 
 error_ptr
     getValueFrom_PORT_STR_PATTERN_Result(
@@ -347,7 +78,7 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
     std::array<std::uint8_t, 4> &ipv4
 );
 
-// 0123:4567:89ab:cdef:0123:4567:89ab:cdef -> 
+// 0123:4567:89ab:cdef:0123:4567:89ab:cdef ->
 //	res[0]=cdef, res[1]=89ab, res[2]=4567 etc.
 //   note: resulting ints are localized to local endianness using std::bytesswap
 //         so 0123 on littleendian systems becomes 2301
