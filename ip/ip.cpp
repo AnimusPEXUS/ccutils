@@ -122,45 +122,38 @@ regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN()
 {
     auto ret
         = regexp::Pattern::newGroup(
-              {
-                  regexp::Pattern::newGroup(
-                      {regexp::Pattern::newGroup(
-                           {regexp::Pattern::newCharIsXDigit()
-                                ->setMinMaxCount(0, 4)
-                                ->setName("number"),
-                            regexp::Pattern::newExactChar(':')
-                                ->setExactCount(1)
-                           }
-                       )
-                           ->unsetMinCount()
-                           ->unsetMaxCount(),
-                       regexp::Pattern::newCharIsXDigit()
-                           ->setMinMaxCount(0, 4)
-                           ->setName("number")
-                      }
-                  )
-                      ->setName("first half"),
-                  regexp::Pattern::newExactChar(':')
-                      ->setExactCount(2)
-                      ->setName("column pair"),
-                  regexp::Pattern::newGroup(
-                      {regexp::Pattern::newCharIsXDigit()
-                           ->setMinMaxCount(0, 4)
-                           ->setName("number"),
-                       regexp::Pattern::newGroup(
-                           {regexp::Pattern::newCharIsXDigit()
-                                ->setMinMaxCount(0, 4)
-                                ->setName("number"),
-                            regexp::Pattern::newExactChar(':')
-                                ->setExactCount(1)
-                           }
-                       )
-                           ->unsetMinCount()
-                           ->unsetMaxCount()
-                      }
-                  )
-                      ->setName("first half"),
-
+              {regexp::Pattern::newOrGroup(
+                   {regexp::Pattern::newGroup(
+                        {regexp::Pattern::newCharIsXDigit()
+                             ->setMinMaxCount(1, 4)
+                             ->setName("number"),
+                         regexp::Pattern::newExactChar(':')
+                             ->setExactCount(1)
+                        }
+                    )
+                        ->setMinCount(1)
+                        ->unsetMaxCount(),
+                    regexp::Pattern::newExactChar(':')
+                        ->setExactCount(1)
+                   }
+               )
+                   ->setName("first half"),
+               regexp::Pattern::newOrGroup(
+                   {regexp::Pattern::newGroup(
+                        {regexp::Pattern::newExactChar(':')
+                             ->setExactCount(1),
+                         regexp::Pattern::newCharIsXDigit()
+                             ->setMinMaxCount(1, 4)
+                             ->setName("number")
+                        }
+                    )
+                        ->setMinCount(1)
+                        ->unsetMaxCount(),
+                    regexp::Pattern::newExactChar(':')
+                        ->setExactCount(1)
+                   }
+               )
+                   ->setName("second half")
               }
         )
               ->setName("IPv6_SHORT_GRP_HEX_STR_PATTERN");
