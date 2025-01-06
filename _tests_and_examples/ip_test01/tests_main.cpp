@@ -31,10 +31,13 @@ const std::vector<UString> testing_ipv6 = []()
     auto x = std::vector<UString>{
         "0123:4567:89ab:cdef:0123:4567:89ab:cdf0",
         "0123:4567:89ab::cdef",
-        "::ffff:192.0.2.128",
         "2345:0425:2CA1:0000:0000:0567:5673:23b5",
+        "2266:25::12:0:ad12",
         "2345:0425:2CA1::0567:5673:23b5",
-        "2266:25::12:0:ad12"
+        "::12:0:ad12",
+        "2266:25::",
+        "::",
+        "::ffff:192.0.2.128"
     };
 
     uniqsort(x);
@@ -54,7 +57,7 @@ const std::vector<UString> testing_cidr = []()
 const std::vector<UString> testing_port = []()
 {
     auto x = std::vector<UString>{
-        ":9050",
+        "9050",
     };
 
     uniqsort(x);
@@ -142,6 +145,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_print_examples(
     wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
+    logger->LogSplitLines(
+        wayround_i2p::ccutils::logger::Status,
+        "here are sample IPs used in tests below. \n"
+        "can be used to quickly navigate to they'r parsing logs."
+    );
 
     for (const auto &i : testing_examples_all)
     {
@@ -234,9 +242,12 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_tests(
             );
         }
 
-        logger->Log(
+        logger->LogSplitLines(
             wayround_i2p::ccutils::logger::Status,
-            "-----------------------------"
+            "-//--//--//--//--//--//--//--//--//--//--//--//--//--//-\n"
+            "//--//--//--//--//--//--//--//--//--//--//--//--//--//--\n"
+            "/--//--//--//--//--//--//--//--//--//--//--//--//--//--/\n"
+            "--//--//--//--//--//--//--//--//--//--//--//--//--//--//\n"
         );
     }
 

@@ -1184,6 +1184,16 @@ UString IPv6::toStringShort() const
         }
     }
 
+    /*
+    std::cout << "std::deque<zeroes_slice> slices;" << std::endl;
+
+    for (std::size_t i = 0; i < slices.size(); i++)
+    {
+        const auto &x = *(slices.begin() + i);
+        std::cout << std::format("  slice(start={}, length={})", x.start, x.length) << std::endl;
+    }
+    */
+
     if (slices.size() == 0)
     {
         return toStringLong();
@@ -1204,38 +1214,52 @@ UString IPv6::toStringShort() const
     UString ret;
 
     {
-        for (
-            std::size_t i = 0;
-            i < longest_np.start;
-            i++
-        )
+        if (longest_np.start == 0)
         {
-            auto z = buff.b16[i];
-
-            if constexpr (std::endian::native == std::endian::little)
-            {
-                z = std::byteswap(z);
-            }
-
-            ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
             ret = UString(":") + ret;
         }
-
-        for (
-            std::size_t i = longest_np.start + longest_np.length;
-            i < 8;
-            i++
-        )
+        else
         {
-            auto z = buff.b16[i];
-
-            if constexpr (std::endian::native == std::endian::little)
+            for (
+                std::size_t i = 0;
+                i < longest_np.start;
+                i++
+            )
             {
-                z = std::byteswap(z);
-            }
+                auto z = buff.b16[i];
 
+                if constexpr (std::endian::native == std::endian::little)
+                {
+                    z = std::byteswap(z);
+                }
+
+                ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
+                ret = UString(":") + ret;
+            }
+        }
+
+        if ((longest_np.start + longest_np.length) == 8)
+        {
             ret = UString(":") + ret;
-            ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
+        }
+        else
+        {
+            for (
+                std::size_t i = longest_np.start + longest_np.length;
+                i < 8;
+                i++
+            )
+            {
+                auto z = buff.b16[i];
+
+                if constexpr (std::endian::native == std::endian::little)
+                {
+                    z = std::byteswap(z);
+                }
+
+                ret = UString(":") + ret;
+                ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
+            }
         }
     }
     return ret;
