@@ -510,8 +510,6 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
         );
     }
 
-    std::cout << res->repr_as_text(true) << std::endl;
-
     // return nullptr; // ok
 
     auto res_or_group = res->findByNameRec("IPv6_STR_PATTERN_OR_GROUP");
@@ -1176,16 +1174,6 @@ UString IPv6::toStringShort() const
             }
         }
     }
-
-    /*
-    std::cout << "std::deque<zeroes_slice> slices;" << std::endl;
-
-    for (std::size_t i = 0; i < slices.size(); i++)
-    {
-        const auto &x = *(slices.begin() + i);
-        std::cout << std::format("  slice(start={}, length={})", x.start, x.length) << std::endl;
-    }
-    */
 
     if (slices.size() == 0)
     {
