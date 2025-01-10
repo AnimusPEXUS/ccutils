@@ -7,5 +7,6 @@ then
 fi
 
 #cd ./build && cmake "$@"
-cmake --build ./build -j4
+#cmake --build ./build -j4 "$@"
 
+cd ./build && make "$@"
