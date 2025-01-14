@@ -1266,6 +1266,20 @@ std::tuple<
     return std::tuple(res->matched, res->match_end - res->match_start);
 }
 
+Pattern_shared makeExact(Pattern_shared pat)
+{
+    Pattern_shared ret
+        = Pattern::newGroup(
+              {Pattern::newTextStart(),
+               pat,
+               Pattern::newTextEnd()
+              }
+        )
+              ->setExactCount(1)
+              ->setName("ExactPattern");
+    return ret;
+}
+
 // todo: this function is too large and complex. maybe it should be splitup
 const Result_shared match_single(
     const Pattern_shared     pattern,
@@ -2383,6 +2397,57 @@ UString PatternTypeString(PatternType v)
         case PatternType::Group:
             return "Group";
     }
+}
+
+error_ptr ResultRoutineCheck(
+    Result_shared res,
+    bool          not_res_is_error,
+    bool          dismatch_is_error,
+    UString       file,
+    std::size_t   line
+)
+{
+    if (not_res_is_error)
+    {
+        if (!res)
+        {
+            return wayround_i2p::ccutils::errors::New(
+                "Result_shared is nullptr",
+                file,
+                line
+            );
+        }
+    }
+    else
+    {
+        if (!res)
+        {
+            return nullptr;
+        }
+    }
+
+    if (res->error)
+    {
+        return wayround_i2p::ccutils::errors::New(
+            std::format("Result_shared is error: {}", res->error->Error()),
+            file,
+            line
+        );
+    }
+
+    if (dismatch_is_error)
+    {
+        if (!res->matched)
+        {
+            return wayround_i2p::ccutils::errors::New(
+                "dismatched",
+                file,
+                line
+            );
+        }
+    }
+
+    return nullptr;
 }
 
 } // namespace wayround_i2p::ccutils::regexp

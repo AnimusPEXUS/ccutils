@@ -191,18 +191,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_tests(
                     UString,                                 // title
                     bool                                     // call debugger
                     >>{
-                {ip::IP_STR_PATTERN, "IP_STR_PATTERN", false},
-                {ip::IPv4_STR_PATTERN, "IPv4_STR_PATTERN", false},
-                {ip::IPv6_STR_PATTERN, "IPv6_STR_PATTERN", false},
+                {ip::IP_STR_PATTERN,                      "IP_STR_PATTERN",                      false},
+                {ip::IPv4_STR_PATTERN,                    "IPv4_STR_PATTERN",                    false},
+                {ip::IPv6_STR_PATTERN,                    "IPv6_STR_PATTERN",                    false},
                 {ip::IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN", false},
-                {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN, "IPv6_SHORT_GRP_HEX_STR_PATTERN", false},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr_or_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr_or_port)", false},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_cidr)", false},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_must_port)", false},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr_or_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_cidr_or_port)", false},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_cidr)", false},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_port), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_and_opt_port)", false},
-                {std::bind(ip::IP_AND_CIDR_OR_PORT_STR_PATTERN, ip::IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_only), "IP_AND_CIDR_OR_PORT_STR_PATTERN(ip_only)", false}
+                {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN,      "IPv6_SHORT_GRP_HEX_STR_PATTERN",      false},
         }
         )
         {
@@ -363,7 +356,7 @@ wayround_i2p::ccutils::tst::TSTInfo main_regexps_shortcuts_tests_i = {
 
 // -----------------------------------------------------------------
 
-wayround_i2p::ccutils::tst::TSTFuncResult main_IPv4_create(
+wayround_i2p::ccutils::tst::TSTFuncResult main_IP_create(
     const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
     std::map<std::string, std::any>              &iitm,
     wayround_i2p::ccutils::logger::LoggerI_shared logger
@@ -375,49 +368,12 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IPv4_create(
             wayround_i2p::ccutils::logger::Status,
             std::format("subject: {}", i)
         );
-        auto ip_res = wayround_i2p::ccutils::ip::IPv4::createFromString(i);
-        auto res    = std::get<0>(ip_res);
-        auto err    = std::get<1>(ip_res);
-        if (err != nullptr)
-        {
-            logger->Log(
-                wayround_i2p::ccutils::logger::Failure,
-                std::format("  - couldn't parse: {}", err->Error())
-            );
-            continue;
-        }
 
-        logger->Log(
-            wayround_i2p::ccutils::logger::Success,
-            std::format("  + parsed: {}", res->toString())
-        );
-    }
+        auto ip_res = wayround_i2p::ccutils::ip::IP::create();
+        auto err    = ip_res->setIPFromString(i);
+        auto res    = ip_res;
 
-    return {true};
-}
-
-wayround_i2p::ccutils::tst::TSTInfo main_IPv4_create_i = {
-    .group_name = "main",
-    .test_name  = "IPv4_create",
-    .func       = main_IPv4_create
-};
-
-// -----------------------------------------------------------------
-
-wayround_i2p::ccutils::tst::TSTFuncResult main_IPv6_create(
-    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
-    std::map<std::string, std::any>              &iitm,
-    wayround_i2p::ccutils::logger::LoggerI_shared logger
-)
-{
-    for (const auto &i : testing_examples_all)
-    {
-        logger->Log(
-            wayround_i2p::ccutils::logger::Status,
-            std::format("subject: {}", i)
-        );
-        auto [res, err] = wayround_i2p::ccutils::ip::IPv6::createFromString(i);
-        if (err != nullptr)
+        if (err)
         {
             logger->Log(
                 wayround_i2p::ccutils::logger::Failure,
@@ -429,12 +385,17 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IPv6_create(
         logger->LogSplitLines(
             wayround_i2p::ccutils::logger::Success,
             std::format(
-                R"---(  + parsed: 
-      short {}
-      long  {}
-)---",
-                res->toStringShort(),
-                res->toStringLong()
+                "   + IP parsed. result:"
+                "      IPv4       : {}"
+                "      IPv6 long  : {}"
+                "      IPv6 short : {}"
+                "      Port       : {}"
+                "      CIDR       : {}",
+                (ip_res->hasIPv4() ? ip_res->getIPAsString() : "-"),
+                (ip_res->hasIPv6() ? ip_res->getAllAsLongString() : "-"),
+                (ip_res->hasIPv6() ? ip_res->getAllAsShortString() : "-"),
+                (ip_res->hasPort() ? ip_res->getPortString() : "-"),
+                (ip_res->hasCIDR() ? ip_res->getCIDRString() : "-")
             )
         );
     }
@@ -442,8 +403,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IPv6_create(
     return {true};
 }
 
-wayround_i2p::ccutils::tst::TSTInfo main_IPv6_create_i = {
+wayround_i2p::ccutils::tst::TSTInfo main_IP_create_i = {
     .group_name = "main",
-    .test_name  = "IPv6_create",
-    .func       = main_IPv6_create
+    .test_name  = "IP_create",
+    .func       = main_IP_create
 };

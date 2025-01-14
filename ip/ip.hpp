@@ -29,8 +29,6 @@ inline bool check_val_fits_2_bytes(long long val);
 // todo: those regexps were made before ccutisl::regexp got repetitions fix
 //       so they may be incorrect or unoptimised
 
-regexp::Pattern_shared PORT_STR_PATTERN();
-regexp::Pattern_shared CIDR_STR_PATTERN();
 regexp::Pattern_shared IPv4_STR_PATTERN();
 regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN();
 regexp::Pattern_shared IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4();
@@ -39,41 +37,38 @@ regexp::Pattern_shared IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4();
 regexp::Pattern_shared IPv6_STR_PATTERN();
 regexp::Pattern_shared IP_STR_PATTERN();
 
-enum class IP_AND_CIDR_OR_PORT_STR_PATTERN_mode : unsigned char
-{
-    ip_and_must_cidr_or_port,
-    ip_and_must_cidr,
-    ip_and_must_port,
-    ip_and_opt_cidr_or_port,
-    ip_and_opt_cidr,
-    ip_and_opt_port,
-    ip_only,
+regexp::Pattern_shared PORT_STR_PATTERN();
+regexp::Pattern_shared CIDR_STR_PATTERN();
+regexp::Pattern_shared PORT_OR_CIDR_STR_PATTERN();
 
-    opt_ip_and_must_cidr_or_port,
-    opt_ip_and_must_cidr,
-    opt_ip_and_must_port,
-    port_only,
-    cidr_only,
-    port_or_cidr_only
-};
+regexp::Pattern_shared IP_ONLY_PATTERN();
+regexp::Pattern_shared PORT_ONLY_PATTERN();
+regexp::Pattern_shared CIDR_ONLY_PATTERN();
+regexp::Pattern_shared PORT_OR_CIDR_ONLY_PATTERN();
 
-regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
-    IP_AND_CIDR_OR_PORT_STR_PATTERN_mode mode
-);
+regexp::Pattern_shared IP_AND_MUST_PORT_OR_CIDR_PATTERN();
+regexp::Pattern_shared IP_AND_MUST_PORT_PATTERN();
+regexp::Pattern_shared IP_AND_MUST_CIDR_PATTERN();
+
+regexp::Pattern_shared IP_AND_OPT_PORT_OR_CIDR_PATTERN();
+regexp::Pattern_shared IP_AND_OPT_PORT_PATTERN();
+regexp::Pattern_shared IP_AND_OPT_CIDR_PATTERN();
+
+regexp::Pattern_shared OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN();
+regexp::Pattern_shared OPT_IP_AND_MUST_PORT_PATTERN();
+regexp::Pattern_shared OPT_IP_AND_MUST_CIDR_PATTERN();
 
 error_ptr
     getValueFrom_PORT_STR_PATTERN_Result(
-        bool                        port_1_cidr_0,
         const regexp::Result_shared res,
-        bool                       &has_value,
+        bool                       &matched,
         std::uint16_t              &value
     );
 
 error_ptr
     getValueFrom_CIDR_STR_PATTERN_Result(
-        bool                        port_1_cidr_0,
         const regexp::Result_shared res,
-        bool                       &has_value,
+        bool                       &matched,
         std::uint16_t              &value
     );
 
@@ -81,41 +76,48 @@ error_ptr
     getValueFrom_port_or_cidr_STR_PATTERN_Result(
         bool                        port_1_cidr_0,
         const regexp::Result_shared res,
-        bool                       &has_value,
+        bool                       &matched,
         std::uint16_t              &value
     );
 
 // 192.168.0.1 -> res[0]=1, res[1]=0, res[2]=168, res[3]=192
 error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
     const regexp::Result_shared  res,
+    bool                        &matched,
     std::array<std::uint8_t, 4> &ipv4
 );
 
-// 0123:4567:89ab:cdef:0123:4567:89ab:cdef ->
-//	res[0]=cdef, res[1]=89ab, res[2]=4567 etc.
-//   note: resulting ints are localized to local endianness
+// set ret_localendian param to true if you want this function to
+//     automatically convert ints in ipv6 to local-endian
 error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
     const regexp::Result_shared   res,
-    std::array<std::uint8_t, 4>  &ipv4,
+    bool                         &matched,
     std::array<std::uint16_t, 8> &ipv6,
-    bool                         &ipv6_short,
-    bool                         &ipv6_v4_comb
-);
-
-// integers in ipv6 array converted to local endianness.
-// lowest index of ip arrays contains lowest ip parts.
-// if function detects ipv6 is comb with ipv4 - ipv4 value additionally goes to ipv4
-error_ptr getValuesFrom_IP_AND_CIDR_OR_PORT_STR_PATTERN_ip_and_opt_cidr_or_port_Result(
-    const regexp::Result_shared   res,
-    IPver                        &ipver,
     std::array<std::uint8_t, 4>  &ipv4,
-    std::array<std::uint16_t, 8> &ipv6,
     bool                         &ipv6_short,
     bool                         &ipv6_v4_comb,
-    bool                         &has_cidr,
+    bool                          ret_localendian
+);
+
+// lowest index of ip arrays contains lowest ip parts.
+// if function detects ipv6 is comb with ipv4 - ipv4 value additionally goes to ipv4.
+// set ret_localendian param to true if you want this function to
+//     automatically convert ints in ipv6 to local-endian.
+// ipv4 result is not affected by ret_localendian.
+error_ptr getAllPossibleValuesFromResult(
+    const regexp::Result_shared   res,
+    IPver                        &ipver,
+    bool                         &ipv6_matched,
+    std::array<std::uint16_t, 8> &ipv6,
+    bool                         &ipv4_matched,
+    std::array<std::uint8_t, 4>  &ipv4,
+    bool                         &ipv6_short,
+    bool                         &ipv6_v4_comb,
+    bool                         &port_matched,
+    std::uint16_t                &port,
+    bool                         &cidr_matched,
     std::uint16_t                &cidr,
-    bool                         &has_port,
-    std::uint16_t                &port
+    bool                          ret_localendian
 );
 
 union IPv6_array
@@ -215,6 +217,9 @@ class IP
     UString getIPAsString() const;
     UString getIPAsStringLong() const;
     UString getIPAsStringShort() const;
+
+    UString getPortString() const;
+    UString getCIDRString() const;
 
     // todo: make customizable versions of getIPAsString() and getAllAsString()
     //       functions (leading zeroes, skipped null-elements)

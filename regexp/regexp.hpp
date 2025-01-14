@@ -447,6 +447,8 @@ std::tuple<
         std::size_t              start_at = 0
     );
 
+Pattern_shared makeExact(Pattern_shared pat);
+
 ///
 // takes [vector], [deque] or [brace-enclosed initializer list]
 // and makes sequence out of [Pattern]s contained in it,
@@ -523,61 +525,13 @@ Pattern_shared appendPatterns(
 
 UString PatternTypeString(PatternType v);
 
-///
-// it maybe tedious to write checks for Result_shared everywhere,
-// so here you have a shortcut, which checks for you:
-// #. res on nullptr,
-// #. res->error
-// #. have option to return error if res->dismatched
-template <bool not_res_is_error, bool dismatch_is_error>
 error_ptr ResultRoutineCheck(
     Result_shared res,
+    bool          not_res_is_error,
+    bool          dismatch_is_error,
     UString       file,
     std::size_t   line
-)
-{
-    if constexpr (not_res_is_error)
-    {
-        if (!res)
-        {
-            return wayround_i2p::ccutils::errors::New(
-                "Result_shared is nullptr",
-                file,
-                line
-            );
-        }
-    }
-    else
-    {
-        if (!res)
-        {
-            return nullptr;
-        }
-    }
-
-    if (res->error)
-    {
-        return wayround_i2p::ccutils::errors::New(
-            std::format("Result_shared is error: {}", res->error->Error()),
-            file,
-            line
-        );
-    }
-
-    if constexpr (dismatch_is_error)
-    {
-        if (!res->matched)
-        {
-            return wayround_i2p::ccutils::errors::New(
-                "dismatched",
-                file,
-                line
-            );
-        }
-    }
-
-    return nullptr;
-}
+);
 
 } // namespace wayround_i2p::ccutils::regexp
 

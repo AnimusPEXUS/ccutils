@@ -14,36 +14,6 @@ inline bool check_val_fits_2_bytes(long long val)
     return (val >= 0 && val <= 0xffff);
 }
 
-regexp::Pattern_shared PORT_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newExactChar(':'),
-               regexp::Pattern::newCharIsDigit()
-                   ->setName("number")
-                   ->setMinCount(1)
-                   ->unsetMaxCount()
-              }
-        )
-              ->setName("PORT_STR_PATTERN");
-    return ret;
-}
-
-regexp::Pattern_shared CIDR_STR_PATTERN()
-{
-    auto ret
-        = regexp::Pattern::newGroup(
-              {regexp::Pattern::newExactChar('/'),
-               regexp::Pattern::newCharIsDigit()
-                   ->setName("number")
-                   ->setMinCount(1)
-                   ->unsetMaxCount()
-              }
-        )
-              ->setName("CIDR_STR_PATTERN");
-    return ret;
-}
-
 regexp::Pattern_shared IPv4_STR_PATTERN()
 {
     auto ret
@@ -222,102 +192,210 @@ regexp::Pattern_shared IP_STR_PATTERN()
     return ret;
 }
 
-regexp::Pattern_shared IP_AND_CIDR_OR_PORT_STR_PATTERN(
-    IP_AND_CIDR_OR_PORT_STR_PATTERN_mode mode
-)
+regexp::Pattern_shared PORT_STR_PATTERN()
 {
-    regexp::Pattern_shared ret;
-    regexp::Pattern_shared port_or_cidr;
-
-    if (mode == IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_only)
-    {
-        ret = IP_STR_PATTERN()->setName("ip");
-    }
-    else
-    {
-        switch (mode)
-        {
-            default:
-                throw wayround_i2p::ccutils::errors::New(
-                    "invalid mode",
-                    __FILE__,
-                    __LINE__
-                );
-
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr_or_port:
-                port_or_cidr
-                    = regexp::Pattern::newOrGroup(
-                          {PORT_STR_PATTERN(),
-                           CIDR_STR_PATTERN()
-                          }
-                    )
-                          ->setExactCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_cidr:
-                port_or_cidr = CIDR_STR_PATTERN()->setExactCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_must_port:
-                port_or_cidr = PORT_STR_PATTERN()->setExactCount(1);
-                break;
-
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr_or_port:
-                port_or_cidr
-                    = regexp::Pattern::newOrGroup(
-                          {PORT_STR_PATTERN(),
-                           CIDR_STR_PATTERN()
-                          }
-                    )
-                          ->unsetMinCount()
-                          ->setMaxCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_cidr:
-                port_or_cidr = CIDR_STR_PATTERN()->unsetMinCount()->setMaxCount(1);
-                break;
-            case IP_AND_CIDR_OR_PORT_STR_PATTERN_mode::ip_and_opt_port:
-                port_or_cidr = PORT_STR_PATTERN()->unsetMinCount()->setMaxCount(1);
-                break;
-        }
-
-        ret = regexp::Pattern::newGroup(
-            {IP_STR_PATTERN()
-                 ->setName("ip"),
-             port_or_cidr
-                 ->setName("port_or_cidr")
-            }
-        );
-    }
-
+    auto ret
+        = regexp::Pattern::newGroup(
+              {regexp::Pattern::newExactChar(':'),
+               regexp::Pattern::newCharIsDigit()
+                   ->setName("number")
+                   ->setMinCount(1)
+                   ->unsetMaxCount()
+              }
+        )
+              ->setName("PORT_STR_PATTERN");
     return ret;
+}
+
+regexp::Pattern_shared CIDR_STR_PATTERN()
+{
+    auto ret
+        = regexp::Pattern::newGroup(
+              {regexp::Pattern::newExactChar('/'),
+               regexp::Pattern::newCharIsDigit()
+                   ->setName("number")
+                   ->setMinCount(1)
+                   ->unsetMaxCount()
+              }
+        )
+              ->setName("CIDR_STR_PATTERN");
+    return ret;
+}
+
+regexp::Pattern_shared PORT_OR_CIDR_STR_PATTERN()
+{
+    auto ret
+        = regexp::Pattern::newOrGroup(
+              {PORT_STR_PATTERN(),
+               CIDR_STR_PATTERN()}
+        )
+              ->setName("PORT_OR_CIDR_STR_PATTERN");
+    return ret;
+}
+
+regexp::Pattern_shared IP_ONLY_PATTERN()
+{
+    return regexp::makeExact(IP_STR_PATTERN());
+}
+
+regexp::Pattern_shared PORT_ONLY_PATTERN()
+{
+    return regexp::makeExact(PORT_STR_PATTERN());
+}
+
+regexp::Pattern_shared CIDR_ONLY_PATTERN()
+{
+    return regexp::makeExact(CIDR_STR_PATTERN());
+}
+
+regexp::Pattern_shared PORT_OR_CIDR_ONLY_PATTERN()
+{
+    return regexp::makeExact(PORT_OR_CIDR_STR_PATTERN());
+}
+
+regexp::Pattern_shared IP_AND_MUST_PORT_OR_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setExactCount(1),
+             PORT_OR_CIDR_STR_PATTERN()
+                 ->setExactCount(1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared IP_AND_MUST_PORT_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setExactCount(1),
+             PORT_STR_PATTERN()
+                 ->setExactCount(1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared IP_AND_MUST_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setExactCount(1),
+             CIDR_STR_PATTERN()
+                 ->setExactCount(1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared IP_AND_OPT_PORT_OR_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setExactCount(1),
+             PORT_OR_CIDR_STR_PATTERN()
+                 ->setMinMaxCount(0, 1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared IP_AND_OPT_PORT_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setExactCount(1),
+             PORT_STR_PATTERN()
+                 ->setMinMaxCount(0, 1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared IP_AND_OPT_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setExactCount(1),
+             PORT_OR_CIDR_STR_PATTERN()
+                 ->setMinMaxCount(0, 1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setMinMaxCount(0, 1),
+             PORT_OR_CIDR_STR_PATTERN()
+                 ->setExactCount(1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared OPT_IP_AND_MUST_PORT_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setMinMaxCount(0, 1),
+             PORT_STR_PATTERN()
+                 ->setExactCount(1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared OPT_IP_AND_MUST_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setMinMaxCount(0, 1),
+             CIDR_STR_PATTERN()
+                 ->setExactCount(1)
+            }
+        )
+    );
 }
 
 error_ptr
     getValueFrom_PORT_STR_PATTERN_Result(
-        bool                        port_1_cidr_0,
         const regexp::Result_shared res,
-        bool                       &has_value,
+        bool                       &matched,
         std::uint16_t              &value
     )
 {
     return getValueFrom_port_or_cidr_STR_PATTERN_Result(
         true,
         res,
-        has_value,
+        matched,
         value
     );
 }
 
 error_ptr
     getValueFrom_CIDR_STR_PATTERN_Result(
-        bool                        port_1_cidr_0,
         const regexp::Result_shared res,
-        bool                       &has_value,
+        bool                       &matched,
         std::uint16_t              &value
     )
 {
     return getValueFrom_port_or_cidr_STR_PATTERN_Result(
         false,
         res,
-        has_value,
+        matched,
         value
     );
 }
@@ -326,12 +404,16 @@ error_ptr
     getValueFrom_port_or_cidr_STR_PATTERN_Result(
         bool                        port_1_cidr_0,
         const regexp::Result_shared res,
-        bool                       &has_value,
+        bool                       &matched,
         std::uint16_t              &value
     )
 {
-    auto err = regexp::ResultRoutineCheck<true, true>(
+    matched = false;
+
+    auto err = regexp::ResultRoutineCheck(
         res,
+        true,
+        false,
         __FILE__,
         __LINE__
     );
@@ -344,8 +426,10 @@ error_ptr
         (port_1_cidr_0 ? "PORT_STR_PATTERN" : "CIDR_STR_PATTERN")
     );
 
-    err = regexp::ResultRoutineCheck<true, true>(
+    err = regexp::ResultRoutineCheck(
         res_VALUE_STR_PATTERN,
+        true,
+        false,
         __FILE__,
         __LINE__
     );
@@ -354,10 +438,17 @@ error_ptr
         return err;
     }
 
+    if (!res_VALUE_STR_PATTERN->matched)
+    {
+        return nullptr;
+    }
+
     auto res_number = res_VALUE_STR_PATTERN->findByNameRec("number");
 
-    err = regexp::ResultRoutineCheck<true, true>(
+    err = regexp::ResultRoutineCheck(
         res_number,
+        true,
+        true,
         __FILE__,
         __LINE__
     );
@@ -394,17 +485,23 @@ error_ptr
 
     value = x;
 
+    matched = true;
+
     return nullptr;
 }
 
 error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
     const regexp::Result_shared  res,
+    bool                        &matched,
     std::array<std::uint8_t, 4> &ipv4
 )
 {
+    matched  = false;
     // todo: optimizations needed? function code is messy!
-    auto err = regexp::ResultRoutineCheck<true, true>(
+    auto err = regexp::ResultRoutineCheck(
         res,
+        true,
+        false,
         __FILE__,
         __LINE__
     );
@@ -413,18 +510,12 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
         return err;
     }
 
-    if (!res->matched)
-    {
-        return wayround_i2p::ccutils::errors::New(
-            "dismatch",
-            __FILE__,
-            __LINE__
-        );
-    }
-
     auto res3 = res->findByName("IPv4_STR_PATTERN");
-    err       = regexp::ResultRoutineCheck<true, true>(
+
+    err = regexp::ResultRoutineCheck(
         res3,
+        true,
+        false,
         __FILE__,
         __LINE__
     );
@@ -435,19 +526,17 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
 
     if (!res3->matched)
     {
-        return wayround_i2p::ccutils::errors::New(
-            "dismatch",
-            __FILE__,
-            __LINE__
-        );
+        return nullptr;
     }
 
     for (unsigned char i = 0; i < 4; i++)
     {
         auto res2 = res3->findByNameRec(std::to_string(i + 1));
 
-        err = regexp::ResultRoutineCheck<true, true>(
+        err = regexp::ResultRoutineCheck(
             res2,
+            true,
+            true,
             __FILE__,
             __LINE__
         );
@@ -479,20 +568,28 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
         }
     }
 
-    // todo: add cidr and port retrieval
+    matched = true;
 
     return nullptr;
 }
 
 error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
     const regexp::Result_shared   res,
+    bool                         &matched,
     std::array<std::uint16_t, 8> &ipv6,
+    std::array<std::uint8_t, 4>  &ipv4,
     bool                         &ipv6_short,
-    bool                         &ipv6_v4_comb
+    bool                         &ipv6_v4_comb,
+    bool                          ret_localendian
 )
 {
-    auto err = regexp::ResultRoutineCheck<true, true>(
+
+    matched = false;
+
+    auto err = regexp::ResultRoutineCheck(
         res,
+        true,
+        false,
         __FILE__,
         __LINE__
     );
@@ -514,8 +611,10 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
 
     auto res_or_group = res->findByNameRec("IPv6_STR_PATTERN_OR_GROUP");
 
-    err = regexp::ResultRoutineCheck<true, true>(
+    err = regexp::ResultRoutineCheck(
         res_or_group,
+        true,
+        false,
         __FILE__,
         __LINE__
     );
@@ -526,11 +625,7 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
 
     if (!res_or_group->matched)
     {
-        return wayround_i2p::ccutils::errors::New(
-            "dismatch",
-            __FILE__,
-            __LINE__
-        );
+        return nullptr;
     }
 
     // return nullptr; // ok
@@ -562,14 +657,34 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
             std::array<std::uint8_t, 4>  ipv4_bytes;
         };
 
-        err = getValuesFrom_IPv4_STR_PATTERN_Result(res_comb, ipv4_bytes);
+        bool ipv4_bytes_matched;
+
+        err = getValuesFrom_IPv4_STR_PATTERN_Result(
+            res_comb,
+            ipv4_bytes_matched,
+            ipv4_bytes
+        );
         if (err)
         {
             return err;
         }
 
+        if (!ipv4_bytes_matched)
+        {
+            return wayround_i2p::ccutils::errors::New(
+                "ipv6_ipv4_comb_dismatch",
+                __FILE__,
+                __LINE__
+            );
+        }
+
         ipv6[0] = ipv6_ints[0];
         ipv6[1] = ipv6_ints[1];
+
+        for (unsigned char i = 0; i < 4; i++)
+        {
+            ipv4[i] = ipv4_bytes[i];
+        }
     }
 
     // return nullptr; // ok
@@ -647,6 +762,85 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
 
         ipv6[(ipv6_v4_comb ? 2 + (i - 1) : i)] = val_int;
     }
+
+    matched = true;
+
+    return nullptr;
+}
+
+error_ptr getAllPossibleValuesFromResult(
+    const regexp::Result_shared   res,
+    IPver                        &ipver,
+    bool                         &ipv6_matched,
+    std::array<std::uint16_t, 8> &ipv6,
+    bool                         &ipv4_matched,
+    std::array<std::uint8_t, 4>  &ipv4,
+    bool                         &ipv6_short,
+    bool                         &ipv6_v4_comb,
+    bool                         &port_matched,
+    std::uint16_t                &port,
+    bool                         &cidr_matched,
+    std::uint16_t                &cidr,
+    bool                          ret_localendian
+)
+{
+    error_ptr err;
+
+    ipv6_matched = false;
+    ipv4_matched = false;
+    port_matched = false;
+    cidr_matched = false;
+
+    err = getValuesFrom_IPv6_STR_PATTERN_Result(
+        res,
+        ipv6_matched,
+        ipv6,
+        ipv4,
+        ipv6_short,
+        ipv6_v4_comb,
+        ret_localendian
+    );
+    if (err)
+    {
+        return err;
+    }
+
+    if (ipv6_matched)
+    {
+        ipver = IPver::v6;
+        goto after_ip_test;
+    }
+
+    err = getValuesFrom_IPv4_STR_PATTERN_Result(
+        res,
+        ipv4_matched,
+        ipv4
+    );
+    if (err)
+    {
+        return err;
+    }
+
+    if (ipv4_matched)
+    {
+        ipver  = IPver::v4;
+        goto after_ip_test;
+    }
+
+after_ip_test:
+    err = nullptr;
+
+    err = getValueFrom_PORT_STR_PATTERN_Result(
+        res,
+        port_matched,
+        port
+    );
+
+    err = getValueFrom_CIDR_STR_PATTERN_Result(
+        res,
+        cidr_matched,
+        cidr
+    );
 
     return nullptr;
 }

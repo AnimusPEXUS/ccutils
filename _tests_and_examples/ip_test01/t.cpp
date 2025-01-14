@@ -37,8 +37,7 @@ int main(int argc, char **args)
         params.AddTest(main_print_examples_i);
         params.AddTest(main_regexps_tests_i);
         // params.AddTest(main_regexps_shortcuts_tests_i);
-        params.AddTest(main_IPv4_create_i);
-        params.AddTest(main_IPv6_create_i);
+        params.AddTest(main_IP_create_i);
     }
 
     return wayround_i2p::ccutils::tst::run_tests(argc, args, params);
