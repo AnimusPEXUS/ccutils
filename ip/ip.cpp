@@ -823,7 +823,7 @@ error_ptr getAllPossibleValuesFromResult(
 
     if (ipv4_matched)
     {
-        ipver  = IPver::v4;
+        ipver = IPver::v4;
         goto after_ip_test;
     }
 
@@ -844,5 +844,134 @@ after_ip_test:
 
     return nullptr;
 }
+
+IP::IP()
+{
+}
+
+IP::~IP()
+{
+}
+
+IP_shared IP::create()
+{
+    auto ret     = IP_shared(new IP());
+    ret->own_ptr = ret;
+    return ret;
+}
+
+error_ptr IP::setAllFromString(const UString &text)
+{
+    auto pat = OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN();
+
+    auto res = pat->match(std::shared_ptr<UString>(new UString(text)));
+
+    bool ipv6_matched;
+    bool ipv4_matched;
+    bool ipv6_short;
+
+    auto err = getAllPossibleValuesFromResult(
+        res,
+        ipver,
+        ipv6_matched,
+        buff.ipv6.b16,
+        ipv4_matched,
+        buff.ipv4,
+        ipv6_short,
+        ipv6_v4_comb,
+        has_port,
+        port,
+        has_cidr,
+        cidr,
+        false
+    );
+
+    if (err)
+    {
+        return err;
+    }
+
+    has_ip = ipv6_matched || ipv4_matched;
+
+    return nullptr;
+}
+
+void IP::setAllFromIP(const IP_shared obj)
+{
+    setIPFromIP(obj);
+    setPortFromIP(obj);
+    setCIDRFromIP(obj);
+}
+
+void IP::setIPFromIP(const IP_shared obj)
+{
+    this->buff = obj->buff;
+}
+
+void IP::setPortFromIP(const IP_shared obj);
+
+void IP::setCIDRFromIP(const IP_shared obj);
+
+void IP::setIPFromArray(const std::array<std::uint8_t, 4> &arr);
+void IP::setIPFromArray(const std::array<std::uint8_t, 16> &arr);
+void IP::setIPFromArray(const std::array<std::uint16_t, 8> &arr, bool big = false);
+void IP::setIPFromArray(const std::array<std::uint32_t, 4> &arr, bool big = false);
+
+error_ptr IP::setIPFromVector(const std::vector<std::uint8_t> &vec);
+error_ptr IP::setIPFromVector(const std::vector<std::uint16_t> &vec, bool big = false);
+error_ptr IP::setIPFromVector(const std::vector<std::uint32_t> &vec, bool big = false);
+
+error_ptr IP::setIPFromString(const UString &text);
+
+// automativaly deletes CIDR
+void IP::setPort(std::uint16_t val);
+
+// automativaly deletes Port
+void IP::setCIDR(std::uint16_t val);
+
+IPver IP::getIPver() const;
+
+bool IP::hasIP() const;
+bool IP::hasIPv4() const;
+bool IP::hasIPv6() const;
+bool IP::hasPort() const;
+bool IP::hasCIDR() const;
+
+bool IP::isIPv6IPv4combine() const;
+
+// returns true if ipv6 is stored insude and 3rd uint16 equals ffff.
+bool IP::hasIPv6IPv4CombineMagic() const;
+
+void IP::setIPv6IPv4Combine(bool val, bool set_ipv4_combine_magic = true);
+
+// note: this doesn't automatically sets IPv6IPv4combine to true.
+//       use setIPv6IPv4combine() function
+void IP::setIPv6IPv4Part(const std::array<std::uint8_t, 4> &arr);
+void IP::setIPv6IPv4Part(const IP &obj);
+
+IP_shared IP::getIPv6IPv4Part() const;
+
+std::array<std::uint8_t, 4>  &IP::getIPAsArray8(std::array<std::uint8_t, 4> &arr) const;
+std::array<std::uint8_t, 16> &IP::getIPAsArray8(std::array<std::uint8_t, 16> &arr) const;
+std::array<std::uint16_t, 8> &IP::getIPAsArray16(std::array<std::uint16_t, 8> &arr, bool big = false) const;
+std::array<std::uint32_t, 4> &IP::getIPAsArray32(std::array<std::uint32_t, 4> &arr, bool big = false) const;
+
+std::vector<std::uint8_t>  &IP::getIPAsVector8(std::vector<std::uint8_t> &vec) const;
+std::vector<std::uint16_t> &IP::getIPAsVector16(std::vector<std::uint16_t> &vec, bool big = false) const;
+std::vector<std::uint32_t> &IP::getIPAsVector32(std::vector<std::uint32_t> &vec, bool big = false) const;
+
+std::tuple<std::uint16_t, error_ptr> IP::getPort() const;
+std::tuple<std::uint16_t, error_ptr> IP::getCIDR() const;
+
+UString IP::getAllAsString() const;
+UString IP::getAllAsLongString() const;
+UString IP::getAllAsShortString() const;
+
+UString IP::getIPAsString() const;
+UString IP::getIPAsStringLong() const;
+UString IP::getIPAsStringShort() const;
+
+UString IP::getPortString() const;
+UString IP::getCIDRString() const;
 
 } // namespace wayround_i2p::ccutils::ip

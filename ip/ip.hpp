@@ -104,6 +104,8 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
 // set ret_localendian param to true if you want this function to
 //     automatically convert ints in ipv6 to local-endian.
 // ipv4 result is not affected by ret_localendian.
+// OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN() is recommended function as a source
+// for this res param.
 error_ptr getAllPossibleValuesFromResult(
     const regexp::Result_shared   res,
     IPver                        &ipver,
@@ -120,12 +122,14 @@ error_ptr getAllPossibleValuesFromResult(
     bool                          ret_localendian
 );
 
+#pragma pack(push, 1)
 union IPv6_array
 {
     std::array<std::uint8_t, 16> b8;
     std::array<std::uint16_t, 8> b16;
     std::array<std::uint32_t, 4> b32;
 };
+#pragma pack(pop)
 
 class IP;
 using IP_shared = std::shared_ptr<IP>;
@@ -148,16 +152,16 @@ class IP
   public:
     ~IP();
 
-    // void reset();
+    void clear();
 
     static IP_shared create();
 
-    void setAllFromString(const UString &text);
+    error_ptr setAllFromString(const UString &text);
 
-    void setAllFromIP(const IP &obj);
-    void setIPFromIP(const IP &obj);
-    void setPortFromIP(const IP &obj);
-    void setCIDRFromIP(const IP &obj);
+    void setAllFromIP(const IP_shared obj);
+    void setIPFromIP(const IP_shared obj);
+    void setPortFromIP(const IP_shared obj);
+    void setCIDRFromIP(const IP_shared obj);
 
     void setIPFromArray(const std::array<std::uint8_t, 4> &arr);
     void setIPFromArray(const std::array<std::uint8_t, 16> &arr);
@@ -225,13 +229,21 @@ class IP
     //       functions (leading zeroes, skipped null-elements)
 
   private:
+    IP_weak own_ptr;
+
     IPver ipver;
 
-    // this is storage for both ipv6 and ipv4. trying to avoid using #pragma pack
-    IPv6_array ipv6;
+#pragma pack(push, 1)
+    union
+    {
+        std::array<std::uint8_t, 4> ipv4;
+        IPv6_array                  ipv6;
+    } buff;
+#pragma pack(pop)
 
-    bool &ipv6_v4_comb;
+    bool ipv6_v4_comb;
 
+    bool has_ip;
     bool has_port;
     bool has_cidr;
 
