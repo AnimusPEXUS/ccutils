@@ -191,11 +191,13 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_tests(
                     UString,                                 // title
                     bool                                     // call debugger
                     >>{
-                {ip::IP_STR_PATTERN,                      "IP_STR_PATTERN",                      false},
-                {ip::IPv4_STR_PATTERN,                    "IPv4_STR_PATTERN",                    false},
-                {ip::IPv6_STR_PATTERN,                    "IPv6_STR_PATTERN",                    false},
-                {ip::IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN, "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN", false},
-                {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN,      "IPv6_SHORT_GRP_HEX_STR_PATTERN",      false},
+                {ip::IPv4_STR_PATTERN,                              "IPv4_STR_PATTERN",                              false},
+                {ip::IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN,           "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN",           false},
+                {ip::IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4, "IPv6_FULL_2BYTE_GRP_HEX_STR_PATTERN_COMB_IPv4", false},
+                {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN,                "IPv6_SHORT_GRP_HEX_STR_PATTERN",                false},
+                {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4,      "IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4",      false},
+                {ip::IPv6_STR_PATTERN,                              "IPv6_STR_PATTERN",                              false},
+                {ip::IP_STR_PATTERN,                                "IP_STR_PATTERN",                                false},
         }
         )
         {
@@ -370,7 +372,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IP_create(
         );
 
         auto ip_res = wayround_i2p::ccutils::ip::IP::create();
-        auto err    = ip_res->setIPFromString(i);
+        auto err    = ip_res->setAllFromString(i);
         auto res    = ip_res;
 
         if (err)
@@ -385,15 +387,15 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IP_create(
         logger->LogSplitLines(
             wayround_i2p::ccutils::logger::Success,
             std::format(
-                "   + IP parsed. result:"
-                "      IPv4       : {}"
-                "      IPv6 long  : {}"
-                "      IPv6 short : {}"
-                "      Port       : {}"
-                "      CIDR       : {}",
-                (ip_res->hasIPv4() ? ip_res->getIPAsString() : "-"),
-                (ip_res->hasIPv6() ? ip_res->getAllAsLongString() : "-"),
-                (ip_res->hasIPv6() ? ip_res->getAllAsShortString() : "-"),
+                "   + IP parsed. result:\n"
+                "      IPv4       : {}\n"
+                "      IPv6 long  : {}\n"
+                "      IPv6 short : {}\n"
+                "      Port       : {}\n"
+                "      CIDR       : {}\n",
+                (ip_res->hasIPv4() ? ip_res->getIPv4AsString() : "-"),
+                (ip_res->hasIPv6() ? ip_res->getIPv6AsStringLong() : "-"),
+                (ip_res->hasIPv6() ? ip_res->getIPv6AsStringShort() : "-"),
                 (ip_res->hasPort() ? ip_res->getPortString() : "-"),
                 (ip_res->hasCIDR() ? ip_res->getCIDRString() : "-")
             )

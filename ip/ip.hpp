@@ -87,8 +87,9 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
     std::array<std::uint8_t, 4> &ipv4
 );
 
-// set ret_localendian param to true if you want this function to
-//     automatically convert ints in ipv6 to local-endian
+// set ret_bigendian param to true if you want this function to
+//     return integers ints in ipv6 as bigendian. else set ret_bigendian to
+//     false if you want ints in ipv6 to be converted to native endian.
 error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
     const regexp::Result_shared   res,
     bool                         &matched,
@@ -96,14 +97,15 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
     std::array<std::uint8_t, 4>  &ipv4,
     bool                         &ipv6_short,
     bool                         &ipv6_v4_comb,
-    bool                          ret_localendian
+    bool                          ret_bigendian
 );
 
 // lowest index of ip arrays contains lowest ip parts.
 // if function detects ipv6 is comb with ipv4 - ipv4 value additionally goes to ipv4.
-// set ret_localendian param to true if you want this function to
-//     automatically convert ints in ipv6 to local-endian.
-// ipv4 result is not affected by ret_localendian.
+// set ret_bigendian param to true if you want this function to
+//     return integers ints in ipv6 as bigendian. else set ret_bigendian to
+//     false if you want ints in ipv6 to be converted to native endian.
+// ipv4 result is not affected by ret_bigendian.
 // OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN() is recommended function as a source
 // for this res param.
 error_ptr getAllPossibleValuesFromResult(
@@ -119,7 +121,7 @@ error_ptr getAllPossibleValuesFromResult(
     std::uint16_t                &port,
     bool                         &cidr_matched,
     std::uint16_t                &cidr,
-    bool                          ret_localendian
+    bool                          ret_bigendian
 );
 
 #pragma pack(push, 1)
@@ -140,9 +142,9 @@ using IP_weak   = std::weak_ptr<IP>;
         ipv6_v4_comb is automatically set to true.
   note: In `set*` functions, if you see `bool big = false` parameter,
         you can set it to true if you passing integers in bigendian order,
-        else, if you passing integers in local endianness keep `big == false`.
+        else, if you passing integers in native endianness keep `big == false`.
         In case of `get*` functions, if you pass big as true - you'll get
-        integers in bigendian, else in local endian.
+        integers in bigendian, else in native endian.
 */
 class IP
 {
@@ -188,6 +190,10 @@ class IP
     bool hasPort() const;
     bool hasCIDR() const;
 
+    void delIP();
+    void delPort();
+    void delCIDR();
+
     bool isIPv6IPv4combine() const;
 
     // returns true if ipv6 is stored insude and 3rd uint16 equals ffff.
@@ -198,29 +204,52 @@ class IP
     // note: this doesn't automatically sets IPv6IPv4combine to true.
     //       use setIPv6IPv4combine() function
     void setIPv6IPv4Part(const std::array<std::uint8_t, 4> &arr);
-    void setIPv6IPv4Part(const IP &obj);
+    void setIPv6IPv4Part(IP_shared obj);
 
     IP_shared getIPv6IPv4Part() const;
 
-    std::array<std::uint8_t, 4>  &getIPAsArray8(std::array<std::uint8_t, 4> &arr) const;
-    std::array<std::uint8_t, 16> &getIPAsArray8(std::array<std::uint8_t, 16> &arr) const;
-    std::array<std::uint16_t, 8> &getIPAsArray16(std::array<std::uint16_t, 8> &arr, bool big = false) const;
-    std::array<std::uint32_t, 4> &getIPAsArray32(std::array<std::uint32_t, 4> &arr, bool big = false) const;
+    std::array<std::uint8_t, 4> &getIPAsArray8(
+        std::array<std::uint8_t, 4> &arr
+    ) const;
 
-    std::vector<std::uint8_t>  &getIPAsVector8(std::vector<std::uint8_t> &vec) const;
-    std::vector<std::uint16_t> &getIPAsVector16(std::vector<std::uint16_t> &vec, bool big = false) const;
-    std::vector<std::uint32_t> &getIPAsVector32(std::vector<std::uint32_t> &vec, bool big = false) const;
+    std::array<std::uint8_t, 16> &getIPAsArray8(
+        std::array<std::uint8_t, 16> &arr
+    ) const;
 
-    std::tuple<std::uint16_t, error_ptr> getPort() const;
-    std::tuple<std::uint16_t, error_ptr> getCIDR() const;
+    std::array<std::uint16_t, 8> &getIPAsArray16(
+        std::array<std::uint16_t, 8> &arr,
+        bool                          big = false
+    ) const;
+
+    std::array<std::uint32_t, 4> &getIPAsArray32(
+        std::array<std::uint32_t, 4> &arr,
+        bool                          big = false
+    ) const;
+
+    std::vector<std::uint8_t> &getIPAsVector8(std::vector<std::uint8_t> &vec) const;
+
+    std::vector<std::uint16_t> &getIPAsVector16(
+        std::vector<std::uint16_t> &vec,
+        bool                        big = false
+    ) const;
+
+    std::vector<std::uint32_t> &getIPAsVector32(
+        std::vector<std::uint32_t> &vec,
+        bool                        big = false
+    ) const;
+
+    std::uint16_t getPort() const;
+    std::uint16_t getCIDR() const;
 
     UString getAllAsString() const;
-    UString getAllAsLongString() const;
-    UString getAllAsShortString() const;
 
     UString getIPAsString() const;
-    UString getIPAsStringLong() const;
-    UString getIPAsStringShort() const;
+
+    UString getIPv4AsString() const;
+
+    UString getIPv6AsString() const;
+    UString getIPv6AsStringLong() const;
+    UString getIPv6AsStringShort() const;
 
     UString getPortString() const;
     UString getCIDRString() const;
