@@ -2429,7 +2429,7 @@ error_ptr ResultRoutineCheck(
     if (res->error)
     {
         return wayround_i2p::ccutils::errors::New(
-            std::format("Result_shared is error: {}", res->error->Error()),
+            std::format("Result has error: {}", res->error->Error()),
             file,
             line
         );

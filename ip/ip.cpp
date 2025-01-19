@@ -514,7 +514,7 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
 
     err = regexp::ResultRoutineCheck(
         res3,
-        true,
+        false,
         false,
         __FILE__,
         __LINE__
@@ -522,6 +522,11 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
     if (err)
     {
         return err;
+    }
+
+    if (!res3)
+    {
+        return nullptr;
     }
 
     if (!res3->matched)
@@ -598,22 +603,13 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
         return err;
     }
 
-    if (!res->matched)
-    {
-        return wayround_i2p::ccutils::errors::New(
-            "dismatch",
-            __FILE__,
-            __LINE__
-        );
-    }
-
     // return nullptr; // ok
 
     auto res_or_group = res->findByNameRec("IPv6_STR_PATTERN_OR_GROUP");
 
     err = regexp::ResultRoutineCheck(
         res_or_group,
-        true,
+        false,
         false,
         __FILE__,
         __LINE__
@@ -621,6 +617,11 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
     if (err)
     {
         return err;
+    }
+
+    if (!res_or_group)
+    {
+        return nullptr;
     }
 
     if (!res_or_group->matched)
@@ -1476,7 +1477,13 @@ UString IP::getIPAsString() const
 
 UString IP::getIPv4AsString() const
 {
-    return std::format("{}.{}.{}.{}", buff.ipv4[3], buff.ipv4[2], buff.ipv4[1], buff.ipv4[0]);
+    return std::format(
+        "{}.{}.{}.{}",
+        buff.ipv4[3],
+        buff.ipv4[2],
+        buff.ipv4[1],
+        buff.ipv4[0]
+    );
 }
 
 UString IP::getIPv6AsString() const

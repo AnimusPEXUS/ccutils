@@ -344,11 +344,19 @@ struct Result : public wayround_i2p::ccutils::repr::RepresentableAsText
     Result_shared findLast() const;
 
     Result_shared findByIndex(std::size_t index) const;
+
+    // returns nullptr if not found
     Result_shared findByName(UString name, bool rec = false) const;
+
+    // returns nullptr if not found
     Result_shared findByNameRec(UString name) const;
+
+    // returns nullptr if not found
     Result_shared findByPath(std::initializer_list<UString> path) const;
+
     // same as findByName()
     Result_shared operator[](UString name) const;
+
     // same as findByIndex()
     Result_shared operator[](std::size_t index) const;
 
