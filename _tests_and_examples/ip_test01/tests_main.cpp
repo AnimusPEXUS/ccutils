@@ -371,9 +371,8 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IP_create(
             std::format("subject: {}", i)
         );
 
-        auto ip_res = wayround_i2p::ccutils::ip::IP::create();
-        auto err    = ip_res->setAllFromString(i);
-        auto res    = ip_res;
+        auto res = wayround_i2p::ccutils::ip::IP::create();
+        auto err = res->setAllFromString(i);
 
         if (err)
         {
@@ -385,7 +384,12 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IP_create(
         }
 
         logger->LogSplitLines(
-            wayround_i2p::ccutils::logger::Success,
+            wayround_i2p::ccutils::logger::Status,
+            res->debugRepr()
+        );
+
+        logger->LogSplitLines(
+            wayround_i2p::ccutils::logger::Status,
             std::format(
                 "   + IP parsed. result:\n"
                 "      IPv4       : {}\n"
@@ -393,11 +397,11 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IP_create(
                 "      IPv6 short : {}\n"
                 "      Port       : {}\n"
                 "      CIDR       : {}\n",
-                (ip_res->hasIPv4() ? ip_res->getIPv4AsString() : "-"),
-                (ip_res->hasIPv6() ? ip_res->getIPv6AsStringLong() : "-"),
-                (ip_res->hasIPv6() ? ip_res->getIPv6AsStringShort() : "-"),
-                (ip_res->hasPort() ? ip_res->getPortString() : "-"),
-                (ip_res->hasCIDR() ? ip_res->getCIDRString() : "-")
+                (res->hasIPv4() ? res->getIPv4AsString() : "-"),
+                (res->hasIPv6() ? res->getIPv6AsStringLong() : "-"),
+                (res->hasIPv6() ? res->getIPv6AsStringShort() : "-"),
+                (res->hasPort() ? res->getPortString() : "-"),
+                (res->hasCIDR() ? res->getCIDRString() : "-")
             )
         );
     }

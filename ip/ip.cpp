@@ -181,13 +181,12 @@ regexp::Pattern_shared IPv6_STR_PATTERN()
 
 regexp::Pattern_shared IP_STR_PATTERN()
 {
-    regexp::Pattern_shared ret
+    auto ret
         = regexp::Pattern::newOrGroup(
               {IPv4_STR_PATTERN(),
                IPv6_STR_PATTERN()
               }
         )
-              ->setExactCount(1)
               ->setName("IP_STR_PATTERN");
     return ret;
 }
@@ -426,16 +425,14 @@ error_ptr
         (port_1_cidr_0 ? "PORT_STR_PATTERN" : "CIDR_STR_PATTERN")
     );
 
-    err = regexp::ResultRoutineCheck(
-        res_VALUE_STR_PATTERN,
-        true,
-        false,
-        __FILE__,
-        __LINE__
-    );
-    if (err)
+    if (!res_VALUE_STR_PATTERN)
     {
-        return err;
+        return nullptr;
+    }
+
+    if (res_VALUE_STR_PATTERN->error)
+    {
+        return res_VALUE_STR_PATTERN->error;
     }
 
     if (!res_VALUE_STR_PATTERN->matched)
@@ -445,16 +442,19 @@ error_ptr
 
     auto res_number = res_VALUE_STR_PATTERN->findByNameRec("number");
 
-    err = regexp::ResultRoutineCheck(
-        res_number,
-        true,
-        true,
-        __FILE__,
-        __LINE__
-    );
-    if (err)
+    if (!res_number)
     {
-        return err;
+        return nullptr;
+    }
+
+    if (res_number->error)
+    {
+        return res_number->error;
+    }
+
+    if (!res_number->matched)
+    {
+        return nullptr;
     }
 
     auto res_number_str = res_number->getMatchedString();
@@ -510,23 +510,16 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
         return err;
     }
 
-    auto res3 = res->findByName("IPv4_STR_PATTERN");
-
-    err = regexp::ResultRoutineCheck(
-        res3,
-        false,
-        false,
-        __FILE__,
-        __LINE__
-    );
-    if (err)
-    {
-        return err;
-    }
+    auto res3 = res->findByNameRec("IPv4_STR_PATTERN");
 
     if (!res3)
     {
         return nullptr;
+    }
+
+    if (res3->error)
+    {
+        return res3->error;
     }
 
     if (!res3->matched)
@@ -538,16 +531,19 @@ error_ptr getValuesFrom_IPv4_STR_PATTERN_Result(
     {
         auto res2 = res3->findByNameRec(std::to_string(i + 1));
 
-        err = regexp::ResultRoutineCheck(
-            res2,
-            true,
-            true,
-            __FILE__,
-            __LINE__
-        );
-        if (err)
+        if (!res2)
         {
-            return err;
+            return nullptr;
+        }
+
+        if (res2->error)
+        {
+            return res2->error;
+        }
+
+        if (!res2->matched)
+        {
+            return nullptr;
         }
 
         auto x = res2->getMatchedString();
@@ -603,25 +599,16 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
         return err;
     }
 
-    // return nullptr; // ok
-
     auto res_or_group = res->findByNameRec("IPv6_STR_PATTERN_OR_GROUP");
-
-    err = regexp::ResultRoutineCheck(
-        res_or_group,
-        false,
-        false,
-        __FILE__,
-        __LINE__
-    );
-    if (err)
-    {
-        return err;
-    }
 
     if (!res_or_group)
     {
         return nullptr;
+    }
+
+    if (res_or_group->error)
+    {
+        return res_or_group->error;
     }
 
     if (!res_or_group->matched)
@@ -629,26 +616,28 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
         return nullptr;
     }
 
-    // return nullptr; // ok
-
     auto ms = res_or_group->getMatchedString();
-
-    // return nullptr; // ok
 
     std::deque<UString> ms_spl;
     ms.split(ms_spl, ":");
-
-    // return nullptr; // ok
 
     ipv6_v4_comb = false;
 
     auto res_comb = res->findByNameRec("IPv4_STR_PATTERN");
     if (res_comb)
     {
+        if (res_comb->error)
+        {
+            return res_comb->error;
+        }
+
+        if (!res_comb->matched)
+        {
+            return nullptr;
+        }
+
         ipv6_v4_comb = true;
     }
-
-    // return nullptr; // ok
 
     if (ipv6_v4_comb)
     {
@@ -688,8 +677,6 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
         }
     }
 
-    // return nullptr; // ok
-
     ipv6_short = false;
 
     decltype(ms_spl)::iterator short_index_itr;
@@ -709,8 +696,6 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
         }
     }
 
-    // return nullptr; // ok
-
     if (ipv6_short)
     {
         while (ms_spl.size() != (ipv6_v4_comb ? 7 : 8))
@@ -718,8 +703,6 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
             short_index_itr = ms_spl.insert(short_index_itr, "");
         }
     }
-
-    // return nullptr; // ok
 
     if (ms_spl.size() != (ipv6_v4_comb ? 7 : 8))
     {
@@ -799,6 +782,8 @@ error_ptr getAllPossibleValuesFromResult(
     ipv4_matched = false;
     port_matched = false;
     cidr_matched = false;
+
+    ipver = IPver::invalid;
 
     err = getValuesFrom_IPv6_STR_PATTERN_Result(
         res,
@@ -887,12 +872,12 @@ error_ptr IP::setAllFromString(const UString &text)
         ipv4_matched,
         buff.ipv4,
         ipv6_short,
-        ipv6_v4_comb,
+        ipv6_v4_comb,	
         has_port,
         port,
         has_cidr,
         cidr,
-        false
+        true
     );
 
     if (err)
@@ -901,6 +886,16 @@ error_ptr IP::setAllFromString(const UString &text)
     }
 
     has_ip = ipv6_matched || ipv4_matched;
+
+    if (ipv6_matched)
+    {
+        ipver = IPver::v6;
+    }
+
+    if (ipv4_matched)
+    {
+        ipver = IPver::v4;
+    }
 
     return nullptr;
 }
@@ -933,6 +928,7 @@ void IP::setIPFromArray(const std::array<std::uint8_t, 4> &arr)
     ipver  = IPver::v4;
 
     buff.ipv4 = arr;
+
     for (unsigned char i = 4; i < 16; i++)
     {
         buff.ipv6.b8[i] = 0;
@@ -1124,12 +1120,20 @@ error_ptr IP::setIPFromString(const UString &text)
     if (ipv6_matched)
     {
         setIPFromArray(ipv6);
+        for (unsigned char i = 0; i < 16; i++)
+        {
+            std::cout << buff.ipv6.b8[i] << "." << "\n";
+        }
         return nullptr;
     }
 
     if (ipv4_matched)
     {
         setIPFromArray(ipv4);
+        for (unsigned char i = 0; i < 4; i++)
+        {
+            std::cout << buff.ipv4[i] << "." << "\n";
+        }
         return nullptr;
     }
 
@@ -1274,11 +1278,12 @@ std::array<std::uint16_t, 8> &IP::getIPAsArray16(
 {
     for (unsigned char i = 0; i < 8; i++)
     {
-        arr[i] = buff.ipv6.b16[i];
+        auto x = buff.ipv6.b16[i];
         if (!big && std::endian::native == std::endian::little)
         {
-            arr[i] = std::byteswap(arr[i]);
+            x = std::byteswap(arr[i]);
         }
+        arr[i] = x;
     }
     return arr;
 }
@@ -1420,7 +1425,7 @@ std::uint16_t IP::getCIDR() const
 
 UString IP::getAllAsString() const
 {
-    UString ip;
+    // UString ip;
     UString port_or_cidr;
 
     if (has_port)
@@ -1438,7 +1443,10 @@ UString IP::getAllAsString() const
 
     UString ret;
 
-    ret = ip;
+    if (has_ip)
+    {
+        ret = getIPAsString();
+    }
 
     if ((ret != "" && ipver == IPver::v6)
         && has_port
@@ -1631,6 +1639,34 @@ UString IP::getPortString() const
 UString IP::getCIDRString() const
 {
     return std::format("/{}", getCIDR());
+}
+
+UString IP::debugRepr() const
+{
+    UString ret = std::format(
+        "text: \"{}\"\n"
+        "  ipv6_matched : {}\n"
+        "  ipv6         : {}\n"
+        "  ipv4_matched : {}\n"
+        "  ipv4         : {}\n"
+        "  ipv6_v4_comb : {}\n"
+        "  has_port     : {}\n"
+        "  port         : {}\n"
+        "  has_cidr     : {}\n"
+        "  cidr         : {}\n",
+        getAllAsString().to_string(),
+        ipver == IPver::v6,
+        (ipver == IPver::v6 ? getIPv6AsString().to_string() : "-"),
+        ipver == IPver::v4,
+        (ipver == IPver::v4 ? getIPv4AsString().to_string() : "-"),
+        ipv6_v4_comb,
+        has_port,
+        port,
+        has_cidr,
+        cidr
+    );
+
+    return ret;
 }
 
 } // namespace wayround_i2p::ccutils::ip

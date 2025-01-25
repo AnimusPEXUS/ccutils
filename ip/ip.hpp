@@ -17,8 +17,9 @@ using UString   = wayround_i2p::ccutils::unicode::UString;
 
 enum class IPver : unsigned char
 {
-    v4 = 4,
-    v6 = 6
+    invalid = 0,
+    v4      = 4,
+    v6      = 6
 };
 
 namespace regexp = wayround_i2p::ccutils::regexp;
@@ -254,6 +255,8 @@ class IP
     UString getPortString() const;
     UString getCIDRString() const;
 
+    UString debugRepr() const;
+
     // todo: make customizable versions of getIPAsString() and getAllAsString()
     //       functions (leading zeroes, skipped null-elements)
 
@@ -270,14 +273,14 @@ class IP
     } buff;
 #pragma pack(pop)
 
-    bool ipv6_v4_comb;
+    bool ipv6_v4_comb = false;
 
-    bool has_ip;
-    bool has_port;
-    bool has_cidr;
+    bool has_ip   = false;
+    bool has_port = false;
+    bool has_cidr = false;
 
-    std::uint16_t port;
-    std::uint16_t cidr;
+    std::uint16_t port = 0;
+    std::uint16_t cidr = 0;
 };
 
 } // namespace wayround_i2p::ccutils::ip
