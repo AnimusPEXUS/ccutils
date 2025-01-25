@@ -135,6 +135,8 @@ union IPv6_array
     std::array<std::uint8_t, 16> b8;
     std::array<std::uint16_t, 8> b16;
     std::array<std::uint32_t, 4> b32;
+    std::array<std::uint64_t, 2> b64;
+    // std::array<std::uint128_t, 1> b128;
 };
 #pragma pack(pop)
 
@@ -159,9 +161,10 @@ class IP
   public:
     ~IP();
 
-    void clear();
-
     static IP_shared create();
+
+    void clear();
+    void resetIPfield();
 
     error_ptr setAllFromString(const UString &text);
 

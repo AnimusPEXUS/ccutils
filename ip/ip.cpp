@@ -788,7 +788,7 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
 
     if (ret_bigendian && std::endian::native == std::endian::little)
     {
-        for (unsigned char i = 0; i < 8; i++)
+        for (unsigned char i = (ipv6_v4_comb ? 2 : 0); i < 8; i++)
         {
             ipv6[i] = std::byteswap(ipv6[i]);
         }
@@ -880,6 +880,7 @@ after_ip_test:
 
 IP::IP()
 {
+    clear();
 }
 
 IP::~IP()
@@ -891,6 +892,26 @@ IP_shared IP::create()
     auto ret     = IP_shared(new IP());
     ret->own_ptr = ret;
     return ret;
+}
+
+void IP::clear()
+{
+    ipver = IPver::invalid;
+
+    has_ip   = false;
+    has_port = false;
+    has_cidr = false;
+
+    ipv6_v4_comb = false;
+
+    resetIPfield();
+    port = 0;
+    cidr = 0;
+}
+
+void IP::resetIPfield()
+{
+    buff.ipv6.b32 = {0, 0, 0, 0};
 }
 
 error_ptr IP::setAllFromString(const UString &text)
@@ -911,7 +932,7 @@ error_ptr IP::setAllFromString(const UString &text)
         ipv4_matched,
         buff.ipv4,
         ipv6_short,
-        ipv6_v4_comb,	
+        ipv6_v4_comb,
         has_port,
         port,
         has_cidr,
@@ -948,17 +969,37 @@ void IP::setAllFromIP(const IP_shared obj)
 
 void IP::setIPFromIP(const IP_shared obj)
 {
-    buff = obj->buff;
+    delIP();
+
+    has_ip = obj->has_ip;
+
+    if (has_ip)
+    {
+        ipver = obj->ipver;
+        switch (ipver)
+        {
+            default:
+                throw "programming error";
+            case IPver::v4:
+                buff.ipv4 = obj->buff.ipv4;
+                break;
+            case IPver::v6:
+                buff.ipv6 = obj->buff.ipv6;
+                break;
+        }
+    }
 }
 
 void IP::setPortFromIP(const IP_shared obj)
 {
-    port = obj->port;
+    has_port = obj->has_port;
+    port     = obj->port;
 }
 
 void IP::setCIDRFromIP(const IP_shared obj)
 {
-    cidr = obj->cidr;
+    has_cidr = obj->has_cidr;
+    cidr     = obj->cidr;
 }
 
 void IP::setIPFromArray(const std::array<std::uint8_t, 4> &arr)
@@ -966,12 +1007,9 @@ void IP::setIPFromArray(const std::array<std::uint8_t, 4> &arr)
     has_ip = true;
     ipver  = IPver::v4;
 
-    buff.ipv4 = arr;
+    resetIPfield();
 
-    for (unsigned char i = 4; i < 16; i++)
-    {
-        buff.ipv6.b8[i] = 0;
-    }
+    buff.ipv4 = arr;
 }
 
 void IP::setIPFromArray(const std::array<std::uint8_t, 16> &arr)
@@ -1110,6 +1148,7 @@ error_ptr IP::setIPFromVector(const std::vector<std::uint32_t> &vec, bool big)
 
 error_ptr IP::setIPFromString(const UString &text)
 {
+    resetIPfield();
 
     auto pat = OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN();
 
@@ -1159,20 +1198,12 @@ error_ptr IP::setIPFromString(const UString &text)
     if (ipv6_matched)
     {
         setIPFromArray(ipv6);
-        for (unsigned char i = 0; i < 16; i++)
-        {
-            std::cout << buff.ipv6.b8[i] << "." << "\n";
-        }
         return nullptr;
     }
 
     if (ipv4_matched)
     {
         setIPFromArray(ipv4);
-        for (unsigned char i = 0; i < 4; i++)
-        {
-            std::cout << buff.ipv4[i] << "." << "\n";
-        }
         return nullptr;
     }
 
@@ -1230,10 +1261,8 @@ bool IP::hasCIDR() const
 void IP::delIP()
 {
     has_ip = false;
-    for (unsigned char i = 0; i < 16; i++)
-    {
-        buff.ipv6.b8[i] = 0;
-    }
+    resetIPfield();
+    ipver = IPver::invalid;
 }
 
 void IP::delPort()
@@ -1256,7 +1285,7 @@ bool IP::isIPv6IPv4combine() const
 // returns true if ipv6 is stored insude and 3rd uint16 equals ffff.
 bool IP::hasIPv6IPv4CombineMagic() const
 {
-    return buff.ipv6.b16[2] == 0xffff;
+    return hasIPv6() && buff.ipv6.b16[2] == 0xffff;
 }
 
 void IP::setIPv6IPv4Combine(bool val, bool set_ipv4_combine_magic)
@@ -1279,6 +1308,8 @@ void IP::setIPv6IPv4Part(const std::array<std::uint8_t, 4> &arr)
     }
 }
 
+// note: this doesn't automatically sets IPv6IPv4combine to true.
+//       use setIPv6IPv4combine() function
 void IP::setIPv6IPv4Part(IP_shared obj)
 {
     buff.ipv4 = obj->buff.ipv4;
@@ -1286,9 +1317,8 @@ void IP::setIPv6IPv4Part(IP_shared obj)
 
 IP_shared IP::getIPv6IPv4Part() const
 {
-
-    auto ret       = IP::create();
-    ret->buff.ipv4 = buff.ipv4;
+    auto ret = IP::create();
+    ret->setIPFromArray(buff.ipv4);
     return ret;
 }
 
@@ -1501,7 +1531,6 @@ UString IP::getAllAsString() const
 
 UString IP::getIPAsString() const
 {
-    UString ret;
     if (!has_ip)
     {
         return "";
@@ -1542,7 +1571,30 @@ UString IP::getIPv6AsStringLong() const
 {
     UString ret;
 
-    for (unsigned char i = 0; i < 8; i++)
+    unsigned char i = 7;
+
+    while (true)
+    {
+        auto z = buff.ipv6.b16[i];
+        if constexpr (std::endian::native == std::endian::little)
+        {
+            z = std::byteswap(z);
+        }
+        ret += std::format("{:04x}", z);
+        if (i >= ((ipv6_v4_comb ? 2 : 0) + 1))
+        {
+            ret += ":";
+        }
+
+        if (i <= (ipv6_v4_comb ? 2 : 0))
+        {
+            break;
+        }
+        i--;
+    }
+
+    /*
+    for (unsigned char i = (ipv6_v4_comb ? 2 : 0); i < 8; i++)
     {
         auto z = buff.ipv6.b16[7 - i];
         if constexpr (std::endian::native == std::endian::little)
@@ -1554,6 +1606,12 @@ UString IP::getIPv6AsStringLong() const
         {
             ret += ":";
         }
+    }
+    */
+
+    if (ipv6_v4_comb)
+    {
+        ret += std::format(":{}", getIPv6IPv4Part()->getAllAsString());
     }
 
     return ret;
@@ -1638,7 +1696,7 @@ UString IP::getIPv6AsStringShort() const
                     z = std::byteswap(z);
                 }
 
-                ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
+                ret = UString(std::vformat("{:x}", std::make_format_args(z))) + ret;
                 ret = UString(":") + ret;
             }
         }
@@ -1663,7 +1721,7 @@ UString IP::getIPv6AsStringShort() const
                 }
 
                 ret = UString(":") + ret;
-                ret = UString(std::vformat("{:04x}", std::make_format_args(z))) + ret;
+                ret = UString(std::vformat("{:x}", std::make_format_args(z))) + ret;
             }
         }
     }
