@@ -369,6 +369,45 @@ regexp::Pattern_shared OPT_IP_AND_MUST_CIDR_PATTERN()
     );
 }
 
+regexp::Pattern_shared OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setMinMaxCount(0, 1),
+             PORT_OR_CIDR_STR_PATTERN()
+                 ->setMinMaxCount(0, 1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared OPT_IP_AND_OPT_PORT_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setMinMaxCount(0, 1),
+             PORT_STR_PATTERN()
+                 ->setMinMaxCount(0, 1)
+            }
+        )
+    );
+}
+
+regexp::Pattern_shared OPT_IP_AND_OPT_CIDR_PATTERN()
+{
+    return regexp::makeExact(
+        regexp::Pattern::newGroup(
+            {IP_STR_PATTERN()
+                 ->setMinMaxCount(0, 1),
+             CIDR_STR_PATTERN()
+                 ->setMinMaxCount(0, 1)
+            }
+        )
+    );
+}
+
 error_ptr
     getValueFrom_PORT_STR_PATTERN_Result(
         const regexp::Result_shared res,
@@ -856,7 +895,7 @@ IP_shared IP::create()
 
 error_ptr IP::setAllFromString(const UString &text)
 {
-    auto pat = OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN();
+    auto pat = OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN();
 
     auto res = pat->match(std::shared_ptr<UString>(new UString(text)));
 
@@ -1072,7 +1111,7 @@ error_ptr IP::setIPFromVector(const std::vector<std::uint32_t> &vec, bool big)
 error_ptr IP::setIPFromString(const UString &text)
 {
 
-    auto pat = OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN();
+    auto pat = OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN();
 
     auto res = pat->match(std::shared_ptr<UString>(new UString(text)));
 

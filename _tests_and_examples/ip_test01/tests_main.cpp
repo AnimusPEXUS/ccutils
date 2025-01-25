@@ -122,7 +122,7 @@ const std::vector<UString> testing_examples_all = []()
 
     for (const auto &i : {
              testing_examples_ipv4,
-             testing_examples_ipv6
+             testing_examples_ipv6,
          })
     {
         std::merge(
@@ -132,6 +132,16 @@ const std::vector<UString> testing_examples_all = []()
             i.end(),
             std::back_inserter(ret)
         );
+    }
+
+    for (const auto &j : testing_port)
+    {
+        ret.push_back(std::format(":{}", j));
+    }
+
+    for (const auto &j : testing_cidr)
+    {
+        ret.push_back(std::format("/{}", j));
     }
 
     return ret;
@@ -198,6 +208,22 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_regexps_tests(
                 {ip::IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4,      "IPv6_SHORT_GRP_HEX_STR_PATTERN_COMB_IPv4",      false},
                 {ip::IPv6_STR_PATTERN,                              "IPv6_STR_PATTERN",                              false},
                 {ip::IP_STR_PATTERN,                                "IP_STR_PATTERN",                                false},
+
+                {ip::IP_AND_MUST_PORT_OR_CIDR_PATTERN,              "IP_AND_MUST_PORT_OR_CIDR_PATTERN",              false},
+                {ip::IP_AND_MUST_PORT_PATTERN,                      "IP_AND_MUST_PORT_PATTERN",                      false},
+                {ip::IP_AND_MUST_CIDR_PATTERN,                      "IP_AND_MUST_CIDR_PATTERN",                      false},
+
+                {ip::IP_AND_OPT_PORT_OR_CIDR_PATTERN,               "IP_AND_OPT_PORT_OR_CIDR_PATTERN",               false},
+                {ip::IP_AND_OPT_PORT_PATTERN,                       "IP_AND_OPT_PORT_PATTERN",                       false},
+                {ip::IP_AND_OPT_CIDR_PATTERN,                       "IP_AND_OPT_CIDR_PATTERN",                       false},
+
+                {ip::OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN,          "OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN",          false},
+                {ip::OPT_IP_AND_MUST_PORT_PATTERN,                  "OPT_IP_AND_MUST_PORT_PATTERN",                  false},
+                {ip::OPT_IP_AND_MUST_CIDR_PATTERN,                  "OPT_IP_AND_MUST_CIDR_PATTERN",                  false},
+
+                {ip::OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN,           "OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN",           false},
+                {ip::OPT_IP_AND_OPT_PORT_PATTERN,                   "OPT_IP_AND_OPT_PORT_PATTERN",                   false},
+                {ip::OPT_IP_AND_OPT_CIDR_PATTERN,                   "OPT_IP_AND_OPT_CIDR_PATTERN",                   false}
         }
         )
         {
@@ -385,18 +411,23 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_IP_create(
 
         logger->LogSplitLines(
             wayround_i2p::ccutils::logger::Status,
-            res->debugRepr()
+            std::format(
+                "   IP object contents: {}",
+                res->debugRepr()
+            )
         );
 
         logger->LogSplitLines(
             wayround_i2p::ccutils::logger::Status,
             std::format(
-                "   + IP parsed. result:\n"
-                "      IPv4       : {}\n"
-                "      IPv6 long  : {}\n"
-                "      IPv6 short : {}\n"
-                "      Port       : {}\n"
-                "      CIDR       : {}\n",
+                "   IP outpat results:\n"
+                "      getAllAsString       : {}\n"
+                "      getIPv4AsString      : {}\n"
+                "      getIPv6AsStringLong  : {}\n"
+                "      getIPv6AsStringShort : {}\n"
+                "      getPortString        : {}\n"
+                "      getCIDRString        : {}\n",
+                res->getAllAsString(),
                 (res->hasIPv4() ? res->getIPv4AsString() : "-"),
                 (res->hasIPv6() ? res->getIPv6AsStringLong() : "-"),
                 (res->hasIPv6() ? res->getIPv6AsStringShort() : "-"),

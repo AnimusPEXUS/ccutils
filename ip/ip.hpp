@@ -59,6 +59,10 @@ regexp::Pattern_shared OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN();
 regexp::Pattern_shared OPT_IP_AND_MUST_PORT_PATTERN();
 regexp::Pattern_shared OPT_IP_AND_MUST_CIDR_PATTERN();
 
+regexp::Pattern_shared OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN();
+regexp::Pattern_shared OPT_IP_AND_OPT_PORT_PATTERN();
+regexp::Pattern_shared OPT_IP_AND_OPT_CIDR_PATTERN();
+
 error_ptr
     getValueFrom_PORT_STR_PATTERN_Result(
         const regexp::Result_shared res,
@@ -107,7 +111,7 @@ error_ptr getValuesFrom_IPv6_STR_PATTERN_Result(
 //     return integers ints in ipv6 as bigendian. else set ret_bigendian to
 //     false if you want ints in ipv6 to be converted to native endian.
 // ipv4 result is not affected by ret_bigendian.
-// OPT_IP_AND_MUST_PORT_OR_CIDR_PATTERN() is recommended function as a source
+// OPT_IP_AND_OPT_PORT_OR_CIDR_PATTERN() is recommended function as a source
 // for this res param.
 error_ptr getAllPossibleValuesFromResult(
     const regexp::Result_shared   res,
