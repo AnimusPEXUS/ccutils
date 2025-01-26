@@ -1,6 +1,8 @@
 #ifndef WAYROUND_I2P_20241007_110017_732503
 #define WAYROUND_I2P_20241007_110017_732503
 
+// todo: create C++ string literal for UString and UChar.
+
 #include <cassert>
 #include <chrono>
 #include <cstdint>

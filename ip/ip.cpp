@@ -1631,7 +1631,7 @@ UString IP::getIPv6AsStringShort() const
         bool        zeroes_slice_started = false;
         std::size_t zeroes_slice_i       = -1;
 
-        for (unsigned char i = 0; i < 8; i++)
+        for (unsigned char i = (ipv6_v4_comb ? 2 : 0); i < 8; i++)
         {
             if (buff.ipv6.b16[i] == 0)
             {
@@ -1676,6 +1676,11 @@ UString IP::getIPv6AsStringShort() const
 
     UString ret;
 
+    if (ipv6_v4_comb)
+    {
+        ret = std::format(":{}", getIPv6IPv4Part()->getAllAsString());
+    }
+
     {
         if (longest_np.start == 0)
         {
@@ -1684,7 +1689,7 @@ UString IP::getIPv6AsStringShort() const
         else
         {
             for (
-                std::size_t i = 0;
+                std::size_t i = (ipv6_v4_comb ? 2 : 0);
                 i < longest_np.start;
                 i++
             )
@@ -1694,6 +1699,11 @@ UString IP::getIPv6AsStringShort() const
                 if constexpr (std::endian::native == std::endian::little)
                 {
                     z = std::byteswap(z);
+                }
+
+                if (i == (ipv6_v4_comb ? 2 : 0) && ret != "")
+                {
+                    ret = UString(":") + ret;
                 }
 
                 ret = UString(std::vformat("{:x}", std::make_format_args(z))) + ret;
