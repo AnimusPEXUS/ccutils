@@ -169,18 +169,46 @@ class IP
     error_ptr setAllFromString(const UString &text);
 
     void setAllFromIP(const IP_shared obj);
+
+    // note: this also cpies ipv6_v4_comb flag
     void setIPFromIP(const IP_shared obj);
     void setPortFromIP(const IP_shared obj);
     void setCIDRFromIP(const IP_shared obj);
 
-    void setIPFromArray(const std::array<std::uint8_t, 4> &arr);
-    void setIPFromArray(const std::array<std::uint8_t, 16> &arr);
-    void setIPFromArray(const std::array<std::uint16_t, 8> &arr, bool big = false);
-    void setIPFromArray(const std::array<std::uint32_t, 4> &arr, bool big = false);
+    void setIPFromArray(
+        const std::array<std::uint8_t, 4> &arr
+    );
 
-    error_ptr setIPFromVector(const std::vector<std::uint8_t> &vec);
-    error_ptr setIPFromVector(const std::vector<std::uint16_t> &vec, bool big = false);
-    error_ptr setIPFromVector(const std::vector<std::uint32_t> &vec, bool big = false);
+    void setIPFromArray(
+        const std::array<std::uint8_t, 16> &arr,
+        bool                                detect_v4_magic = false
+    );
+
+    void setIPFromArray(
+        const std::array<std::uint16_t, 8> &arr,
+        bool                                big             = false,
+        bool                                detect_v4_magic = false
+    );
+
+    void setIPFromArray(
+        const std::array<std::uint32_t, 4> &arr,
+        bool                                big             = false,
+        bool                                detect_v4_magic = false
+    );
+
+    error_ptr setIPFromVector(
+        const std::vector<std::uint8_t> &vec
+    );
+
+    error_ptr setIPFromVector(
+        const std::vector<std::uint16_t> &vec,
+        bool                              big = false
+    );
+
+    error_ptr setIPFromVector(
+        const std::vector<std::uint32_t> &vec,
+        bool                              big = false
+    );
 
     error_ptr setIPFromString(const UString &text);
 
@@ -202,12 +230,16 @@ class IP
     void delPort();
     void delCIDR();
 
-    bool isIPv6IPv4combine() const;
+    bool isIPv6IPv4combine(bool true_if_magic = true, bool true_if_flag = true) const;
 
     // returns true if ipv6 is stored insude and 3rd uint16 equals ffff.
-    bool hasIPv6IPv4CombineMagic() const;
+    bool hasIPv6IPv4CombineMagic(bool ensure_has_ip_and_ip_is_ipv6 = false) const;
+
+    void reset_ipv6_v4_comb_basing_on_magic(bool ensure_has_ip_and_ip_is_ipv6 = false);
 
     void setIPv6IPv4Combine(bool val, bool set_ipv4_combine_magic = true);
+
+    void applyIPv6IPv4CombineMagic(bool also_set_ipv6_v4_comb_true = true);
 
     // note: this doesn't automatically sets IPv6IPv4combine to true.
     //       use setIPv6IPv4combine() function
@@ -256,8 +288,8 @@ class IP
     UString getIPv4AsString() const;
 
     UString getIPv6AsString() const;
-    UString getIPv6AsStringLong() const;
-    UString getIPv6AsStringShort() const;
+    UString getIPv6AsStringLong(bool leading_zeroes = true) const;
+    UString getIPv6AsStringShort(bool leading_zeroes = false) const;
 
     UString getPortString() const;
     UString getCIDRString() const;

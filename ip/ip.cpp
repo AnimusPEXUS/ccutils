@@ -975,7 +975,8 @@ void IP::setIPFromIP(const IP_shared obj)
 
     if (has_ip)
     {
-        ipver = obj->ipver;
+        ipver        = obj->ipver;
+        ipv6_v4_comb = obj->ipv6_v4_comb;
         switch (ipver)
         {
             default:
@@ -1012,15 +1013,27 @@ void IP::setIPFromArray(const std::array<std::uint8_t, 4> &arr)
     buff.ipv4 = arr;
 }
 
-void IP::setIPFromArray(const std::array<std::uint8_t, 16> &arr)
+void IP::setIPFromArray(
+    const std::array<std::uint8_t, 16> &arr,
+    bool                                detect_v4_magic
+)
 {
     has_ip = true;
     ipver  = IPver::v6;
 
     buff.ipv6.b8 = arr;
+
+    if (detect_v4_magic)
+    {
+        reset_ipv6_v4_comb_basing_on_magic();
+    }
 }
 
-void IP::setIPFromArray(const std::array<std::uint16_t, 8> &arr, bool big)
+void IP::setIPFromArray(
+    const std::array<std::uint16_t, 8> &arr,
+    bool                                big,
+    bool                                detect_v4_magic
+)
 {
     has_ip = true;
     ipver  = IPver::v6;
@@ -1036,9 +1049,18 @@ void IP::setIPFromArray(const std::array<std::uint16_t, 8> &arr, bool big)
     {
         buff.ipv6.b16 = arr;
     }
+
+    if (detect_v4_magic)
+    {
+        reset_ipv6_v4_comb_basing_on_magic();
+    }
 }
 
-void IP::setIPFromArray(const std::array<std::uint32_t, 4> &arr, bool big)
+void IP::setIPFromArray(
+    const std::array<std::uint32_t, 4> &arr,
+    bool                                big,
+    bool                                detect_v4_magic
+)
 {
     has_ip = true;
     ipver  = IPver::v6;
@@ -1053,6 +1075,11 @@ void IP::setIPFromArray(const std::array<std::uint32_t, 4> &arr, bool big)
     else
     {
         buff.ipv6.b32 = arr;
+    }
+
+    if (detect_v4_magic)
+    {
+        reset_ipv6_v4_comb_basing_on_magic();
     }
 }
 
@@ -1277,29 +1304,60 @@ void IP::delCIDR()
     cidr     = 0;
 }
 
-bool IP::isIPv6IPv4combine() const
+bool IP::isIPv6IPv4combine(bool true_if_magic, bool true_if_flag) const
 {
-    return ipv6_v4_comb;
+    if (!hasIPv6())
+    {
+        return false;
+    }
+
+    if (true_if_magic && hasIPv6IPv4CombineMagic())
+    {
+        return true;
+    }
+
+    if (true_if_flag && ipv6_v4_comb)
+    {
+        return true;
+    }
+
+    return false;
 }
 
-// returns true if ipv6 is stored insude and 3rd uint16 equals ffff.
-bool IP::hasIPv6IPv4CombineMagic() const
+bool IP::hasIPv6IPv4CombineMagic(bool ensure_has_ip_and_ip_is_ipv6) const
 {
-    return hasIPv6() && buff.ipv6.b16[2] == 0xffff;
+    if (ensure_has_ip_and_ip_is_ipv6 && !hasIPv6())
+    {
+        return false;
+    }
+
+    return buff.ipv6.b16[2] == 0xffff;
+}
+
+void IP::reset_ipv6_v4_comb_basing_on_magic(bool ensure_has_ip_and_ip_is_ipv6)
+{
+    setIPv6IPv4Combine(hasIPv6IPv4CombineMagic(ensure_has_ip_and_ip_is_ipv6));
 }
 
 void IP::setIPv6IPv4Combine(bool val, bool set_ipv4_combine_magic)
 {
-    ipv6_v4_comb = true;
+    ipv6_v4_comb = val;
 
-    if (set_ipv4_combine_magic)
+    if (set_ipv4_combine_magic && val)
     {
-        buff.ipv6.b16[2] = 0xffff;
+        applyIPv6IPv4CombineMagic(false);
     }
 }
 
-// note: this doesn't automatically sets IPv6IPv4combine to true.
-//       use setIPv6IPv4combine() function
+void IP::applyIPv6IPv4CombineMagic(bool also_set_ipv6_v4_comb_true)
+{
+    buff.ipv6.b16[2] = 0xffff;
+    if (also_set_ipv6_v4_comb_true)
+    {
+        ipv6_v4_comb = true;
+    }
+}
+
 void IP::setIPv6IPv4Part(const std::array<std::uint8_t, 4> &arr)
 {
     for (unsigned char i = 0; i < 4; i++)
@@ -1308,8 +1366,6 @@ void IP::setIPv6IPv4Part(const std::array<std::uint8_t, 4> &arr)
     }
 }
 
-// note: this doesn't automatically sets IPv6IPv4combine to true.
-//       use setIPv6IPv4combine() function
 void IP::setIPv6IPv4Part(IP_shared obj)
 {
     buff.ipv4 = obj->buff.ipv4;
@@ -1567,9 +1623,11 @@ UString IP::getIPv6AsString() const
     return getIPv6AsStringShort();
 }
 
-UString IP::getIPv6AsStringLong() const
+UString IP::getIPv6AsStringLong(bool leading_zeroes) const
 {
     UString ret;
+
+    const std::string fmt = (leading_zeroes ? "{:04x}" : "{:01x}");
 
     unsigned char i = 7;
 
@@ -1580,7 +1638,7 @@ UString IP::getIPv6AsStringLong() const
         {
             z = std::byteswap(z);
         }
-        ret += std::format("{:04x}", z);
+        ret += std::vformat(fmt, std::make_format_args(z));
         if (i >= ((ipv6_v4_comb ? 2 : 0) + 1))
         {
             ret += ":";
@@ -1593,22 +1651,6 @@ UString IP::getIPv6AsStringLong() const
         i--;
     }
 
-    /*
-    for (unsigned char i = (ipv6_v4_comb ? 2 : 0); i < 8; i++)
-    {
-        auto z = buff.ipv6.b16[7 - i];
-        if constexpr (std::endian::native == std::endian::little)
-        {
-            z = std::byteswap(z);
-        }
-        ret += std::format("{:04x}", z);
-        if (i < 7)
-        {
-            ret += ":";
-        }
-    }
-    */
-
     if (ipv6_v4_comb)
     {
         ret += std::format(":{}", getIPv6IPv4Part()->getAllAsString());
@@ -1617,8 +1659,10 @@ UString IP::getIPv6AsStringLong() const
     return ret;
 }
 
-UString IP::getIPv6AsStringShort() const
+UString IP::getIPv6AsStringShort(bool leading_zeroes) const
 {
+    const std::string fmt = (leading_zeroes ? "{:04x}" : "{:01x}");
+
     struct zeroes_slice
     {
         std::size_t start;
@@ -1659,7 +1703,7 @@ UString IP::getIPv6AsStringShort() const
 
     if (slices.size() == 0)
     {
-        return getIPv6AsStringLong();
+        return getIPv6AsStringLong(false);
     }
 
     zeroes_slice *longest = &(slices[0]);
@@ -1706,7 +1750,7 @@ UString IP::getIPv6AsStringShort() const
                     ret = UString(":") + ret;
                 }
 
-                ret = UString(std::vformat("{:x}", std::make_format_args(z))) + ret;
+                ret = UString(std::vformat(fmt, std::make_format_args(z))) + ret;
                 ret = UString(":") + ret;
             }
         }
@@ -1731,7 +1775,7 @@ UString IP::getIPv6AsStringShort() const
                 }
 
                 ret = UString(":") + ret;
-                ret = UString(std::vformat("{:x}", std::make_format_args(z))) + ret;
+                ret = UString(std::vformat(fmt, std::make_format_args(z))) + ret;
             }
         }
     }
