@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <csignal>
+// #include <csignal>
 
 #include <wayround_i2p/ccutils/ip/ip.hpp>
 
@@ -10,8 +10,28 @@ using UString = wayround_i2p::ccutils::unicode::UString;
 
 void uniqsort(std::vector<UString> &x)
 {
-    auto y = std::unique(x.begin(), x.end());
-    x.erase(y, x.end());
+    // note: for some reason unique doesn't work with std::string properly
+    // auto y = std::unique(x.begin(), x.end());
+    // x.resize(std::distance(x.begin(), y));
+
+    {
+        std::vector<UString> new_vec;
+
+        for (const auto &x_i : x)
+        {
+            for (const auto &new_vec_i : new_vec)
+            {
+                if (new_vec_i == x_i)
+                {
+                    goto cont;
+                }
+            }
+            new_vec.push_back(x_i);
+        cont:
+        }
+        x = new_vec;
+    }
+
     std::sort(x.begin(), x.end());
 }
 
@@ -125,13 +145,10 @@ const std::vector<UString> testing_examples_all = []()
              testing_examples_ipv6,
          })
     {
-        std::merge(
-            ret.begin(),
-            ret.end(),
-            i.begin(),
-            i.end(),
-            std::back_inserter(ret)
-        );
+        for (const auto &j : i)
+        {
+            ret.push_back(j);
+        }
     }
 
     for (const auto &j : testing_port)
