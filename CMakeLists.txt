@@ -16,7 +16,7 @@ else()
 endif()
 
 
-#find_package(PkgConfig REQUIRED)
+find_package(PkgConfig REQUIRED)
 
 # set(Boost_USE_STATIC_LIBS        ON)
 #set(Boost_USE_DEBUG_LIBS        OFF)
@@ -25,7 +25,24 @@ endif()
 
 #find_package(Boost REQUIRED COMPONENTS json regex)
 
-
+##
+# documentation for create_ccutils_component function
+#
+# this function used for creating componnts of ccutils.
+# components created by using add_library() cmake function.
+#
+# parameters:
+#  TARGETNAME     - name for component, for example 'ccutils_xxx' where xxx is desired
+#                   name and whole 'ccutils_xxx' is to be addressed by othe components.
+#  SUBDIR         - subdir in ccutils sources directory in which source files for
+#                   'ccutils_xxx' is found.
+#  SOURCES        - names of files to be used as sources (without .c/.cpp or other
+#                   extensions)
+#  HEADERS        - same as SOURCES, but for header files.
+#  LIBS_PUB       - passed to target_link_libraries() cmake function
+#  LIBS_PRIV      - passed to target_link_libraries() cmake function
+#  INC_DIRS_PUB   - passed to target_include_directories() cmake function
+#  INC_DIRS_PRIV  - passed to target_include_directories() cmake function
 
 function(create_ccutils_component)
   set(options)
@@ -135,6 +152,8 @@ function(create_ccutils_component)
 
 
 endfunction()
+
+
 
 create_ccutils_component(
   TARGETNAME ccutils_utils_cf
@@ -465,6 +484,49 @@ create_ccutils_component(
   ccutils_errors
   ccutils_regexp
 )
+
+option(
+  CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER
+  "Enable SigC wrapper (compatability layer) for ccutils/signal"
+  TRUE
+)
+
+set(ccutils_signal_ADD_SOURCES, "signal")
+set(ccutils_signal_ADD_HEADERS, "signal")
+set(ccutils_signal_ADD_LIBS_PUB, "")
+set(ccutils_signal_ADD_LIBS_PRIV, "")
+set(ccutils_signal_ADD_INC_DIRS_PUB, "")
+set(ccutils_signal_ADD_INC_DIRS_PRIV, "")
+
+if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
+
+  list(APPEND ccutils_signal_ADD_SOURCES "signal_sigc_compat")
+  list(APPEND ccutils_signal_ADD_HEADERS "signal_sigc_compat")
+
+endif()
+
+create_ccutils_component(
+  TARGETNAME ccutils_signal
+  SUBDIR signal
+
+  SOURCES
+  ${ccutils_signal_ADD_SOURCES}
+
+  HEADERS
+  ${ccutils_signal_ADD_HEADERS}
+
+  LIBS_PUB
+  ${ccutils_signal_ADD_LIBS_PUB}
+)
+
+if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
+
+  pkg_check_modules(sigc REQUIRED IMPORTED_TARGET sigc++-3.0)
+
+  target_compile_options(ccutils_signal PUBLIC "${sigc_CFLAGS}")
+  target_link_options(ccutils_signal PUBLIC "${sigc_LDFLAGS}")
+
+endif()
 
 create_ccutils_component(
   TARGETNAME ccutils_akigo

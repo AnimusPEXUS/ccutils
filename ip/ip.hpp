@@ -232,7 +232,7 @@ class IP
 
     bool isIPv6IPv4combine(bool true_if_magic = true, bool true_if_flag = true) const;
 
-    // returns true if ipv6 is stored insude and 3rd uint16 equals ffff.
+    // returns true if ipv6 is stored inside and 3rd uint16 equals ffff.
     bool hasIPv6IPv4CombineMagic(bool ensure_has_ip_and_ip_is_ipv6 = false) const;
 
     void reset_ipv6_v4_comb_basing_on_magic(bool ensure_has_ip_and_ip_is_ipv6 = false);
