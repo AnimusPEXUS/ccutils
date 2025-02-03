@@ -491,12 +491,12 @@ option(
   FALSE
 )
 
-set(ccutils_signal_ADD_SOURCES, "signal")
-set(ccutils_signal_ADD_HEADERS, "signal")
-set(ccutils_signal_ADD_LIBS_PUB, "")
-set(ccutils_signal_ADD_LIBS_PRIV, "")
-set(ccutils_signal_ADD_INC_DIRS_PUB, "")
-set(ccutils_signal_ADD_INC_DIRS_PRIV, "")
+set(ccutils_signal_ADD_SOURCES "signal")
+set(ccutils_signal_ADD_HEADERS "signal")
+set(ccutils_signal_ADD_LIBS_PUB "")
+set(ccutils_signal_ADD_LIBS_PRIV "")
+set(ccutils_signal_ADD_INC_DIRS_PUB "")
+set(ccutils_signal_ADD_INC_DIRS_PRIV "")
 
 if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
 
