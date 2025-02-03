@@ -63,7 +63,7 @@ function(create_ccutils_component)
   list(SORT create_ccutils_component_SOURCES)
   list(SORT create_ccutils_component_HEADERS)
 
-  message("        difining ccutils component: ${create_ccutils_component_TARGETNAME}")
+  message("        defining ccutils component: ${create_ccutils_component_TARGETNAME}")
 
   # todo: make configurable option for EXCLUDE_FROM_ALL parameter in add_library
 
