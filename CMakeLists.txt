@@ -488,7 +488,7 @@ create_ccutils_component(
 option(
   CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER
   "Enable SigC wrapper (compatability layer) for ccutils/signal"
-  TRUE
+  FALSE
 )
 
 set(ccutils_signal_ADD_SOURCES, "signal")
