@@ -65,6 +65,8 @@ function(create_ccutils_component)
 
   message("  adding component: ${create_ccutils_component_TARGETNAME}")
 
+  # todo: make configurable option for EXCLUDE_FROM_ALL parameter in add_library
+
   add_library(
     ${create_ccutils_component_TARGETNAME}
     EXCLUDE_FROM_ALL
