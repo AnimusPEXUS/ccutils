@@ -67,6 +67,7 @@ function(create_ccutils_component)
 
   add_library(
     ${create_ccutils_component_TARGETNAME}
+    EXCLUDE_FROM_ALL
   )
 
   set(formatted_sources_list)
