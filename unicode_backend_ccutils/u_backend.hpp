@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20241007_110017_742470
-#define WAYROUND_I2P_20241007_110017_742470
+#ifndef WAYROUND_I2P_20250205_113427_126944
+#define WAYROUND_I2P_20250205_113427_126944
 
 #include <wayround_i2p/ccutils/unicode_backend_01/ccu_b01_generated_types.hpp>
 
