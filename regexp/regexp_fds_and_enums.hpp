@@ -56,6 +56,8 @@ enum class PatternType : unsigned char
     ExactChar,
     CharRange,
 
+    CharValidFunc,
+
     AnyChar,
 
     CharIsAlpha,

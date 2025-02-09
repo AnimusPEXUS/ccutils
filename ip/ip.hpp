@@ -12,6 +12,8 @@
 namespace wayround_i2p::ccutils::ip
 {
 
+namespace regexp = wayround_i2p::ccutils::regexp;
+
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 using UString   = wayround_i2p::ccutils::unicode::UString;
 
@@ -21,8 +23,6 @@ enum class IPver : unsigned char
     v4      = 4,
     v6      = 6
 };
-
-namespace regexp = wayround_i2p::ccutils::regexp;
 
 inline bool check_val_fits_1_byte(long long val);
 inline bool check_val_fits_2_bytes(long long val);

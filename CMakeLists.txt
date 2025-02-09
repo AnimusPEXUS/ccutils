@@ -531,6 +531,24 @@ if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
 
 endif()
 
+
+create_ccutils_component(
+  TARGETNAME ccutils_json
+  SUBDIR json
+
+  SOURCES
+  json
+
+  HEADERS
+  json
+
+  LIBS_PUB
+  ccutils_unicode
+  ccutils_errors
+  ccutils_regexp
+)
+
+
 create_ccutils_component(
   TARGETNAME ccutils_akigo
   SUBDIR akigo

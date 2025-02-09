@@ -384,6 +384,13 @@ Pattern_shared Pattern::setCharRange(UChar char0, UChar char1)
     return Pattern_shared(this->own_ptr);
 }
 
+Pattern_shared Pattern::setIsCharValidFunc(std::function<bool(UChar x)> cb)
+{
+    this->pattern_type  = PatternType::CharValidFunc;
+    this->charValidFunc = cb;
+    return Pattern_shared(this->own_ptr);
+}
+
 Pattern_shared Pattern::setAnyChar()
 {
     this->pattern_type = PatternType::AnyChar;
@@ -665,6 +672,13 @@ Pattern_shared Pattern::newCharRange(UChar char0, UChar char1)
 {
     auto ret = Pattern::create();
     ret->setCharRange(char0, char1);
+    return ret;
+}
+
+Pattern_shared Pattern::newIsCharValidFunc(std::function<bool(UChar x)> cb)
+{
+    auto ret = Pattern::create();
+    ret->setIsCharValidFunc(cb);
     return ret;
 }
 
@@ -1280,6 +1294,12 @@ Pattern_shared makeExact(Pattern_shared pat)
     return ret;
 }
 
+Pattern_shared make_string_matching_pattern(UString str)
+{
+    Pattern_shared_deque new_pattern_deque;
+    return Pattern::newGroup(new_pattern_deque);
+}
+
 // todo: this function is too large and complex. maybe it should be splitup
 const Result_shared match_single(
     const Pattern_shared     pattern,
@@ -1634,6 +1654,36 @@ const Result_shared match_single(
             }
 
             return ret;
+        }
+        case PatternType::CharValidFunc:
+        {
+            if (!pattern->charValidFunc)
+            {
+                ret->error
+                    = wayround_i2p::ccutils::errors::New(
+                        "pattern->charValidFunc must be set",
+                        __FILE__,
+                        __LINE__
+                    );
+                return ret;
+            }
+
+            if (isLineEnd(subject, start_at))
+            {
+                ret->matched = false;
+                return ret;
+            }
+
+            auto subj_char = (*subject)[start_at];
+
+            // todo: add case-sensitivity here or (better) pass pattern to cb
+            //       function and let it decide.
+
+            ret->matched = pattern->charValidFunc(subj_char);
+            if (ret->matched)
+            {
+                ret->match_end = start_at + 1;
+            }
         }
         case PatternType::AnyChar:
         {
@@ -2368,6 +2418,9 @@ UString PatternTypeString(PatternType v)
             return "ExactChar";
         case PatternType::CharRange:
             return "CharRange";
+
+        case PatternType::CharValidFunc:
+            return "CharValidFunc";
 
         case PatternType::AnyChar:
             return "AnyChar";

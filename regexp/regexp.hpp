@@ -73,6 +73,8 @@ Pattern_shared appendPatterns(
 
 struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 {
+    // todo: make Pattern as class?
+
     // this is used for sequencing
 
     Pattern_weak   parent;
@@ -100,6 +102,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
         return own_ptr.lock();
     }
 
+    // todo: rename findSize -> calcSize ?
     std::size_t    findSize() const;
     Pattern_shared findFirst() const;
     Pattern_shared findLast() const;
@@ -123,6 +126,8 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // 2 - for CharRange
     // any number of chars for CharList
     std::vector<UChar> values;
+
+    std::function<bool(UChar x)> charValidFunc;
 
     // clears notSubSequence, orGroup and group fields
     void removeAllSubpatterns();
@@ -162,6 +167,8 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     Pattern_shared setExactChar(UChar chr);
     Pattern_shared setCharRange(UChar char0, UChar char1);
+
+    Pattern_shared setIsCharValidFunc(std::function<bool(UChar x)> cb);
 
     Pattern_shared setAnyChar();
 
@@ -241,6 +248,8 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     static Pattern_shared newExactChar(UChar chr);
     static Pattern_shared newCharRange(UChar char0, UChar char1);
+
+    static Pattern_shared newIsCharValidFunc(std::function<bool(UChar x)> cb);
 
     static Pattern_shared newAnyChar();
 
@@ -456,6 +465,7 @@ std::tuple<
     );
 
 Pattern_shared makeExact(Pattern_shared pat);
+Pattern_shared make_string_matching_pattern(UString str);
 
 ///
 // takes [vector], [deque] or [brace-enclosed initializer list]
