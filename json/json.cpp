@@ -1,6 +1,8 @@
 
 #include "json.hpp"
 
+#include <wayround_i2p/ccutils/unicode/u.hpp>
+
 namespace wayround_i2p::ccutils::json
 {
 
@@ -122,9 +124,14 @@ regexp::Pattern_shared characters_PATTERN()
 {
     return regexp::Pattern::newOrGroup(
         {regexp::Pattern::newIsCharValidFunc(
-             [](UChar x) -> bool
+             [](
+                 UChar                        x,
+                 const regexp::Pattern_shared pat,
+                 std::size_t                  start_at
+             ) -> bool
              {
-                 return x >= 0x20 && x <= 0x10ffff;
+                 auto xx = x.as_int32();
+                 return xx >= 0x20 && xx <= 0x10ffff;
              }
          ),
 

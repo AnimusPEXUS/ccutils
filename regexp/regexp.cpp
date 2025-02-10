@@ -384,7 +384,7 @@ Pattern_shared Pattern::setCharRange(UChar char0, UChar char1)
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setIsCharValidFunc(std::function<bool(UChar x)> cb)
+Pattern_shared Pattern::setIsCharValidFunc(CBFunctionToCheckChar02 cb)
 {
     this->pattern_type  = PatternType::CharValidFunc;
     this->charValidFunc = cb;
@@ -675,7 +675,7 @@ Pattern_shared Pattern::newCharRange(UChar char0, UChar char1)
     return ret;
 }
 
-Pattern_shared Pattern::newIsCharValidFunc(std::function<bool(UChar x)> cb)
+Pattern_shared Pattern::newIsCharValidFunc(CBFunctionToCheckChar02 cb)
 {
     auto ret = Pattern::create();
     ret->setIsCharValidFunc(cb);
@@ -1679,7 +1679,7 @@ const Result_shared match_single(
             // todo: add case-sensitivity here or (better) pass pattern to cb
             //       function and let it decide.
 
-            ret->matched = pattern->charValidFunc(subj_char);
+            ret->matched = pattern->charValidFunc(subj_char, pattern, start_at);
             if (ret->matched)
             {
                 ret->match_end = start_at + 1;

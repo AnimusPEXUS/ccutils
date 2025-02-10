@@ -12,6 +12,7 @@ namespace regexp = wayround_i2p::ccutils::regexp;
 
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 using UString   = wayround_i2p::ccutils::unicode::UString;
+using UChar     = wayround_i2p::ccutils::unicode::UChar;
 
 regexp::Pattern_shared json_PATTERN();
 regexp::Pattern_shared value_PATTERN();

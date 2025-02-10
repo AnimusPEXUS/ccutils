@@ -31,6 +31,13 @@ using CBFunctionToCheckChar01 = std::function<
           std::size_t // here you get char offset at subject string
     )>;
 
+using CBFunctionToCheckChar02 = std::function<
+    bool(
+        UChar                x,
+        const Pattern_shared pattern,
+        std::size_t          start_at
+    )>;
+
 // todo: add (thinking required)
 //       * 'OnlyIfMatched' pattern option, which forces dismatch if named
 //         pattern didn't matched
@@ -127,7 +134,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // any number of chars for CharList
     std::vector<UChar> values;
 
-    std::function<bool(UChar x)> charValidFunc;
+    CBFunctionToCheckChar02 charValidFunc;
 
     // clears notSubSequence, orGroup and group fields
     void removeAllSubpatterns();
@@ -168,7 +175,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setExactChar(UChar chr);
     Pattern_shared setCharRange(UChar char0, UChar char1);
 
-    Pattern_shared setIsCharValidFunc(std::function<bool(UChar x)> cb);
+    Pattern_shared setIsCharValidFunc(CBFunctionToCheckChar02 cb);
 
     Pattern_shared setAnyChar();
 
@@ -249,7 +256,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     static Pattern_shared newExactChar(UChar chr);
     static Pattern_shared newCharRange(UChar char0, UChar char1);
 
-    static Pattern_shared newIsCharValidFunc(std::function<bool(UChar x)> cb);
+    static Pattern_shared newIsCharValidFunc(CBFunctionToCheckChar02 cb);
 
     static Pattern_shared newAnyChar();
 
