@@ -5,6 +5,7 @@
 #include <format>
 #include <functional>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <experimental/scope>
@@ -134,6 +135,8 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     // any number of chars for CharList
     std::vector<UChar> values;
 
+    bool charRange_including_last;
+
     CBFunctionToCheckChar02 charValidFunc;
 
     // clears notSubSequence, orGroup and group fields
@@ -173,7 +176,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     Pattern_shared setLineSplit();
 
     Pattern_shared setExactChar(UChar chr);
-    Pattern_shared setCharRange(UChar char0, UChar char1);
+    Pattern_shared setCharRange(UChar char0, UChar char1, bool including_last = false);
 
     Pattern_shared setIsCharValidFunc(CBFunctionToCheckChar02 cb);
 
@@ -254,7 +257,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
     static Pattern_shared newLineSplit();
 
     static Pattern_shared newExactChar(UChar chr);
-    static Pattern_shared newCharRange(UChar char0, UChar char1);
+    static Pattern_shared newCharRange(UChar char0, UChar char1, bool including_last = false);
 
     static Pattern_shared newIsCharValidFunc(CBFunctionToCheckChar02 cb);
 
@@ -313,6 +316,26 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
         findAll(
             std::shared_ptr<UString> subject,
             std::size_t              start_at = 0
+        );
+
+    const Result_shared match(
+        const UString      &subject,
+        std::size_t         start_at      = 0,
+        const Result_shared parent_result = nullptr
+    );
+
+    const Result_shared find(
+        const UString &subject,
+        std::size_t    start_at = 0,
+        bool           backward = false
+    );
+
+    const std::tuple<
+        const Result_shared_deque,
+        wayround_i2p::ccutils::errors::error_ptr>
+        findAll(
+            const UString &subject,
+            std::size_t    start_at = 0
         );
 
   private:
@@ -450,6 +473,29 @@ const std::tuple<
         const Pattern_shared     pattern,
         std::shared_ptr<UString> subject,
         std::size_t              start_at
+    );
+
+const Result_shared match(
+    const Pattern_shared pattern,
+    const UString       &subject,
+    std::size_t          start_at      = 0,
+    const Result_shared  parent_result = nullptr
+);
+
+const Result_shared find(
+    const Pattern_shared pattern,
+    const UString       &subject,
+    std::size_t          start_at = 0,
+    bool                 backward = false
+);
+
+const std::tuple<
+    const Result_shared_deque,
+    wayround_i2p::ccutils::errors::error_ptr>
+    findAll(
+        const Pattern_shared pattern,
+        const UString       &subject,
+        std::size_t          start_at
     );
 
 bool isTextEnd(

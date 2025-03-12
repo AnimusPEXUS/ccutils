@@ -93,6 +93,15 @@ const std::tuple<
         std::size_t              start_at = 0
     );
 
+const std::tuple<
+    const Result_shared_deque,
+    wayround_i2p::ccutils::errors::error_ptr>
+    findAll(
+        const Pattern_shared pattern,
+        const UString       &subject,
+        std::size_t          start_at = 0
+    );
+
 // Pattern_shared create(PatternType type);
 
 } // namespace wayround_i2p::ccutils::regexp

@@ -369,7 +369,7 @@ Pattern_shared Pattern::setExactChar(UChar chr)
     return Pattern_shared(this->own_ptr);
 }
 
-Pattern_shared Pattern::setCharRange(UChar char0, UChar char1)
+Pattern_shared Pattern::setCharRange(UChar char0, UChar char1, bool including_last)
 {
     if (!(char1 >= char0))
     {
@@ -379,8 +379,9 @@ Pattern_shared Pattern::setCharRange(UChar char0, UChar char1)
             __LINE__
         );
     }
-    this->pattern_type = PatternType::CharRange;
-    this->values       = {char0, char1};
+    this->pattern_type             = PatternType::CharRange;
+    this->values                   = {char0, char1};
+    this->charRange_including_last = including_last;
     return Pattern_shared(this->own_ptr);
 }
 
@@ -668,10 +669,10 @@ Pattern_shared Pattern::newExactChar(UChar chr)
     return ret;
 }
 
-Pattern_shared Pattern::newCharRange(UChar char0, UChar char1)
+Pattern_shared Pattern::newCharRange(UChar char0, UChar char1, bool including_last)
 {
     auto ret = Pattern::create();
-    ret->setCharRange(char0, char1);
+    ret->setCharRange(char0, char1, including_last);
     return ret;
 }
 
@@ -819,6 +820,46 @@ const std::tuple<
     return wayround_i2p::ccutils::regexp::findAll(
         Pattern_shared(this->own_ptr),
         subject,
+        start_at
+    );
+}
+
+const Result_shared Pattern::match(
+    const UString      &subject,
+    std::size_t         start_at,
+    const Result_shared parent_result
+)
+{
+    return match(
+        std::shared_ptr<UString>(new UString(subject)),
+        start_at,
+        parent_result
+    );
+}
+
+const Result_shared Pattern::find(
+    const UString &subject,
+    std::size_t    start_at,
+    bool           backward
+)
+{
+    return find(
+        std::shared_ptr<UString>(new UString(subject)),
+        start_at,
+        backward
+    );
+}
+
+const std::tuple<
+    const Result_shared_deque,
+    wayround_i2p::ccutils::errors::error_ptr>
+    Pattern::findAll(
+        const UString &subject,
+        std::size_t    start_at
+    )
+{
+    return findAll(
+        std::shared_ptr<UString>(new UString(subject)),
         start_at
     );
 }
@@ -1645,8 +1686,16 @@ const Result_shared match_single(
                 subj_char = subj_char.lower();
             }
 
-            ret->matched = (target_char0 <= subj_char)
-                        && (subj_char < target_char1);
+            if (!pattern->charRange_including_last)
+            {
+                ret->matched = (target_char0 <= subj_char)
+                            && (subj_char < target_char1);
+            }
+            else
+            {
+                ret->matched = (target_char0 <= subj_char)
+                            && (subj_char <= target_char1);
+            }
 
             if (ret->matched)
             {
@@ -2367,6 +2416,52 @@ const std::tuple<
     }
 
     return std::tuple(ret, ret_err);
+}
+
+const Result_shared match(
+    const Pattern_shared pattern,
+    const UString       &subject,
+    std::size_t          start_at,
+    const Result_shared  parent_result
+)
+{
+    return match(
+        pattern,
+        std::shared_ptr<UString>(new UString(subject)),
+        start_at,
+        parent_result
+    );
+}
+
+const Result_shared find(
+    const Pattern_shared pattern,
+    const UString       &subject,
+    std::size_t          start_at,
+    bool                 backward
+)
+{
+    return find(
+        pattern,
+        std::shared_ptr<UString>(new UString(subject)),
+        start_at,
+        backward
+    );
+}
+
+const std::tuple<
+    const Result_shared_deque,
+    wayround_i2p::ccutils::errors::error_ptr>
+    findAll(
+        const Pattern_shared pattern,
+        const UString       &subject,
+        std::size_t          start_at
+    )
+{
+    return findAll(
+        pattern,
+        std::shared_ptr<UString>(new UString(subject)),
+        start_at
+    );
 }
 
 Pattern_shared makeSequence(std::initializer_list<Pattern_shared> val)
