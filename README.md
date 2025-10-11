@@ -9,9 +9,9 @@ ccutils is collection of C++ tools. I'm going to use it in my projects.
 <table>
 
 <tr>
-	<th>name</th>
-	<th>short description</th>
-	<th>state</th>
+	<th>Item</th>
+	<th>Short Description</th>
+	<th>State/Status/Usability</th>
 </tr>
 
 <tr>
@@ -57,7 +57,7 @@ ccutils is collection of C++ tools. I'm going to use it in my projects.
 		in future it should be pluggable
 		and should be able to integrate with modern logging systems.
 	</td>
-	<td>probably <strong>ok</strong>, but needs upgrades and thinking</td>
+	<td><em>probably ok</em>, but needs upgrades and thinking</td>
 
 </tr>
 
@@ -66,7 +66,7 @@ ccutils is collection of C++ tools. I'm going to use it in my projects.
 	<td>
 		this is just a shortcut for POSIX utilities.
 	</td>
-	<td>not now</td>
+	<td>not ready. working on it by need. not finished. don't use it.</td>
 </tr>
 
 <tr>
@@ -75,16 +75,6 @@ ccutils is collection of C++ tools. I'm going to use it in my projects.
 		Interface for requesting human-readable data representation.
 	</td>
 	<td>ok</td>
-</tr>
-
-<tr>
-	<td>akigo</td>
-	<td>
-		Some Golang vibe to C++. As I migrate from Golang,
-		I missing some convenient
-		parts of it in C++.
-	</td>
-	<td>stalled. thinking required</td>
 </tr>
 
 <tr>
@@ -102,17 +92,31 @@ ccutils is collection of C++ tools. I'm going to use it in my projects.
 		You can see it in action under
 		[testing subdirectory](./_tests_and_examples).
 	</td>
-	<td>stable for now</td>
+	<td>ok. stable for now</td>
 </tr>
 
 <tr>
 	<td>fint</td>
 	<td>
-		wip. 
 		Flexible Int manipulation utilities. provides new 'smart' integer type
 		to work with integers of arbitrary size.
 	</td>
-	<td>stable for now</td>
+	<td>wip. requires thinking</td>
+</tr>
+
+<tr>
+	<td><span style="color:red;">akigo</span></td>
+	<td>
+        <p>
+		Some Golang vibe to C++. As I migrate from Golang,
+		I missing some convenient
+		parts of it in C++.
+        </p>
+        <p>
+        This is the main idea-package of ccutils. Most other ccutils packages done to supply functionality to akigo.
+        </p>
+	</td>
+	<td>work in progress. see separate table to know it's state.</td>
 </tr>
 
 <!--
@@ -122,6 +126,34 @@ ccutils is collection of C++ tools. I'm going to use it in my projects.
 <td>
 </td>
 <td></td>
+</tr>
+
+-->
+
+</table>
+
+## <span style="color:red;">akigo</span> state
+
+akigo devided on two ideological parts:
+
+1. packages like in go
+1. utility packages for akigo, which doesn't deserv to climb up to overal ccutils
+
+<table>
+
+<tr>
+	<th>Item</th>
+	<th>Short Description</th>
+	<th>State/Status/Usability</th>
+</tr>
+
+<!--
+
+<tr>
+    <td></td>
+    <td>
+    </td>
+    <td></td>
 </tr>
 
 -->

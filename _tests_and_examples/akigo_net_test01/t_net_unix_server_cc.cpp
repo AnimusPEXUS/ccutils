@@ -98,6 +98,12 @@ int main(int argc, char **args)
         return 1;
     }
 
+    if (!s)
+    {
+        std::cout << "s is null" << std::endl;
+        return 1;
+    }
+
     for (;;)
     {
         akigo_ns::net::Conn_ptr c;

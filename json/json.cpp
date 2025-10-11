@@ -6,6 +6,7 @@
 namespace wayround_i2p::ccutils::json
 {
 
+/*
 regexp::Pattern_shared json_PATTERN()
 {
     return element_PATTERN();
@@ -276,5 +277,6 @@ regexp::Pattern_shared ws_PATTERN()
     )
         ->setMinMaxCount(0, 1);
 }
+*/
 
 } // namespace wayround_i2p::ccutils::json

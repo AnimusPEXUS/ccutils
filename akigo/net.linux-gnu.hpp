@@ -19,25 +19,25 @@ using ustring   = wayround_i2p::akigo::builtin::ustring;
 
 using FDCtl = wayround_i2p::ccutils::posix_tools::FDCtl;
 
-// todo: make better CMakeLists.txt and move PosixFDCtlNetConnAdaptor
+// todo: make better CMakeLists.txt and move PosixFDCtlNetConnAdapter
 //       to separate source file
 
-class PosixFDCtlNetConnAdaptor : wayround_i2p::akigo::net::Conn,
+class PosixFDCtlNetConnAdapter : wayround_i2p::akigo::net::Conn,
                                  wayround_i2p::akigo::net::PacketConn
 {
   public:
-    static std::shared_ptr<PosixFDCtlNetConnAdaptor> create();
+    static std::shared_ptr<PosixFDCtlNetConnAdapter> create();
 
   private:
     std::shared_ptr<FDCtl> fdctl;
 
-    std::weak_ptr<PosixFDCtlNetConnAdaptor> own_ptr;
+    std::weak_ptr<PosixFDCtlNetConnAdapter> own_ptr;
 
   protected:
-    PosixFDCtlNetConnAdaptor();
+    PosixFDCtlNetConnAdapter();
 
   public:
-    ~PosixFDCtlNetConnAdaptor();
+    ~PosixFDCtlNetConnAdapter();
 
     void                   setFDCtl(std::shared_ptr<FDCtl> fd);
     std::shared_ptr<FDCtl> getFDCtl();
@@ -62,21 +62,21 @@ class PosixFDCtlNetConnAdaptor : wayround_i2p::akigo::net::Conn,
     std::tuple<size_type, error_ptr>           WriteTo(byte_vector b, Addr_ptr addr);
 };
 
-class PosixFDCtlNetConnAdaptorAddr : public wayround_i2p::akigo::net::Addr
+class PosixFDCtlNetConnAdapterAddr : public wayround_i2p::akigo::net::Addr
 {
   public:
     ustring Network();
     ustring String();
 
     static std::tuple<
-        std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
+        std::shared_ptr<PosixFDCtlNetConnAdapterAddr>,
         int> // todo: use akigo::error ?
         create_for_local(
             std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl
         );
 
     static std::tuple<
-        std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
+        std::shared_ptr<PosixFDCtlNetConnAdapterAddr>,
         int> // todo: use akigo::error ?
         create_for_peer(
             std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl
@@ -84,7 +84,7 @@ class PosixFDCtlNetConnAdaptorAddr : public wayround_i2p::akigo::net::Addr
 
   private:
     static std::tuple<
-        std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
+        std::shared_ptr<PosixFDCtlNetConnAdapterAddr>,
         int> // todo: use akigo::error ?
         create_for_x(
             std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl,
@@ -92,16 +92,16 @@ class PosixFDCtlNetConnAdaptorAddr : public wayround_i2p::akigo::net::Addr
         );
 
   protected:
-    PosixFDCtlNetConnAdaptorAddr(
+    PosixFDCtlNetConnAdapterAddr(
         // std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDAddress> addr
     );
 
   public:
-    ~PosixFDCtlNetConnAdaptorAddr();
+    ~PosixFDCtlNetConnAdapterAddr();
 
   private:
     // std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDAddress> addr;
-    std::weak_ptr<PosixFDCtlNetConnAdaptorAddr> own_ptr;
+    std::weak_ptr<PosixFDCtlNetConnAdapterAddr> own_ptr;
 
     ustring _network;
     ustring _string;

@@ -12,6 +12,8 @@
 namespace wayround_i2p::ccutils::ip
 {
 
+// package for parsing/formatting IPv4/6
+
 namespace regexp = wayround_i2p::ccutils::regexp;
 
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;

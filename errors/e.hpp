@@ -13,6 +13,8 @@
 // todo: make stacktrace when gcc will support
 //       it without any additional libraries
 
+// tools for error handling
+
 namespace wayround_i2p::ccutils::errors
 {
 

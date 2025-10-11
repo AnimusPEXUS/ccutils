@@ -139,7 +139,7 @@ struct Pattern : public wayround_i2p::ccutils::repr::RepresentableAsText
 
     CBFunctionToCheckChar02 charValidFunc;
 
-    // clears notSubSequence, orGroup and group fields
+    // clears notSubPattern, orGroup and group fields
     void removeAllSubpatterns();
 
     Pattern_shared       notSubPattern;

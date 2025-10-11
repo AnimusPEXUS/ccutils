@@ -39,44 +39,60 @@ std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
         );
     }
 
-    auto ret = PosixFDCtlNetConnAdaptor::create();
+    auto ret = PosixFDCtlNetConnAdapter::create();
 
     ret->setFDCtl(fdctl);
 
-    return std::tuple(std::dynamic_pointer_cast<UnixListener>(ret), nullptr);
+    std::cout << "ListenUnix, ret: " << (ret == nullptr ? "" : "not") << " null" << std::endl;
+
+    {
+        UnixListener       *x1;
+        decltype(ret.get()) x2;
+        x1 = x2;
+    }
+
+    auto x = std::dynamic_pointer_cast<UnixListener>(ret);
+
+    std::cout << "ListenUnix,   x: " << (x == nullptr ? "" : "not") << " null" << std::endl;
+
+    return std::tuple(x, nullptr);
 }
+
+// todo 2025-10-06: don't remember why I wanted to separate this.
+//                  maybe this separation not needed anymore.
+//                  thinking here required.
 
 // ------- ↓ ↓ ------- source to be separated ------- ↓ ↓ -------
 
-std::shared_ptr<PosixFDCtlNetConnAdaptor> PosixFDCtlNetConnAdaptor::create()
+std::shared_ptr<PosixFDCtlNetConnAdapter> PosixFDCtlNetConnAdapter::create()
 {
     auto ret
-        = std::shared_ptr<PosixFDCtlNetConnAdaptor>(new PosixFDCtlNetConnAdaptor());
+        = std::shared_ptr<PosixFDCtlNetConnAdapter>(new PosixFDCtlNetConnAdapter());
 
     ret->own_ptr = ret;
 
     return ret;
 }
 
-PosixFDCtlNetConnAdaptor::PosixFDCtlNetConnAdaptor()
+PosixFDCtlNetConnAdapter::PosixFDCtlNetConnAdapter()
 {
 }
 
-PosixFDCtlNetConnAdaptor::~PosixFDCtlNetConnAdaptor()
+PosixFDCtlNetConnAdapter::~PosixFDCtlNetConnAdapter()
 {
 }
 
-void PosixFDCtlNetConnAdaptor::setFDCtl(std::shared_ptr<FDCtl> fdctl)
+void PosixFDCtlNetConnAdapter::setFDCtl(std::shared_ptr<FDCtl> fdctl)
 {
     this->fdctl = fdctl;
 }
 
-std::shared_ptr<FDCtl> PosixFDCtlNetConnAdaptor::getFDCtl()
+std::shared_ptr<FDCtl> PosixFDCtlNetConnAdapter::getFDCtl()
 {
     return fdctl;
 }
 
-error_ptr PosixFDCtlNetConnAdaptor::Close()
+error_ptr PosixFDCtlNetConnAdapter::Close()
 {
     if (fdctl)
     {
@@ -86,9 +102,9 @@ error_ptr PosixFDCtlNetConnAdaptor::Close()
     return nullptr;
 }
 
-Addr_ptr PosixFDCtlNetConnAdaptor::LocalAddr()
+Addr_ptr PosixFDCtlNetConnAdapter::LocalAddr()
 {
-    auto addr = PosixFDCtlNetConnAdaptorAddr::create_for_local(fdctl);
+    auto addr = PosixFDCtlNetConnAdapterAddr::create_for_local(fdctl);
     if (std::get<1>(addr) != 0)
     {
         return nullptr;
@@ -98,9 +114,9 @@ Addr_ptr PosixFDCtlNetConnAdaptor::LocalAddr()
     );
 }
 
-Addr_ptr PosixFDCtlNetConnAdaptor::RemoteAddr()
+Addr_ptr PosixFDCtlNetConnAdapter::RemoteAddr()
 {
-    auto addr = PosixFDCtlNetConnAdaptorAddr::create_for_peer(fdctl);
+    auto addr = PosixFDCtlNetConnAdapterAddr::create_for_peer(fdctl);
     if (std::get<1>(addr) != 0)
     {
         return nullptr;
@@ -110,12 +126,12 @@ Addr_ptr PosixFDCtlNetConnAdaptor::RemoteAddr()
     );
 }
 
-bool PosixFDCtlNetConnAdaptor::SupportsNonBlocking()
+bool PosixFDCtlNetConnAdapter::SupportsNonBlocking()
 {
     return true;
 }
 
-bool PosixFDCtlNetConnAdaptor::GetNonBlocking()
+bool PosixFDCtlNetConnAdapter::GetNonBlocking()
 {
     bool ret;
 
@@ -124,81 +140,81 @@ bool PosixFDCtlNetConnAdaptor::GetNonBlocking()
     return ret;
 }
 
-void PosixFDCtlNetConnAdaptor::SetNonBlocking(bool value)
+void PosixFDCtlNetConnAdapter::SetNonBlocking(bool value)
 {
     fdctl->setNonBlocking(value);
 }
 
-error_ptr PosixFDCtlNetConnAdaptor::SetDeadline(wayround_i2p::akigo::time::Time t)
+error_ptr PosixFDCtlNetConnAdapter::SetDeadline(wayround_i2p::akigo::time::Time t)
 {
     // todo: todo
     return nullptr;
 }
 
-error_ptr PosixFDCtlNetConnAdaptor::SetReadDeadline(wayround_i2p::akigo::time::Time t)
+error_ptr PosixFDCtlNetConnAdapter::SetReadDeadline(wayround_i2p::akigo::time::Time t)
 {
     // todo: todo
     return nullptr;
 }
 
-error_ptr PosixFDCtlNetConnAdaptor::SetWriteDeadline(wayround_i2p::akigo::time::Time t)
+error_ptr PosixFDCtlNetConnAdapter::SetWriteDeadline(wayround_i2p::akigo::time::Time t)
 {
     // todo: todo
     return nullptr;
 }
 
-std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdaptor::Read(byte_vector b)
+std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdapter::Read(byte_vector b)
 {
     return std::tuple<size_type, error_ptr>();
 }
 
-std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdaptor::Write(byte_vector b)
+std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdapter::Write(byte_vector b)
 {
     return std::tuple<size_type, error_ptr>();
 }
 
-std::tuple<size_type, Addr_ptr, error_ptr> PosixFDCtlNetConnAdaptor::ReadFrom(byte_vector b)
+std::tuple<size_type, Addr_ptr, error_ptr> PosixFDCtlNetConnAdapter::ReadFrom(byte_vector b)
 {
     // todo: todo
     return std::tuple<size_type, Addr_ptr, error_ptr>();
 }
 
-std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdaptor::WriteTo(byte_vector b, Addr_ptr addr)
+std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdapter::WriteTo(byte_vector b, Addr_ptr addr)
 {
     // todo: todo
     return std::tuple<size_type, error_ptr>();
 }
 
 std::tuple<
-    std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
+    std::shared_ptr<PosixFDCtlNetConnAdapterAddr>,
     int> // todo: use akigo::error ?
-    PosixFDCtlNetConnAdaptorAddr::create_for_local(
+    PosixFDCtlNetConnAdapterAddr::create_for_local(
         std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl
     )
 {
-    return PosixFDCtlNetConnAdaptorAddr::create_for_x(fdctl, false);
+    return PosixFDCtlNetConnAdapterAddr::create_for_x(fdctl, false);
 }
 
 std::tuple<
-    std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
+    std::shared_ptr<PosixFDCtlNetConnAdapterAddr>,
     int> // todo: use akigo::error ?
-    PosixFDCtlNetConnAdaptorAddr::create_for_peer(
+    PosixFDCtlNetConnAdapterAddr::create_for_peer(
         std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl
     )
 {
-    return PosixFDCtlNetConnAdaptorAddr::create_for_x(fdctl, true);
+    return PosixFDCtlNetConnAdapterAddr::create_for_x(fdctl, true);
 }
 
-std::tuple<std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
+std::tuple<std::shared_ptr<PosixFDCtlNetConnAdapterAddr>,
            int> // todo: use akigo::error ?
-    PosixFDCtlNetConnAdaptorAddr::create_for_x(
+    PosixFDCtlNetConnAdapterAddr::create_for_x(
         std::shared_ptr<wayround_i2p::ccutils::posix_tools::FDCtl> fdctl,
         bool                                                       remote
     )
 {
     auto ret
-        = std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>(
-            new PosixFDCtlNetConnAdaptorAddr()
+        = std::shared_ptr<PosixFDCtlNetConnAdapterAddr>(
+            new PosixFDCtlNetConnAdapterAddr()
         );
 
     ret->own_ptr = ret;
@@ -365,20 +381,20 @@ std::tuple<std::shared_ptr<PosixFDCtlNetConnAdaptorAddr>,
     return std::tuple(ret, 0);
 }
 
-PosixFDCtlNetConnAdaptorAddr::PosixFDCtlNetConnAdaptorAddr()
+PosixFDCtlNetConnAdapterAddr::PosixFDCtlNetConnAdapterAddr()
 {
 }
 
-PosixFDCtlNetConnAdaptorAddr::~PosixFDCtlNetConnAdaptorAddr()
+PosixFDCtlNetConnAdapterAddr::~PosixFDCtlNetConnAdapterAddr()
 {
 }
 
-ustring PosixFDCtlNetConnAdaptorAddr::Network()
+ustring PosixFDCtlNetConnAdapterAddr::Network()
 {
     return _network;
 }
 
-ustring PosixFDCtlNetConnAdaptorAddr::String()
+ustring PosixFDCtlNetConnAdapterAddr::String()
 {
     return _string;
 }
