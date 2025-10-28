@@ -24,12 +24,17 @@
 namespace wayround_i2p::ccutils::posix_tools
 {
 
+class FDAddress;
+
+using FDAddress_ptr  = std::shared_ptr<FDAddress>;
+using FDAddress_weak = std::weak_ptr<FDAddress>;
+
 class FDAddress
 {
   private:
     std::vector<std::uint8_t> addr_buff;
 
-    std::weak_ptr<FDAddress> own_ptr;
+    FDAddress_weak own_ptr;
 
   public:
     static std::shared_ptr<FDAddress> create();

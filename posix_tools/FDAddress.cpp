@@ -6,23 +6,23 @@
 namespace wayround_i2p::ccutils::posix_tools
 {
 
-std::shared_ptr<FDAddress> FDAddress::create()
+FDAddress_ptr FDAddress::create()
 {
-    auto ret     = std::shared_ptr<FDAddress>(new FDAddress());
+    auto ret     = FDAddress_ptr(new FDAddress());
     ret->own_ptr = ret;
     return ret;
 }
 
-std::shared_ptr<FDAddress> FDAddress::create(
+FDAddress_ptr FDAddress::create(
     std::vector<std::uint8_t> addr_buff
 )
 {
-    auto ret     = std::shared_ptr<FDAddress>(new FDAddress(addr_buff));
+    auto ret     = FDAddress_ptr(new FDAddress(addr_buff));
     ret->own_ptr = ret;
     return ret;
 }
 
-std::shared_ptr<FDAddress> FDAddress::create(
+FDAddress_ptr FDAddress::create(
     struct sockaddr *addr,
     socklen_t        length
 )

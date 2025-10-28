@@ -17,21 +17,36 @@ using error_ptr = wayround_i2p::akigo::builtin::error_ptr;
 using error     = wayround_i2p::akigo::builtin::error;
 using ustring   = wayround_i2p::akigo::builtin::ustring;
 
-using FDCtl = wayround_i2p::ccutils::posix_tools::FDCtl;
+using FDCtl      = wayround_i2p::ccutils::posix_tools::FDCtl;
+using FDCtl_ptr  = wayround_i2p::ccutils::posix_tools::FDCtl_ptr;
+using FDCtl_weak = wayround_i2p::ccutils::posix_tools::FDCtl_weak;
 
 // todo: make better CMakeLists.txt and move PosixFDCtlNetConnAdapter
 //       to separate source file
 
+// todo: rename PosixFDCtlNetConnAdapter to PosixFDCtlAkigoNetAdapter
+
+class PosixFDCtlNetConnAdapterAddr;
+
+using PosixFDCtlNetConnAdapterAddr_ptr  = std::shared_ptr<PosixFDCtlNetConnAdapterAddr>;
+using PosixFDCtlNetConnAdapterAddr_weak = std::weak_ptr<PosixFDCtlNetConnAdapterAddr>;
+
+class PosixFDCtlNetConnAdapter;
+
+using PosixFDCtlNetConnAdapter_ptr  = std::shared_ptr<PosixFDCtlNetConnAdapter>;
+using PosixFDCtlNetConnAdapter_weak = std::weak_ptr<PosixFDCtlNetConnAdapter>;
+
 class PosixFDCtlNetConnAdapter : wayround_i2p::akigo::net::Conn,
-                                 wayround_i2p::akigo::net::PacketConn
+                                 wayround_i2p::akigo::net::PacketConn,
+                                 wayround_i2p::akigo::net::Listener
 {
   public:
-    static std::shared_ptr<PosixFDCtlNetConnAdapter> create();
+    static PosixFDCtlNetConnAdapter_ptr create();
 
   private:
     std::shared_ptr<FDCtl> fdctl;
 
-    std::weak_ptr<PosixFDCtlNetConnAdapter> own_ptr;
+    PosixFDCtlNetConnAdapter_weak own_ptr;
 
   protected:
     PosixFDCtlNetConnAdapter();
@@ -60,6 +75,8 @@ class PosixFDCtlNetConnAdapter : wayround_i2p::akigo::net::Conn,
 
     std::tuple<size_type, Addr_ptr, error_ptr> ReadFrom(byte_vector b);
     std::tuple<size_type, error_ptr>           WriteTo(byte_vector b, Addr_ptr addr);
+
+    std::tuple<Conn_ptr, error_ptr> Accept();
 };
 
 class PosixFDCtlNetConnAdapterAddr : public wayround_i2p::akigo::net::Addr

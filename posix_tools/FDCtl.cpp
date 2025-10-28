@@ -23,7 +23,7 @@ consteval FDCtlInitOptions fdctl_normal_open_options()
 
 std::shared_ptr<FDCtl> FDCtl::create(int fd, FDCtlInitOptions opts)
 {
-    auto ret     = std::shared_ptr<FDCtl>(new FDCtl(fd, opts));
+    auto ret     = FDCtl_ptr(new FDCtl(fd, opts));
     ret->own_ptr = ret;
     return ret;
 }
@@ -350,7 +350,7 @@ FDCtl_res_errNoS FDCtl::Dup2(
 
 /*
 // note: see header for info on why this is disabled
-std::shared_ptr<FDCtl> FDCtl::Dup2(std::shared_ptr<FDCtl> newfd)
+FDCtl_ptr FDCtl::Dup2(FDCtl_ptr newfd)
 {
 }
 */
@@ -451,15 +451,15 @@ FDAddress_err_errNoS FDCtl::GetPeerName()
 }
 
 FDCtl_res_errNoS FDCtl::Connect(
-    std::shared_ptr<FDAddress> addr
+    FDAddress_ptr addr
 )
 {
     return this->Connect(addr, fdctl_normal_open_options());
 }
 
 FDCtl_res_errNoS FDCtl::Connect(
-    std::shared_ptr<FDAddress> addr,
-    FDCtlInitOptions           opts
+    FDAddress_ptr    addr,
+    FDCtlInitOptions opts
 )
 {
     auto addr_buff = addr->getAddrBuff();

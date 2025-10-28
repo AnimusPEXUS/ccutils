@@ -22,6 +22,9 @@ using byte_vector = std::vector<uint8_t>;
 
 class FDCtl;
 
+using FDCtl_ptr  = std::shared_ptr<FDCtl>;
+using FDCtl_weak = std::weak_ptr<FDCtl>;
+
 // class FDAddress;
 // int FDAddress::setAddrBuff(std::vector<std::uint8_t> addr_buff);
 
@@ -71,7 +74,7 @@ struct size_errNoS : sizeS, errNoS
 
 struct FDCtl_res_errNoS : res_errNoS
 {
-    std::shared_ptr<FDCtl> fdctl;
+    FDCtl_ptr fdctl;
 };
 
 struct FDAddress_err_errNoS : err_errNoS
@@ -81,8 +84,8 @@ struct FDAddress_err_errNoS : err_errNoS
 
 struct FDCtl_FDAddress_res_errNoS : res_errNoS
 {
-    std::shared_ptr<FDCtl>     fdctl;
-    std::shared_ptr<FDAddress> addr;
+    FDCtl_ptr     fdctl;
+    FDAddress_ptr addr;
 };
 
 struct socktype_res_errNoS : res_errNoS
@@ -106,13 +109,13 @@ consteval FDCtlInitOptions fdctl_normal_open_options();
 class FDCtl
 {
   private:
-    std::weak_ptr<FDCtl> own_ptr;
+    FDCtl_weak own_ptr;
 
   protected:
     FDCtl(int fd, FDCtlInitOptions opts);
 
   public:
-    static std::shared_ptr<FDCtl> create(int fd, FDCtlInitOptions opts);
+    static FDCtl_ptr create(int fd, FDCtlInitOptions opts);
 
     ~FDCtl();
 
@@ -198,7 +201,7 @@ class FDCtl
 
     // note: making this function will introduce problem: this will
     //   require maintaining db and checking if result of dup2 is same as newfd
-    // FDCtl_err_errNoS Dup2(std::shared_ptr<FDCtl> newfd);
+    // FDCtl_err_errNoS Dup2(FDCtl_ptr newfd);
 
     // closes current fd (if it [is set] and [not closed]) and
     // calls socket() in this object's class with same parameters
@@ -216,7 +219,7 @@ class FDCtl
         bool             dont_close_if_open = false
     );
 
-    err_errNoS Bind(std::shared_ptr<FDAddress> addr);
+    err_errNoS Bind(FDAddress_ptr addr);
 
   private:
     FDAddress_err_errNoS Get_X_Name(bool sock_or_peer);
@@ -226,11 +229,11 @@ class FDCtl
     FDAddress_err_errNoS GetPeerName();
 
     FDCtl_res_errNoS Connect(
-        std::shared_ptr<FDAddress> addr
+        FDAddress_ptr addr
     );
     FDCtl_res_errNoS Connect(
-        std::shared_ptr<FDAddress> addr,
-        FDCtlInitOptions           opts
+        FDAddress_ptr    addr,
+        FDCtlInitOptions opts
     );
 
     FDCtl_FDAddress_res_errNoS Accept();

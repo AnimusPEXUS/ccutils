@@ -217,9 +217,7 @@ std::tuple<UnixConn_ptr, error_ptr> ListenUnixgram(
     UnixAddr_ptr laddr
 );
 
-class UnixListener : public Listener
-{
-};
+class UnixListener;
 
 using UnixListener_ptr = std::shared_ptr<UnixListener>;
 

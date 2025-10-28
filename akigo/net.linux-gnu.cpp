@@ -45,12 +45,6 @@ std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
 
     std::cout << "ListenUnix, ret: " << (ret == nullptr ? "" : "not") << " null" << std::endl;
 
-    {
-        UnixListener       *x1;
-        decltype(ret.get()) x2;
-        x1 = x2;
-    }
-
     auto x = std::dynamic_pointer_cast<UnixListener>(ret);
 
     std::cout << "ListenUnix,   x: " << (x == nullptr ? "" : "not") << " null" << std::endl;
@@ -61,6 +55,8 @@ std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
 // todo 2025-10-06: don't remember why I wanted to separate this.
 //                  maybe this separation not needed anymore.
 //                  thinking here required.
+// note 2025-10-12: confirmed - PosixFDCtlNetConnAdapter should be separated into own
+//                  source file(s)
 
 // ------- ↓ ↓ ------- source to be separated ------- ↓ ↓ -------
 
@@ -183,6 +179,12 @@ std::tuple<size_type, error_ptr> PosixFDCtlNetConnAdapter::WriteTo(byte_vector b
 {
     // todo: todo
     return std::tuple<size_type, error_ptr>();
+}
+
+std::tuple<Conn_ptr, error_ptr> PosixFDCtlNetConnAdapter::Accept()
+{
+    // todo: todo
+    return std::tuple<Conn_ptr, error_ptr>();
 }
 
 std::tuple<
