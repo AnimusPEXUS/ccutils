@@ -26,6 +26,7 @@ find_package(PkgConfig REQUIRED)
 #find_package(Boost REQUIRED COMPONENTS json regex)
 
 include("./cmake_scripts/create_ccutils_component.cmake")
+#include("./cmake_scripts/ccutils_define_package.cmake")
 
 create_ccutils_component(
   TARGETNAME ccutils_utils_cf

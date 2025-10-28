@@ -1,20 +1,20 @@
 
 ##
-# documentation for ccutils_definine_package function
+# documentation for ccutils_define_package function
 #
 # you can use this function to define packages in your cmake-based project.
 #
 # this function eventually uses add_library() cmake function.
 #
-# note: ccutils_definine_package is improved create_ccutils_component function.
-#       in ccutils_definine_package there are no separate SOURCES/HEADERS parameters,
+# note: ccutils_define_package is improved create_ccutils_component function.
+#       in ccutils_define_package there are no separate SOURCES/HEADERS parameters,
 #       but instead ITEMS parameter.
 #
 # programmer should list items of package. items are essentially names of cpp/hpp files,
-# but without extensions. ccutils_definine_package take item name and then searches
+# but without extensions. ccutils_define_package take item name and then searches
 # named subdirectory for cpp/hpp files with item's name + additioanlly searches cpp/hpp
 # files with host cpu/os name. for example, if we assign item 'apple' to package,
-# ccutils_definine_package will try to find following files:
+# ccutils_define_package will try to find following files:
 #   apple.cpp, apple.hpp,
 #   apple.any.any.cpp, apple.any.any.hpp,
 #   apple.x86_64.any.cpp, apple.x86_64.any.hpp,
@@ -24,7 +24,7 @@
 # where `x86_64` and `linux-gnu` currently detected host.
 #   (this can be used to create separate sources for different CPUs and OSes)
 #
-# warning: current version of ccutils_definine_package is not intended for creation of
+# warning: current version of ccutils_define_package is not intended for creation of
 #          shared libraries.. maybe in future, but not now.
 #
 #
@@ -51,7 +51,7 @@
 #     but you, brobably, to keep orger, should lean to minimize possibility placing
 #     different domains and projects in same cpp code repository and/or same CMakeLists.txt.
 
-function(ccutils_definine_package)
+function(ccutils_define_package)
   set(options)
   set(
     oneValueArgs
@@ -67,28 +67,28 @@ function(ccutils_definine_package)
     INC_DIRS_PUB INC_DIRS_PRIV
   )
   cmake_parse_arguments(
-    ccutils_definine_package_arg
+    ccutils_define_package_arg
     "${options}"
     "${oneValueArgs}"
     "${multiValueArgs}"
     ${ARGN}
   )
 
-  list(SORT ccutils_definine_package_arg_ITEMS)
+  list(SORT ccutils_define_package_arg_ITEMS)
 
-  set(msg " defining ${ccutils_definine_package_arg_PROJECT_NAME} package ")
-  string(append msg "${ccutils_definine_package_arg_PACKAGE_NAME}")
+  set(msg " defining ${ccutils_define_package_arg_PROJECT_NAME} package ")
+  string(append msg "${ccutils_define_package_arg_PACKAGE_NAME}")
   message(msg)
 
   add_library(
-    ${ccutils_definine_package_arg_PACKAGE_NAME}
+    ${ccutils_define_package_arg_PACKAGE_NAME}
     EXCLUDE_FROM_ALL
   )
 
   set(found_sources)
   set(found_headers)
 
-  foreach(item ${ccutils_definine_package_arg_ITEMS})
+  foreach(item ${ccutils_define_package_arg_ITEMS})
 
     set(filename_base_to_check
       "${item}"
@@ -142,17 +142,17 @@ function(ccutils_definine_package)
     list(
       APPEND
       formatted_sources_list
-      "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_definine_package_arg_SUBDIR}/${i}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${i}"
     )
   endforeach()
 
 
   set(formatted_headers_list)
-  foreach(i ${ccutils_definine_package_arg_HEADERS})
+  foreach(i ${ccutils_define_package_arg_HEADERS})
     list(
       APPEND
       formatted_headers_list
-      "${ccutils_definine_package_arg_SUBDIR}/includes/${ccutils_definine_package_arg_DOMAIN_NAME}/${ccutils_definine_package_arg_PACKAGE_NAME}/${ccutils_definine_package_arg_SUBDIR}/${i}.hpp"
+      "${ccutils_define_package_arg_SUBDIR}/includes/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}/${i}.hpp"
     )
   endforeach()
 
@@ -160,48 +160,48 @@ function(ccutils_definine_package)
 
   # apply .cpp files
   target_sources(
-    ${ccutils_definine_package_arg_PACKAGE_NAME}
+    ${ccutils_define_package_arg_PACKAGE_NAME}
     PRIVATE
     ${formatted_sources_list}
   )
 
   # apply .hpp files todo: investigate this
   target_sources(
-    ${ccutils_definine_package_arg_PACKAGE_NAME}
+    ${ccutils_define_package_arg_PACKAGE_NAME}
     PUBLIC
-    FILE_SET ${ccutils_definine_package_arg_PACKAGE_NAME}_headers
+    FILE_SET ${ccutils_define_package_arg_PACKAGE_NAME}_headers
     TYPE HEADERS
-    BASE_DIRS ${ccutils_definine_package_arg_SUBDIR}/includes
+    BASE_DIRS ${ccutils_define_package_arg_SUBDIR}/includes
     FILES
     ${formatted_headers_list}
   )
 
   # add dependencies
   target_link_libraries(
-    ${ccutils_definine_package_arg_PACKAGE_NAME}
+    ${ccutils_define_package_arg_PACKAGE_NAME}
     PUBLIC
-    ${ccutils_definine_package_arg_LIBS_PUB}
+    ${ccutils_define_package_arg_LIBS_PUB}
     PRIVATE
-    ${ccutils_definine_package_arg_arg_LIBS_PRIV}
+    ${ccutils_define_package_arg_LIBS_PRIV}
   )
 
   # todo: don't remember what's this doing
   target_include_directories(
-    ${ccutils_definine_package_arg_PACKAGE_NAME}
+    ${ccutils_define_package_arg_PACKAGE_NAME}
     PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_definine_package_arg_SUBDIR}/includes>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_definine_package_arg_DOMAIN_NAME}/${ccutils_definine_package_arg_PACKAGE_NAME}/${ccutils_definine_package_arg_SUBDIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/includes>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}>
     PUBLIC
-    ${ccutils_definine_package_arg_INC_DIRS_PUB}
+    ${ccutils_define_package_arg_INC_DIRS_PUB}
     PRIVATE
-    ${ccutils_definine_package_arg_INC_DIRS_PRIV}
+    ${ccutils_define_package_arg_INC_DIRS_PRIV}
   )
 
   # installation instruction (this is used, for example, if `make install` issued)
   install(
-    TARGETS ${ccutils_definine_package_arg_PACKAGE_NAME}
-    FILE_SET ${ccutils_definine_package_arg_PACKAGE_NAME}_headers
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_definine_package_arg_DOMAIN_NAME}/${ccutils_definine_package_arg_PACKAGE_NAME}/${ccutils_definine_package_arg_SUBDIR}
+    TARGETS ${ccutils_define_package_arg_PACKAGE_NAME}
+    FILE_SET ${ccutils_define_package_arg_PACKAGE_NAME}_headers
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}
   )
 
   # -v- old -v-
@@ -209,19 +209,19 @@ function(ccutils_definine_package)
   # todo: make configurable option for EXCLUDE_FROM_ALL parameter in add_library
   #
   #  add_library(
-  #    ${ccutils_definine_package_arg_PACKAGE_NAME}
+  #    ${ccutils_define_package_arg_PACKAGE_NAME}
   #    EXCLUDE_FROM_ALL
   #  )
   #
   #  set(formatted_sources_list)
-  #  foreach(i ${ccutils_definine_package_arg_SOURCES})
+  #  foreach(i ${ccutils_define_package_arg_SOURCES})
   #    list(
   #      APPEND
   #      formatted_sources_list
-  #      "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_definine_package_arg_SUBDIR}/${i}.cpp"
+  #      "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${i}.cpp"
   #    )
   #
-  #    set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_definine_package_arg_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.cpp")
+  #    set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.cpp")
   #    if (EXISTS ${nfn})
   #      list(
   #	APPEND
@@ -233,21 +233,21 @@ function(ccutils_definine_package)
   #  endforeach()
   #
   #  target_sources(
-  #    ${ccutils_definine_package_arg_PACKAGE_NAME}
+  #    ${ccutils_define_package_arg_PACKAGE_NAME}
   #    PRIVATE
   #    ${formatted_sources_list}
   #  )
   #
   #  set(formatted_headers_list)
-  #  foreach(i ${ccutils_definine_package_arg_HEADERS})
+  #  foreach(i ${ccutils_define_package_arg_HEADERS})
   #    list(
   #      APPEND
   #      formatted_headers_list
-  #      "${ccutils_definine_package_arg_SUBDIR}/includes/${ccutils_definine_package_arg_DOMAIN_NAME}/${ccutils_definine_package_arg_PACKAGE_NAME}/${ccutils_definine_package_arg_SUBDIR}/${i}.hpp"
+  #      "${ccutils_define_package_arg_SUBDIR}/includes/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}/${i}.hpp"
   #    )
   #
   #
-  #    set(nfn "${ccutils_definine_package_arg_SUBDIR}/includes/${ccutils_definine_package_arg_DOMAIN_NAME}/${ccutils_definine_package_arg_PACKAGE_NAME}/${ccutils_definine_package_arg_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.hpp")
+  #    set(nfn "${ccutils_define_package_arg_SUBDIR}/includes/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.hpp")
   #    if (EXISTS ${nfn})
   #      list(
   #	APPEND
@@ -260,38 +260,38 @@ function(ccutils_definine_package)
   #
   #
   #  target_sources(
-  #    ${ccutils_definine_package_arg_PACKAGE_NAME}
+  #    ${ccutils_define_package_arg_PACKAGE_NAME}
   #    PUBLIC
-  #    FILE_SET ${ccutils_definine_package_arg_PACKAGE_NAME}_headers
+  #    FILE_SET ${ccutils_define_package_arg_PACKAGE_NAME}_headers
   #    TYPE HEADERS
-  #    BASE_DIRS ${ccutils_definine_package_arg_SUBDIR}/includes
+  #    BASE_DIRS ${ccutils_define_package_arg_SUBDIR}/includes
   #    FILES
   #    ${formatted_headers_list}
   #  )
   #
   #  target_link_libraries(
-  #    ${ccutils_definine_package_arg_PACKAGE_NAME}
+  #    ${ccutils_define_package_arg_PACKAGE_NAME}
   #    PUBLIC
-  #    ${ccutils_definine_package_arg_LIBS_PUB}
+  #    ${ccutils_define_package_arg_LIBS_PUB}
   #    PRIVATE
-  #    ${ccutils_definine_package_arg_arg_LIBS_PRIV}
+  #    ${ccutils_define_package_arg_LIBS_PRIV}
   #  )
   #
   #  target_include_directories(
-  #    ${ccutils_definine_package_arg_PACKAGE_NAME}
+  #    ${ccutils_define_package_arg_PACKAGE_NAME}
   #    PUBLIC
-  #    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_definine_package_arg_SUBDIR}/includes>
-  #    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_definine_package_arg_DOMAIN_NAME}/${ccutils_definine_package_arg_PACKAGE_NAME}/${ccutils_definine_package_arg_SUBDIR}>
+  #    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/includes>
+  #    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}>
   #    PUBLIC
-  #    ${ccutils_definine_package_arg_INC_DIRS_PUB}
+  #    ${ccutils_define_package_arg_INC_DIRS_PUB}
   #    PRIVATE
-  #    ${ccutils_definine_package_arg_INC_DIRS_PRIV}
+  #    ${ccutils_define_package_arg_INC_DIRS_PRIV}
   #  )
   #
   #  install(
-  #    TARGETS ${ccutils_definine_package_arg_PACKAGE_NAME}
-  #    FILE_SET ${ccutils_definine_package_arg_PACKAGE_NAME}_headers
-  #    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_definine_package_arg_DOMAIN_NAME}/${ccutils_definine_package_arg_PACKAGE_NAME}/${ccutils_definine_package_arg_SUBDIR}
+  #    TARGETS ${ccutils_define_package_arg_PACKAGE_NAME}
+  #    FILE_SET ${ccutils_define_package_arg_PACKAGE_NAME}_headers
+  #    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}
   #  )
 
 
