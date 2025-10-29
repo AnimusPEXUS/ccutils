@@ -26,16 +26,17 @@ find_package(PkgConfig REQUIRED)
 #find_package(Boost REQUIRED COMPONENTS json regex)
 
 include("./cmake_scripts/create_ccutils_component.cmake")
-#include("./cmake_scripts/ccutils_define_package.cmake")
 
-create_ccutils_component(
-  TARGETNAME ccutils_utils_cf
+include("./cmake_scripts/ccutils_unicode_backend_selector.cmake")
+include("./cmake_scripts/ccutils_define_package.cmake")
+
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_utils_cf
   SUBDIR utils
 
-  SOURCES
-  cf
-
-  HEADERS
+  ITEMS
   cf
 
   LIBS_PUB
@@ -43,88 +44,32 @@ create_ccutils_component(
   ccutils_errors
 )
 
-create_ccutils_component(
-  TARGETNAME ccutils_utils_concepts
+# note: same dir as utils
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_utils_concepts
   SUBDIR utils
 
-  SOURCES
-  concepts
-
-  HEADERS
+  ITEMS
   concepts
 
   LIBS_PUB
 )
 
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_utils_concepts
+  SUBDIR utils
 
-create_ccutils_component(
-  TARGETNAME ccutils_errors
-  SUBDIR errors
-
-  SOURCES
-  e
-
-  HEADERS
-  e
+  ITEMS
+  concepts
 
   LIBS_PUB
-  ccutils_unicode
 )
 
-
-set(
-  CCUTILS_UNICODE_BACKEND
-  icu
-  CACHE
-  STRING
-  "set to 'icu' or 'ccutils' - select backend used by ccutils_unicode library"
-)
-
-block(SCOPE_FOR VARIABLES)
-  set(CCUTILS_UNICODE_BACKEND_correct OFF)
-  foreach(i IN ITEMS icu ccutils)
-    if ("${i}" STREQUAL "${CCUTILS_UNICODE_BACKEND}")
-      set(CCUTILS_UNICODE_BACKEND_correct ON)
-      break()
-    endif()
-  endforeach()
-  if (NOT CCUTILS_UNICODE_BACKEND_correct)
-    message(FATAL_ERROR "invalid value for CCUTILS_UNICODE_BACKEND")
-  endif()
-endblock()
-
-message("CCUTILS_UNICODE_BACKEND is ${CCUTILS_UNICODE_BACKEND}")
-
-set(
-  CCUTILS_UNICODE_SOURCES
-  u
-)
-
-set(
-  CCUTILS_UNICODE_HEADERS
-  u
-)
-
-set(
-  CCUTILS_UNICODE_LIBS_PUB
-  ccutils_errors
-  ccutils_regexp
-  ccutils_repr
-  ccutils_utils_cf
-)
-
-
-#set(
-#  CCUTILS_UNICODE_LIBS_PUB
-#  ccutils_errors
-#  ccutils_regexp
-#  ccutils_repr
-#)
-
-set(
-  CCUTILS_UNICODE_INC_DIRS_PUB
-  ${ccutils_errors_INCLUDE_DIRS}
-)
+set(CCUTILS_UNICODE_LIBS_PUB_ADD)
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
 
@@ -132,14 +77,13 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
 
   find_package(ICU 73.0 COMPONENTS uc i18n io REQUIRED)
 
-  create_ccutils_component(
-    TARGETNAME ccutils_unicode_backend_icu
+  ccutils_define_package(
+    DOMAIN_NAME wayround.i2p
+    PROJECT_NAME ccutils
+    PACKAGE_NAME ccutils_unicode_backend_icu
     SUBDIR unicode_backend_icu
 
-    SOURCES
-    u_backend
-
-    HEADERS
+    ITEMS
     u_backend
 
     LIBS_PUB
@@ -157,36 +101,21 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
 
   list(
     APPEND
-    CCUTILS_UNICODE_SOURCES
-  )
-  list(
-    APPEND
-    CCUTILS_UNICODE_HEADERS
-  )
-  list(
-    APPEND
-    CCUTILS_UNICODE_LIBS_PUB
+    CCUTILS_UNICODE_LIBS_PUB_ADD
     ccutils_unicode_backend_icu
-  )
-  list(
-    APPEND
-    CCUTILS_UNICODE_INC_DIRS_PUB
   )
 
 endif()
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 
-  create_ccutils_component(
-    TARGETNAME ccutils_unicode_backend_ccutils
+  ccutils_define_package(
+    DOMAIN_NAME wayround.i2p
+    PROJECT_NAME ccutils
+    PACKAGE_NAME ccutils_unicode_backend_ccutils
     SUBDIR unicode_backend_ccutils
 
-    SOURCES
-    u_backend
-    ccuub_ccutils_generated_types
-    ccuub_ccutils_generated_char_db
-
-    HEADERS
+    ITEMS
     u_backend
     ccuub_ccutils_generated_types
     ccuub_ccutils_generated_char_db
@@ -200,39 +129,29 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 
   list(
     APPEND
-    CCUTILS_UNICODE_SOURCES
-  )
-  list(
-    APPEND
-    CCUTILS_UNICODE_HEADERS
-  )
-  list(
-    APPEND
-    CCUTILS_UNICODE_LIBS_PUB
+    CCUTILS_UNICODE_LIBS_PUB_ADD
     ccutils_unicode_backend_ccutils
   )
-  list(
-    APPEND
-    CCUTILS_UNICODE_INC_DIRS_PUB
-  )
+
 endif()
 
 
-create_ccutils_component(
-  TARGETNAME ccutils_unicode
+
+
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_unicode
   SUBDIR unicode
 
-  SOURCES
-  ${CCUTILS_UNICODE_SOURCES}
-
-  HEADERS
-  ${CCUTILS_UNICODE_HEADERS}
+  ITEMS
+  u
 
   LIBS_PUB
-  ${CCUTILS_UNICODE_LIBS_PUB}
+  ccutils_errors
+  ccutils_unicode
 
   INC_DIRS_PUB
-  ${CCUTILS_UNICODE_INC_DIRS_PUB}
 )
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
@@ -241,96 +160,81 @@ elseif (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
   target_compile_options(ccutils_unicode PUBLIC "-DCCUTILS_UNICODE_BACKEND=ccutils")
 endif()
 
-create_ccutils_component(
-  TARGETNAME ccutils_repr
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_repr
   SUBDIR repr
 
-  SOURCES
-  repr
-
-  HEADERS
+  ITEMS
   repr
 
   LIBS_PUB
-  ccutils_unicode
   ccutils_errors
+  ccutils_unicode
 )
 
-create_ccutils_component(
-  TARGETNAME ccutils_logger
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_logger
   SUBDIR logger
 
-  SOURCES
-  logger
-
-  HEADERS
+  ITEMS
   logger
 
   LIBS_PUB
-  ccutils_unicode
   ccutils_errors
+  ccutils_unicode
 )
 
-
-create_ccutils_component(
-  TARGETNAME ccutils_regexp
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_regexp
   SUBDIR regexp
 
-  SOURCES
+  ITEMS
   regexp
-  regexp_fds_and_enums
-
-  HEADERS
-  regexp
-  regexp_fds_and_enums
 
   LIBS_PUB
-  ccutils_unicode
   ccutils_errors
+  ccutils_unicode
   ccutils_repr
 )
 
-
-
-create_ccutils_component(
-  TARGETNAME ccutils_test_suite_tool
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_test_suite_tool
   SUBDIR test_suite_tool
 
-  SOURCES
-  tst
-
-  HEADERS
+  ITEMS
   tst
 
   LIBS_PUB
-  ccutils_unicode
   ccutils_errors
+  ccutils_unicode
   ccutils_logger
 )
 
-
-
-
-create_ccutils_component(
-  TARGETNAME ccutils_worker01
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_worker01
   SUBDIR worker01
 
-  SOURCES
-  Worker01
-
-  HEADERS
+  ITEMS
   Worker01
 )
 
-create_ccutils_component(
-  TARGETNAME ccutils_posix_tools
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_posix_tools
   SUBDIR posix_tools
 
-  SOURCES
-  FDCtl
-  FDAddress
-
-  HEADERS
+  ITEMS
   FDCtl
   FDAddress
 
@@ -338,18 +242,17 @@ create_ccutils_component(
   ccutils_unicode
   ccutils_ip
 
-  INC_DIRS_PUB
-  ${ccutils_unicode_INCLUDE_DIRS}
+  #INC_DIRS_PUB
+  #  ${ccutils_unicode_INCLUDE_DIRS}
 )
 
-create_ccutils_component(
-  TARGETNAME ccutils_ip
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_ip
   SUBDIR ip
 
-  SOURCES
-  ip
-
-  HEADERS
+  ITEMS
   ip
 
   LIBS_PUB
@@ -364,52 +267,37 @@ option(
   FALSE
 )
 
-set(ccutils_signal_ADD_SOURCES "signal")
-set(ccutils_signal_ADD_HEADERS "signal")
-set(ccutils_signal_ADD_LIBS_PUB "")
-set(ccutils_signal_ADD_LIBS_PRIV "")
-set(ccutils_signal_ADD_INC_DIRS_PUB "")
-set(ccutils_signal_ADD_INC_DIRS_PRIV "")
-
+set(ccutils_signal_ADD_ITEMS)
 if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
-
-  list(APPEND ccutils_signal_ADD_SOURCES "signal_sigc_compat")
-  list(APPEND ccutils_signal_ADD_HEADERS "signal_sigc_compat")
-
+  list(APPEND ccutils_signal_ADD_ITEMS "signal_sigc_compat")
 endif()
 
-create_ccutils_component(
-  TARGETNAME ccutils_signal
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_signal
   SUBDIR signal
 
-  SOURCES
-  ${ccutils_signal_ADD_SOURCES}
-
-  HEADERS
-  ${ccutils_signal_ADD_HEADERS}
-
-  LIBS_PUB
-  ${ccutils_signal_ADD_LIBS_PUB}
+  ITEMS
+  signal
+  ${ccutils_signal_ADD_ITEMS}
 )
 
-if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
 
+if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
   pkg_check_modules(sigc REQUIRED IMPORTED_TARGET sigc++-3.0)
 
   target_compile_options(ccutils_signal PUBLIC "${sigc_CFLAGS}")
   target_link_options(ccutils_signal PUBLIC "${sigc_LDFLAGS}")
-
 endif()
 
-
-create_ccutils_component(
-  TARGETNAME ccutils_json
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_json
   SUBDIR json
 
-  SOURCES
-  json
-
-  HEADERS
+  ITEMS
   json
 
   LIBS_PUB
@@ -418,21 +306,13 @@ create_ccutils_component(
   ccutils_regexp
 )
 
-
-create_ccutils_component(
-  TARGETNAME ccutils_akigo
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_akigo
   SUBDIR akigo
 
-  SOURCES
-  builtin
-  io
-  net
-  time
-  context
-  os
-
-  HEADERS
-  _pkg
+  ITEMS
   builtin
   io
   net

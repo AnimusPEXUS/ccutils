@@ -19,6 +19,7 @@
 #  INC_DIRS_PRIV  - passed to target_include_directories() cmake function
 
 function(create_ccutils_component)
+
   set(options)
   set(oneValueArgs TARGETNAME SUBDIR)
   set(
@@ -27,6 +28,7 @@ function(create_ccutils_component)
     LIBS_PUB LIBS_PRIV
     INC_DIRS_PUB INC_DIRS_PRIV
   )
+
   cmake_parse_arguments(
     create_ccutils_component
     "${options}"
@@ -38,7 +40,7 @@ function(create_ccutils_component)
   list(SORT create_ccutils_component_SOURCES)
   list(SORT create_ccutils_component_HEADERS)
 
-  message("        defining ccutils component: ${create_ccutils_component_TARGETNAME}")
+  message("defining ccutils component: ${create_ccutils_component_TARGETNAME}")
 
   # todo: make configurable option for EXCLUDE_FROM_ALL parameter in add_library
 

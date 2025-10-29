@@ -52,6 +52,7 @@
 #     different domains and projects in same cpp code repository and/or same CMakeLists.txt.
 
 function(ccutils_define_package)
+
   set(options)
   set(
     oneValueArgs
@@ -66,6 +67,7 @@ function(ccutils_define_package)
     LIBS_PUB LIBS_PRIV
     INC_DIRS_PUB INC_DIRS_PRIV
   )
+
   cmake_parse_arguments(
     ccutils_define_package_arg
     "${options}"
