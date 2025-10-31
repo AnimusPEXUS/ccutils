@@ -53,13 +53,18 @@
 
 function(ccutils_define_package)
 
-  set(options)
+  set(
+    options
+    # PRINT_FOUND_FILE_NAMES
+  )
   set(
     oneValueArgs
     DOMAIN_NAME
     PROJECT_NAME
     PACKAGE_NAME
     SUBDIR
+    CPU
+    OS
   )
   set(
     multiValueArgs
@@ -78,9 +83,54 @@ function(ccutils_define_package)
 
   list(SORT ccutils_define_package_arg_ITEMS)
 
-  set(msg " defining ${ccutils_define_package_arg_PROJECT_NAME} package ")
-  string(append msg "${ccutils_define_package_arg_PACKAGE_NAME}")
-  message(msg)
+  block()
+
+    # note: this doesn't work, so i forced to write code for each parameter
+    # foreach(i DOMAIN_NAME PROJECT_NAME PACKAGE_NAME SUBDIR CPU OS )
+    #   set(t_len 0)
+    #   set(x "ccutils_define_package_arg_${i}")
+    #   set(x1 "${x}")
+    #   message(NOTICE "i: ${i}")
+    #   message(NOTICE "x: ${x}")
+    #   message(NOTICE "x1: ${x1}")
+    #   string(LENGTH "${x1}" t_len)
+    #   if(t_len EQUAL 0)
+    #      message(FATAL_ERROR "${i} must be defined")
+    #   endif()
+    #  endforeach()
+
+    set(t_len 0)
+    string(LENGTH "${ccutils_define_package_arg_DOMAIN_NAME}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "DOMAIN_NAME must be defined")
+    endif()
+
+    string(LENGTH "${ccutils_define_package_arg_PROJECT_NAME}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "PROJECT_NAME must be defined")
+    endif()
+
+    string(LENGTH "${ccutils_define_package_arg_PACKAGE_NAME}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "PACKAGE_NAME must be defined")
+    endif()
+
+    string(LENGTH "${ccutils_define_package_arg_CPU}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "CPU must be defined")
+    endif()
+
+    string(LENGTH "${ccutils_define_package_arg_OS}" t_len)
+    if(t_len EQUAL 0)
+      message(FATAL_ERROR "OS must be defined")
+    endif()
+
+  endblock()
+  # return()
+
+  set(msg "  defining ${ccutils_define_package_arg_PROJECT_NAME} package ")
+  string(APPEND msg "${ccutils_define_package_arg_PACKAGE_NAME}")
+  message(NOTICE "${msg}")
 
   add_library(
     ${ccutils_define_package_arg_PACKAGE_NAME}
@@ -92,12 +142,14 @@ function(ccutils_define_package)
 
   foreach(item ${ccutils_define_package_arg_ITEMS})
 
+    set(files_found 0)
+
     set(filename_base_to_check
       "${item}"
       "${item}.any.any"
-      "${item}.${CPU}.any"
-      "${item}.any.${OS}"
-      "${item}.${CPU}.${OS}"
+      "${item}.${ccutils_define_package_arg_CPU}.any"
+      "${item}.any.${ccutils_define_package_arg_OS}"
+      "${item}.${ccutils_define_package_arg_CPU}.${ccutils_define_package_arg_OS}"
     )
 
     foreach(base ${filename_base_to_check})
@@ -105,11 +157,15 @@ function(ccutils_define_package)
       foreach(ext ".cpp" ".hpp")
 
         set(filename_base_c)
-        string(append filename_base_c "${base}")
-        string(append filename_base_c "${ext}")
+        string(APPEND filename_base_c "${base}")
+        string(APPEND filename_base_c "${ext}")
 
+        # message(NOTICE "filename_base_c: ${filename_base_c}")
 
-        set(fntc "${CMAKE_CURRENT_SOURCE_DIR}/${create_ccutils_component_SUBDIR}/${filename_base_c}")
+        set(fntc "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${filename_base_c}")
+
+        # message(NOTICE "fntc: ${fntc}")
+
         if (EXISTS "${fntc}")
 
           set(res "")
@@ -117,8 +173,10 @@ function(ccutils_define_package)
           string(REGEX MATCH "^.*\.cpp$" res "${filename_base_c}")
 	  string(LENGTH "${res}" res_len)
 
+          # message(NOTICE "res_len GREATER 0: res: ${res}")
           if(res_len GREATER 0)
             list(APPEND found_sources "${fntc}")
+            math(EXPR files_found "${files_found} + 1")
           endif()
 
           set(res "")
@@ -128,6 +186,7 @@ function(ccutils_define_package)
 
           if(res_len GREATER 0)
             list(APPEND found_headers "${fntc}")
+            math(EXPR files_found "${files_found} + 1")
           endif()
 
         endif()
@@ -135,7 +194,25 @@ function(ccutils_define_package)
 
     endforeach()
 
+    if (${files_found} EQUAL 0)
+      message(WARNING "no files found for item '${item}'")
+    endif()
+
   endforeach()
+
+  # print file names
+
+  if (0)
+    message("    sources:")
+    foreach(i ${found_sources})
+      message(NOTICE "      " "${i}")
+    endforeach()
+
+    message("    headers:")
+    foreach(i ${found_headers})
+      message(NOTICE "      " "${i}")
+    endforeach()
+  endif()
 
   # final lists formatting
 
@@ -144,7 +221,8 @@ function(ccutils_define_package)
     list(
       APPEND
       formatted_sources_list
-      "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${i}"
+      # "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${i}"
+      "${i}"
     )
   endforeach()
 
@@ -205,96 +283,5 @@ function(ccutils_define_package)
     FILE_SET ${ccutils_define_package_arg_PACKAGE_NAME}_headers
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}
   )
-
-  # -v- old -v-
-
-  # todo: make configurable option for EXCLUDE_FROM_ALL parameter in add_library
-  #
-  #  add_library(
-  #    ${ccutils_define_package_arg_PACKAGE_NAME}
-  #    EXCLUDE_FROM_ALL
-  #  )
-  #
-  #  set(formatted_sources_list)
-  #  foreach(i ${ccutils_define_package_arg_SOURCES})
-  #    list(
-  #      APPEND
-  #      formatted_sources_list
-  #      "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${i}.cpp"
-  #    )
-  #
-  #    set(nfn "${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.cpp")
-  #    if (EXISTS ${nfn})
-  #      list(
-  #	APPEND
-  #	formatted_sources_list
-  #	"${nfn}"
-  #      )
-  #    endif()
-  #
-  #  endforeach()
-  #
-  #  target_sources(
-  #    ${ccutils_define_package_arg_PACKAGE_NAME}
-  #    PRIVATE
-  #    ${formatted_sources_list}
-  #  )
-  #
-  #  set(formatted_headers_list)
-  #  foreach(i ${ccutils_define_package_arg_HEADERS})
-  #    list(
-  #      APPEND
-  #      formatted_headers_list
-  #      "${ccutils_define_package_arg_SUBDIR}/includes/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}/${i}.hpp"
-  #    )
-  #
-  #
-  #    set(nfn "${ccutils_define_package_arg_SUBDIR}/includes/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}/${i}.${PARTICULAR_SYSTEM_NAME}.hpp")
-  #    if (EXISTS ${nfn})
-  #      list(
-  #	APPEND
-  #	formatted_headers_list
-  #	"${nfn}"
-  #      )
-  #    endif()
-  #
-  #  endforeach()
-  #
-  #
-  #  target_sources(
-  #    ${ccutils_define_package_arg_PACKAGE_NAME}
-  #    PUBLIC
-  #    FILE_SET ${ccutils_define_package_arg_PACKAGE_NAME}_headers
-  #    TYPE HEADERS
-  #    BASE_DIRS ${ccutils_define_package_arg_SUBDIR}/includes
-  #    FILES
-  #    ${formatted_headers_list}
-  #  )
-  #
-  #  target_link_libraries(
-  #    ${ccutils_define_package_arg_PACKAGE_NAME}
-  #    PUBLIC
-  #    ${ccutils_define_package_arg_LIBS_PUB}
-  #    PRIVATE
-  #    ${ccutils_define_package_arg_LIBS_PRIV}
-  #  )
-  #
-  #  target_include_directories(
-  #    ${ccutils_define_package_arg_PACKAGE_NAME}
-  #    PUBLIC
-  #    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ccutils_define_package_arg_SUBDIR}/includes>
-  #    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}>
-  #    PUBLIC
-  #    ${ccutils_define_package_arg_INC_DIRS_PUB}
-  #    PRIVATE
-  #    ${ccutils_define_package_arg_INC_DIRS_PRIV}
-  #  )
-  #
-  #  install(
-  #    TARGETS ${ccutils_define_package_arg_PACKAGE_NAME}
-  #    FILE_SET ${ccutils_define_package_arg_PACKAGE_NAME}_headers
-  #    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${ccutils_define_package_arg_DOMAIN_NAME}/${ccutils_define_package_arg_PACKAGE_NAME}/${ccutils_define_package_arg_SUBDIR}
-  #  )
-
 
 endfunction()

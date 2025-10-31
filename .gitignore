@@ -5,6 +5,7 @@
 *.so
 *~
 **/CMakeFiles
+**/CMakeCache.txt
 /unicode_backend_ccutils_codegen/log.log
 /unicode_backend_ccutils_codegen/ucd.all.flat.xml
 /docs_output

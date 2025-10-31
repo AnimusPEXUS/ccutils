@@ -7,13 +7,28 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # system detection. this is used to select/provide system-specific sources and headers
 
-set(PARTICULAR_SYSTEM_NAME "")
-# todo: detection should be improver here in future
-if (((DEFINED UNIX) AND (UNIX EQUAL 1)) AND ((DEFINED LINUX) AND (LINUX EQUAL 1)))
-  set(PARTICULAR_SYSTEM_NAME "linux-gnu")
-else()
-  message(FATAL_ERROR "system not supported")
-endif()
+include("./cmake_scripts/ccutils_detect_cpu_os.cmake")
+
+set(HOST_CPU)
+set(HOST_OS)
+
+ccutils_detect_cpu_os(HOST_CPU HOST_OS)
+
+message(NOTICE "configuring for '${HOST_OS}' on '${HOST_CPU}'")
+
+block()
+  set(t_l 0)
+  string(LENGTH "${HOST_CPU}" t_l)
+  if (t_l EQUAL 0)
+    message(FATAL_ERROR "error detecting CPU")
+  endif()
+
+  set(t_l 0)
+  string(LENGTH "${HOST_OS}" t_l)
+  if (t_l EQUAL 0)
+    message(FATAL_ERROR "error detecting OS")
+  endif()
+endblock()
 
 
 find_package(PkgConfig REQUIRED)
@@ -35,6 +50,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_utils_cf
   SUBDIR utils
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   cf
@@ -50,18 +67,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_utils_concepts
   SUBDIR utils
-
-  ITEMS
-  concepts
-
-  LIBS_PUB
-)
-
-ccutils_define_package(
-  DOMAIN_NAME wayround.i2p
-  PROJECT_NAME ccutils
-  PACKAGE_NAME ccutils_utils_concepts
-  SUBDIR utils
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   concepts
@@ -82,6 +89,8 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
     PROJECT_NAME ccutils
     PACKAGE_NAME ccutils_unicode_backend_icu
     SUBDIR unicode_backend_icu
+    CPU ${HOST_CPU}
+    OS ${HOST_OS}
 
     ITEMS
     u_backend
@@ -114,6 +123,8 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
     PROJECT_NAME ccutils
     PACKAGE_NAME ccutils_unicode_backend_ccutils
     SUBDIR unicode_backend_ccutils
+    CPU ${HOST_CPU}
+    OS ${HOST_OS}
 
     ITEMS
     u_backend
@@ -135,21 +146,23 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 
 endif()
 
-
-
-
 ccutils_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_unicode
   SUBDIR unicode
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   u
 
   LIBS_PUB
   ccutils_errors
-  ccutils_unicode
+  ccutils_regexp
+  ccutils_repr
+  ccutils_utils_cf
+  ${CCUTILS_UNICODE_LIBS_PUB_ADD}
 
   INC_DIRS_PUB
 )
@@ -165,6 +178,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_repr
   SUBDIR repr
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   repr
@@ -179,6 +194,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_logger
   SUBDIR logger
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   logger
@@ -193,6 +210,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_regexp
   SUBDIR regexp
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   regexp
@@ -208,6 +227,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_test_suite_tool
   SUBDIR test_suite_tool
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   tst
@@ -223,6 +244,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_worker01
   SUBDIR worker01
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   Worker01
@@ -233,6 +256,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_posix_tools
   SUBDIR posix_tools
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   FDCtl
@@ -251,6 +276,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_ip
   SUBDIR ip
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   ip
@@ -277,6 +304,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_signal
   SUBDIR signal
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   signal
@@ -296,6 +325,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_json
   SUBDIR json
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   json
@@ -311,6 +342,8 @@ ccutils_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_akigo
   SUBDIR akigo
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
 
   ITEMS
   builtin
