@@ -245,7 +245,7 @@ function(ccutils_define_package)
     ${formatted_sources_list}
   )
 
-  # apply .hpp files todo: investigate this
+  # apply .hpp files
   target_sources(
     ${ccutils_define_package_arg_PACKAGE_NAME}
     PUBLIC
@@ -265,7 +265,6 @@ function(ccutils_define_package)
     ${ccutils_define_package_arg_LIBS_PRIV}
   )
 
-  # todo: don't remember what's this doing
   target_include_directories(
     ${ccutils_define_package_arg_PACKAGE_NAME}
     PUBLIC

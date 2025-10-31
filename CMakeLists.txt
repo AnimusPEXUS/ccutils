@@ -76,6 +76,21 @@ ccutils_define_package(
   LIBS_PUB
 )
 
+ccutils_define_package(
+  DOMAIN_NAME wayround.i2p
+  PROJECT_NAME ccutils
+  PACKAGE_NAME ccutils_errors
+  SUBDIR errors
+  CPU ${HOST_CPU}
+  OS ${HOST_OS}
+
+  ITEMS
+  e
+
+  LIBS_PUB
+  ccutils_unicode
+)
+
 set(CCUTILS_UNICODE_LIBS_PUB_ADD)
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
