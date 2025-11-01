@@ -1,6 +1,6 @@
 
 
-#include <wayround_i2p/ccutils/akigo/net.linux-gnu.hpp>
+#include <wayround_i2p/ccutils/akigo/net.any.linux-gnu.hpp>
 
 namespace wayround_i2p::akigo::net
 {
