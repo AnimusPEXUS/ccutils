@@ -6,8 +6,11 @@ import os.path
 import datetime
 import re
 
-RE_NUMBER_str = r'WAYROUND_I2P_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d+'
+COOL_HEADERGUARD_TEXT = 'WAYROUND_I2P'
+
+RE_NUMBER_str = COOL_HEADERGUARD_TEXT + r'_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d+'
 RE_FIRST_LINE_RE_CHECK = re.compile(r'#ifndef '+RE_NUMBER_str)
+
 
 def edit_file(fullpath_first, fullpath):
 
@@ -23,13 +26,17 @@ def edit_file(fullpath_first, fullpath):
         lns[i] = lns[i].rstrip()
 
     if len(lns) > 0:
-        if RE_FIRST_LINE_RE_CHECK.match(lns[0]):
-            # print(f"  looks ok already")
-            return
 
-        if lns[0].startswith('#ifndef'):
+        if lns[0].startswith('#ifndef '+COOL_HEADERGUARD_TEXT):
+            if RE_FIRST_LINE_RE_CHECK.match(lns[0]):
+                # no editing needed, just return
+                return
+
+            # regeneration required, so continuing
+
             del lns[0]
         else:
+            # some unexpected code on line one - don't edit file
             print(f"  skipping (code 1) {relp}")
             return
 
@@ -55,7 +62,7 @@ def edit_file(fullpath_first, fullpath):
 
     a = datetime.datetime.now(datetime.UTC)
 
-    gened_name = 'WAYROUND_I2P_{:04d}{:02d}{:02d}_{:02d}{:02d}{:02d}_{:d}'.format(
+    gened_name = COOL_HEADERGUARD_TEXT+'_{:04d}{:02d}{:02d}_{:02d}{:02d}{:02d}_{:d}'.format(
         a.year, a.month, a.day, a.hour, a.minute, a.second, a.microsecond
     )
 
