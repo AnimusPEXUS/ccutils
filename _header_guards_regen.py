@@ -9,7 +9,7 @@ import re
 COOL_HEADERGUARD_TEXT = 'WAYROUND_I2P'
 
 RE_NUMBER_str = COOL_HEADERGUARD_TEXT + r'_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d+'
-RE_FIRST_LINE_RE_CHECK = re.compile(r'#ifndef '+RE_NUMBER_str)
+RE_FIRST_LINE_RE_CHECK = re.compile(r'^#ifndef '+RE_NUMBER_str+r'$')
 
 
 def edit_file(fullpath_first, fullpath):
