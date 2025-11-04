@@ -1,4 +1,8 @@
 
+# todo: this function requires cleanups. 
+# todo: too many literal and repeated string formattings.
+# todo: also: 80 chars per line! - will address this when I'll be able to do it with ccedit
+
 ##
 # documentation for ccutils_define_package function
 #
