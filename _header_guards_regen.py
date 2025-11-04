@@ -4,14 +4,17 @@
 
 import os.path
 import datetime
+import re
 
+RE_NUMBER_str = r'WAYROUND_I2P_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d+'
+RE_FIRST_LINE_RE_CHECK = re.compile(r'#ifndef '+RE_NUMBER_str)
 
 def edit_file(fullpath_first, fullpath):
 
     lns = []
 
     relp = os.path.relpath(fullpath, fullpath_first)
-    print("editing: {}".format(relp))
+    # print("editing: {}".format(relp))
 
     with open(fullpath, 'r') as f:
         lns = f.readlines()
@@ -20,17 +23,21 @@ def edit_file(fullpath_first, fullpath):
         lns[i] = lns[i].rstrip()
 
     if len(lns) > 0:
+        if RE_FIRST_LINE_RE_CHECK.match(lns[0]):
+            # print(f"  looks ok already")
+            return
+
         if lns[0].startswith('#ifndef'):
             del lns[0]
         else:
-            print(f"skipping 1 {relp}")
+            print(f"  skipping (code 1) {relp}")
             return
 
     if len(lns) > 0:
         if lns[0].startswith('#define'):
             del lns[0]
         else:
-            print(f"skipping 2 {relp}")
+            print(f"  skipping (code 2) {relp}")
             return
 
     while len(lns) > 0:
@@ -43,7 +50,7 @@ def edit_file(fullpath_first, fullpath):
         if lns[-1].startswith('#endif'):
             del lns[-1]
         else:
-            print(f"skipping 4 {relp}: {lns[-1]}")
+            print(f"  skipping (code 4) {relp}: {lns[-1]}")
             return
 
     a = datetime.datetime.now(datetime.UTC)
@@ -51,6 +58,8 @@ def edit_file(fullpath_first, fullpath):
     gened_name = 'WAYROUND_I2P_{:04d}{:02d}{:02d}_{:02d}{:02d}{:02d}_{:d}'.format(
         a.year, a.month, a.day, a.hour, a.minute, a.second, a.microsecond
     )
+
+    print("changing: {}".format(relp))
 
     lns.insert(0, "#define {}".format(gened_name))
     lns.insert(0, "#ifndef {}".format(gened_name))
