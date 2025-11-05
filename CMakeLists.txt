@@ -5,31 +5,7 @@ project(ccutils)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# system detection. this is used to select/provide system-specific sources and headers
-
-include("./cmake_scripts/ccutils_detect_cpu_os.cmake")
-
-set(HOST_CPU)
-set(HOST_OS)
-
-ccutils_detect_cpu_os(HOST_CPU HOST_OS)
-
-message(NOTICE "configuring for '${HOST_OS}' on '${HOST_CPU}'")
-
-block()
-  set(t_l 0)
-  string(LENGTH "${HOST_CPU}" t_l)
-  if (t_l EQUAL 0)
-    message(FATAL_ERROR "error detecting CPU")
-  endif()
-
-  set(t_l 0)
-  string(LENGTH "${HOST_OS}" t_l)
-  if (t_l EQUAL 0)
-    message(FATAL_ERROR "error detecting OS")
-  endif()
-endblock()
-
+include("./ccucts/_import_me.cmake")
 
 find_package(PkgConfig REQUIRED)
 
@@ -40,18 +16,15 @@ find_package(PkgConfig REQUIRED)
 
 #find_package(Boost REQUIRED COMPONENTS json regex)
 
-include("./cmake_scripts/create_ccutils_component.cmake")
-
 include("./cmake_scripts/ccutils_unicode_backend_selector.cmake")
-include("./cmake_scripts/ccutils_define_package.cmake")
 
-ccutils_define_package(
+message(STATUS "defining ccutils packages:")
+
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_utils_cf
   SUBDIR utils
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
 
   ITEMS
   cf
@@ -62,13 +35,14 @@ ccutils_define_package(
 )
 
 # note: same dir as utils
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_utils_concepts
   SUBDIR utils
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   concepts
@@ -76,13 +50,14 @@ ccutils_define_package(
   LIBS_PUB
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_errors
   SUBDIR errors
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   e
@@ -95,17 +70,14 @@ set(CCUTILS_UNICODE_LIBS_PUB_ADD)
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
 
-  #set(ICU_DEBUG ON)
-
-  find_package(ICU 73.0 COMPONENTS uc i18n io REQUIRED)
-
-  ccutils_define_package(
+  ccucts_define_package(
     DOMAIN_NAME wayround.i2p
     PROJECT_NAME ccutils
     PACKAGE_NAME ccutils_unicode_backend_icu
     SUBDIR unicode_backend_icu
-    CPU ${HOST_CPU}
-    OS ${HOST_OS}
+
+    ADD_COMPILE_FLAGS
+    ${ADD_COMPILE_FLAGS}
 
     ITEMS
     u_backend
@@ -133,13 +105,14 @@ endif()
 
 if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 
-  ccutils_define_package(
+  ccucts_define_package(
     DOMAIN_NAME wayround.i2p
     PROJECT_NAME ccutils
     PACKAGE_NAME ccutils_unicode_backend_ccutils
     SUBDIR unicode_backend_ccutils
-    CPU ${HOST_CPU}
-    OS ${HOST_OS}
+
+    ADD_COMPILE_FLAGS
+    ${ADD_COMPILE_FLAGS}
 
     ITEMS
     u_backend
@@ -161,13 +134,14 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 
 endif()
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_unicode
   SUBDIR unicode
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   u
@@ -188,13 +162,14 @@ elseif (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
   target_compile_options(ccutils_unicode PUBLIC "-DCCUTILS_UNICODE_BACKEND=ccutils")
 endif()
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_repr
   SUBDIR repr
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   repr
@@ -204,13 +179,14 @@ ccutils_define_package(
   ccutils_unicode
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_logger
   SUBDIR logger
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   logger
@@ -220,13 +196,15 @@ ccutils_define_package(
   ccutils_unicode
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_regexp
   SUBDIR regexp
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   regexp
@@ -237,13 +215,14 @@ ccutils_define_package(
   ccutils_repr
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_test_suite_tool
   SUBDIR test_suite_tool
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   tst
@@ -254,25 +233,27 @@ ccutils_define_package(
   ccutils_logger
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_worker01
   SUBDIR worker01
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   Worker01
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_posix_tools
   SUBDIR posix_tools
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   FDCtl
@@ -286,13 +267,14 @@ ccutils_define_package(
   #  ${ccutils_unicode_INCLUDE_DIRS}
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_ip
   SUBDIR ip
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   ip
@@ -309,39 +291,43 @@ option(
   FALSE
 )
 
-set(ccutils_signal_ADD_ITEMS)
+set(CCUTILS_SIGNAL_ADD_ITEMS)
 if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
-  list(APPEND ccutils_signal_ADD_ITEMS "signal_sigc_compat")
+  list(APPEND CCUTILS_SIGNAL_ADD_ITEMS "signal_sigc_compat")
+
+  pkg_check_modules(sigc REQUIRED IMPORTED_TARGET sigc++-3.0)
+
+  set(CCUTILS_SIGNAL_ADD_COMPILE_FLAGS "${sigc_CFLAGS}")
+  set(CCUTILS_SIGNAL_ADD_LINK_FLAGS "${sigc_LDFLAGS}")
 endif()
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_signal
-  SUBDIR signal
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+  SUBDIR 
+  signal
+  ${CCUTILS_SIGNAL_ADD_ITEMS}
+
+  ADD_COMPILE_FLAGS
+  ${CCUTILS_SIGNAL_ADD_COMPILE_FLAGS}
+
+  ADD_LINK_FLAGS
+  ${CCUTILS_SIGNAL_ADD_LINK_FLAGS}	
 
   ITEMS
   signal
   ${ccutils_signal_ADD_ITEMS}
 )
 
-
-if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
-  pkg_check_modules(sigc REQUIRED IMPORTED_TARGET sigc++-3.0)
-
-  target_compile_options(ccutils_signal PUBLIC "${sigc_CFLAGS}")
-  target_link_options(ccutils_signal PUBLIC "${sigc_LDFLAGS}")
-endif()
-
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_json
   SUBDIR json
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
+
+  ADD_COMPILE_FLAGS
+  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   json
@@ -352,13 +338,11 @@ ccutils_define_package(
   ccutils_regexp
 )
 
-ccutils_define_package(
+ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_akigo
   SUBDIR akigo
-  CPU ${HOST_CPU}
-  OS ${HOST_OS}
 
   ITEMS
   builtin
