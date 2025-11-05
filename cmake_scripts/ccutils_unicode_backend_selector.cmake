@@ -29,3 +29,4 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
   find_package(ICU 73.0 COMPONENTS uc i18n io REQUIRED)
 
 endif()
+

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.31)
 
 project(ccutils)
 
@@ -34,15 +34,11 @@ ccucts_define_package(
   ccutils_errors
 )
 
-# note: same dir as utils
 ccucts_define_package(
   DOMAIN_NAME wayround.i2p
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_utils_concepts
   SUBDIR utils
-
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   concepts
@@ -55,9 +51,6 @@ ccucts_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_errors
   SUBDIR errors
-
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   e
@@ -75,9 +68,6 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
     PROJECT_NAME ccutils
     PACKAGE_NAME ccutils_unicode_backend_icu
     SUBDIR unicode_backend_icu
-
-    ADD_COMPILE_FLAGS
-    ${ADD_COMPILE_FLAGS}
 
     ITEMS
     u_backend
@@ -111,9 +101,6 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
     PACKAGE_NAME ccutils_unicode_backend_ccutils
     SUBDIR unicode_backend_ccutils
 
-    ADD_COMPILE_FLAGS
-    ${ADD_COMPILE_FLAGS}
-
     ITEMS
     u_backend
     ccuub_ccutils_generated_types
@@ -122,8 +109,6 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
     LIBS_PUB
     ccutils_errors
     ccutils_unicode
-
-    INC_DIRS_PUB
   )
 
   list(
@@ -140,9 +125,6 @@ ccucts_define_package(
   PACKAGE_NAME ccutils_unicode
   SUBDIR unicode
 
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
-
   ITEMS
   u
 
@@ -153,9 +135,9 @@ ccucts_define_package(
   ccutils_utils_cf
   ${CCUTILS_UNICODE_LIBS_PUB_ADD}
 
-  INC_DIRS_PUB
 )
 
+# todo: maybe use ADD_COMPILE_FLAGS abowe
 if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
   target_compile_options(ccutils_unicode PUBLIC "-DCCUTILS_UNICODE_BACKEND=icu")
 elseif (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
@@ -167,9 +149,6 @@ ccucts_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_repr
   SUBDIR repr
-
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   repr
@@ -185,9 +164,6 @@ ccucts_define_package(
   PACKAGE_NAME ccutils_logger
   SUBDIR logger
 
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
-
   ITEMS
   logger
 
@@ -201,10 +177,6 @@ ccucts_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_regexp
   SUBDIR regexp
-
-
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   regexp
@@ -221,9 +193,6 @@ ccucts_define_package(
   PACKAGE_NAME ccutils_test_suite_tool
   SUBDIR test_suite_tool
 
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
-
   ITEMS
   tst
 
@@ -239,9 +208,6 @@ ccucts_define_package(
   PACKAGE_NAME ccutils_worker01
   SUBDIR worker01
 
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
-
   ITEMS
   Worker01
 )
@@ -252,9 +218,6 @@ ccucts_define_package(
   PACKAGE_NAME ccutils_posix_tools
   SUBDIR posix_tools
 
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
-
   ITEMS
   FDCtl
   FDAddress
@@ -262,9 +225,6 @@ ccucts_define_package(
   LIBS_PUB
   ccutils_unicode
   ccutils_ip
-
-  #INC_DIRS_PUB
-  #  ${ccutils_unicode_INCLUDE_DIRS}
 )
 
 ccucts_define_package(
@@ -272,9 +232,6 @@ ccucts_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_ip
   SUBDIR ip
-
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   ip
@@ -325,9 +282,6 @@ ccucts_define_package(
   PROJECT_NAME ccutils
   PACKAGE_NAME ccutils_json
   SUBDIR json
-
-  ADD_COMPILE_FLAGS
-  ${ADD_COMPILE_FLAGS}
 
   ITEMS
   json
