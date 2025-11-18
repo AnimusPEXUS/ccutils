@@ -124,6 +124,8 @@ class PosixFDCtlNetConnAdapterAddr : public wayround_i2p::akigo::net::Addr
     ustring _string;
 };
 
+
+
 } // namespace wayround_i2p::akigo::net
 
 #endif

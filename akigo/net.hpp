@@ -229,3 +229,5 @@ std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
 } // namespace wayround_i2p::akigo::net
 
 #endif
+
+#include <wayround_i2p/ccutils/akigo/net.local_headers.hpp>
