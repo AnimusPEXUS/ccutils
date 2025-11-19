@@ -6,7 +6,7 @@
 *~
 **/CMakeFiles
 **/CMakeCache.txt
-**/*.local_headers.hpp
+**/*._local_headers.hpp
 /unicode_backend_ccutils_codegen/log.log
 /unicode_backend_ccutils_codegen/ucd.all.flat.xml
 /docs_output

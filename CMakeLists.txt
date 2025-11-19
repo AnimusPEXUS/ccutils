@@ -53,10 +53,14 @@ include("./cmake_scripts/ccutils_unicode_backend_selector.cmake")
 
 message(STATUS "defining ccutils packages:")
 
+set(ccutils_DOMAIN_NAME wayround.i2p)
+set(ccutils_DOMAIN_DIRNAME wayround_i2p)
+set(ccutils_PROJECT_NAME ccutils)
+
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_utils_cf
   SUBDIR utils
 
@@ -69,9 +73,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_utils_concepts
   SUBDIR utils
 
@@ -82,9 +86,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_errors
   SUBDIR errors
 
@@ -100,9 +104,9 @@ set(CCUTILS_UNICODE_LIBS_PUB_ADD)
 if (CCUTILS_UNICODE_BACKEND STREQUAL icu)
 
   ccucts_define_package(
-    DOMAIN_NAME wayround.i2p
-    DOMAIN_DIRNAME wayround_i2p
-    PROJECT_NAME ccutils
+    DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+    DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+    PROJECT_NAME ${ccutils_PROJECT_NAME}
     PACKAGE_NAME ccutils_unicode_backend_icu
     SUBDIR unicode_backend_icu
 
@@ -133,9 +137,9 @@ endif()
 if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 
   ccucts_define_package(
-    DOMAIN_NAME wayround.i2p
-    DOMAIN_DIRNAME wayround_i2p
-    PROJECT_NAME ccutils
+    DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+    DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+    PROJECT_NAME ${ccutils_PROJECT_NAME}
     PACKAGE_NAME ccutils_unicode_backend_ccutils
     SUBDIR unicode_backend_ccutils
 
@@ -158,9 +162,9 @@ if (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 endif()
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_unicode
   SUBDIR unicode
 
@@ -184,9 +188,9 @@ elseif (CCUTILS_UNICODE_BACKEND STREQUAL ccutils)
 endif()
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_repr
   SUBDIR repr
 
@@ -199,9 +203,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_logger
   SUBDIR logger
 
@@ -214,9 +218,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_regexp
   SUBDIR regexp
 
@@ -230,9 +234,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_test_suite_tool
   SUBDIR test_suite_tool
 
@@ -246,9 +250,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_worker01
   SUBDIR worker01
 
@@ -257,9 +261,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_posix_tools
   SUBDIR posix_tools
 
@@ -273,9 +277,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_ip
   SUBDIR ip
 
@@ -305,9 +309,9 @@ if (CCUTILS_SIGNAL_ENABLE_SIGC_WRAPPER)
 endif()
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_signal
   SUBDIR
   signal
@@ -325,9 +329,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_json
   SUBDIR json
 
@@ -341,9 +345,9 @@ ccucts_define_package(
 )
 
 ccucts_define_package(
-  DOMAIN_NAME wayround.i2p
-  DOMAIN_DIRNAME wayround_i2p
-  PROJECT_NAME ccutils
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
   PACKAGE_NAME ccutils_akigo
   SUBDIR akigo
 

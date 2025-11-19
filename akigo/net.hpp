@@ -10,6 +10,8 @@
 #include <wayround_i2p/ccutils/akigo/os.hpp>
 #include <wayround_i2p/ccutils/akigo/time.hpp>
 
+#include <wayround_i2p/ccutils/akigo/net._local_headers.hpp>
+
 // on GNU+Linux akigo uses posix interface to implement Go's-like net-like
 // functionality.
 //
@@ -228,6 +230,5 @@ std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
 
 } // namespace wayround_i2p::akigo::net
 
-#endif
 
-#include <wayround_i2p/ccutils/akigo/net.local_headers.hpp>
+#endif
