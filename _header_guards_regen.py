@@ -66,7 +66,7 @@ def edit_file(fullpath_first, fullpath):
         a.year, a.month, a.day, a.hour, a.minute, a.second, a.microsecond
     )
 
-    print("changing: {}".format(relp))
+    print("  editing {}".format(relp))
 
     lns.insert(0, "#define {}".format(gened_name))
     lns.insert(0, "#ifndef {}".format(gened_name))

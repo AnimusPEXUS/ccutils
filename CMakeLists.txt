@@ -344,6 +344,11 @@ ccucts_define_package(
   ccutils_regexp
 )
 
+set(ccutils_akigo_ADDITIONAL_ITEMS)
+if (CCUCTS_CALCULATED_HOST_POSIX)
+  list(APPEND ccutils_akigo_ADDITIONAL_ITEMS PosixFDCtlNetConnAdapter)
+endif()
+
 ccucts_define_package(
   DOMAIN_NAME ${ccutils_DOMAIN_NAME}
   DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
@@ -361,6 +366,7 @@ ccucts_define_package(
   time
   context
   os
+  ${ccutils_akigo_ADDITIONAL_ITEMS}
 
   LIBS_PUB
   ccutils_posix_tools
