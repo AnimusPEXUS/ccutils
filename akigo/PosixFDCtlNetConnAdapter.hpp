@@ -6,15 +6,12 @@
 
 #include <wayround_i2p/ccutils/akigo/builtin.hpp>
 #include <wayround_i2p/ccutils/akigo/errors.hpp>
-#include <wayround_i2p/ccutils/akigo/net.hpp>
+
+#include "net.hpp"
 
 #include <wayround_i2p/ccutils/posix_tools/FDCtl.hpp>
 
-// todo: make better CMakeLists.txt and move PosixFDCtlNetConnAdapter
-//       to separate source file
-// todo: ok?
-
-// todo: rename PosixFDCtlNetConnAdapter to PosixFDCtlAkigoNetAdapter
+// todo: rename PosixFDCtlNetConnAdapter to PosixFDCtlAkigoNetAdapter?
 // todo: rename still needed?
 
 namespace wayround_i2p::akigo::net
@@ -38,9 +35,7 @@ class PosixFDCtlNetConnAdapter;
 using PosixFDCtlNetConnAdapter_ptr  = std::shared_ptr<PosixFDCtlNetConnAdapter>;
 using PosixFDCtlNetConnAdapter_weak = std::weak_ptr<PosixFDCtlNetConnAdapter>;
 
-class PosixFDCtlNetConnAdapter : wayround_i2p::akigo::net::Conn,
-                                 wayround_i2p::akigo::net::PacketConn,
-                                 wayround_i2p::akigo::net::Listener
+class PosixFDCtlNetConnAdapter
 {
   public:
     static PosixFDCtlNetConnAdapter_ptr create();

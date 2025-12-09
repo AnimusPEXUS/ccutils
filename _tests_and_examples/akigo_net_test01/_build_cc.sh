@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#export CXX=`which clang++`
+#export CC=`which clang`
+#export 
+
 cmake -S . -B ./build
 if [ $? -ne 0 ]
 then

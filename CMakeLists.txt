@@ -346,7 +346,11 @@ ccucts_define_package(
 
 set(ccutils_akigo_ADDITIONAL_ITEMS)
 if (CCUCTS_CALCULATED_HOST_POSIX)
-  list(APPEND ccutils_akigo_ADDITIONAL_ITEMS PosixFDCtlNetConnAdapter)
+  list(
+    APPEND
+    ccutils_akigo_ADDITIONAL_ITEMS
+    PosixFDCtlNetConnAdapter
+  )
 endif()
 
 ccucts_define_package(

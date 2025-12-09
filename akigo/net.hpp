@@ -10,8 +10,6 @@
 #include <wayround_i2p/ccutils/akigo/os.hpp>
 #include <wayround_i2p/ccutils/akigo/time.hpp>
 
-#include <wayround_i2p/ccutils/akigo/net._local_headers.hpp>
-
 // on GNU+Linux akigo uses posix interface to implement Go's-like net-like
 // functionality.
 //
@@ -124,14 +122,16 @@ class Dialer
         ControlContext;
 };
 
+class Listener;
+
+using Listener_ptr = std::shared_ptr<Listener>;
+
 class Listener
 {
   public:
     virtual std::tuple<Conn_ptr, error_ptr> Accept() = 0;
     virtual error_ptr                       Close()  = 0;
 };
-
-using Listener_ptr = std::shared_ptr<Listener>;
 
 class IP
 {
@@ -185,7 +185,7 @@ class UDPConn : public Conn, public PacketConn
 {
 };
 
-class UnixAddr : public IP
+class UnixAddr // : public IP
 {
   public:
     ustring Name;
@@ -203,7 +203,7 @@ class UnixConn : public Conn
     error_ptr CloseRead();
     error_ptr CloseWrite();
 
-    std::tuple<File_ptr, error_ptr> File();
+    std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr> File();
 };
 
 using UnixConn_ptr = std::shared_ptr<UnixConn>;
@@ -219,16 +219,10 @@ std::tuple<UnixConn_ptr, error_ptr> ListenUnixgram(
     UnixAddr_ptr laddr
 );
 
-class UnixListener;
-
-using UnixListener_ptr = std::shared_ptr<UnixListener>;
-
-std::tuple<UnixListener_ptr, error_ptr> ListenUnix(
-    ustring      network,
-    UnixAddr_ptr laddr
-);
-
 } // namespace wayround_i2p::akigo::net
 
+#include <wayround_i2p/ccutils/akigo/net_tcp.hpp>
+#include <wayround_i2p/ccutils/akigo/net_udp.hpp>
+#include <wayround_i2p/ccutils/akigo/net_unix.hpp>
 
 #endif

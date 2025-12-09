@@ -1,7 +1,6 @@
 
-#include <wayround_i2p/ccutils/akigo/net.hpp>
-
-#include <wayround_i2p/ccutils/akigo/PosixFDCtlNetConnAdapter.hpp>
+#include "PosixFDCtlNetConnAdapter.hpp"
+#include "net.hpp"
 
 namespace wayround_i2p::akigo::net
 {
