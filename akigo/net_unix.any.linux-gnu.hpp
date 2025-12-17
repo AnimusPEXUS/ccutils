@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <wayround_i2p/ccutils/posix_tools/FDCtl.hpp>
+
 #include "net_unix.hpp"
 
 namespace wayround_i2p::akigo::net
@@ -18,11 +20,19 @@ using LocalUnixListener_weak = std::weak_ptr<LocalUnixListener>;
 
 class LocalUnixListener : public wayround_i2p::akigo::net::UnixListener
 {
+  private:
+    wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl;
+
   public:
-    static std::tuple<LocalUnixListener_ptr, error_ptr> create(ustring network, UnixAddr_ptr laddr);
+    static std::tuple<LocalUnixListener_ptr, error_ptr>
+        create(ustring network, UnixAddr_ptr laddr);
 
   protected:
-    LocalUnixListener(ustring network, UnixAddr_ptr laddr);
+    LocalUnixListener(
+        ustring      network,
+        UnixAddr_ptr laddr,
+        error_ptr   &err
+    );
 
   public:
     ~LocalUnixListener();

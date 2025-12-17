@@ -16,12 +16,21 @@
 // here is Golang documentation quote with all it's
 // supported net names used net package
 //
-// Known networks are       "tcp", "tcp4"   (IPv4-only),
-//   "tcp6"    (IPv6-only), "udp", "udp4"   (IPv4-only),
-//   "udp6"  (IPv6 - only),  "ip",  "ip4"   (IPv4-only),
-//    "ip6"    (IPv6-only),
+// Known values for network parameter are:
 //
-//   "unix", "unixgram" and "unixpacket".
+//         "tcp"
+//        "tcp4"   (IPv4-only)
+//        "tcp6"   (IPv6-only)
+//         "udp"
+//        "udp4"   (IPv4-only)
+//        "udp6"   (IPv6-only)
+//          "ip"
+//         "ip4"   (IPv4-only)
+//         "ip6"   (IPv6-only)
+//
+//        "unix"
+//    "unixgram"
+//  "unixpacket"
 //
 //  In posix, ip and tcp/udp are separate things,
 //    which means there is no tcp4/6 udp4/6 etc in posix
@@ -184,6 +193,9 @@ class UDPAddr : public IP
 class UDPConn : public Conn, public PacketConn
 {
 };
+
+// todo: move unix-related structures and other
+//       unix-related entities to net_unix.[hc]pp files
 
 class UnixAddr // : public IP
 {

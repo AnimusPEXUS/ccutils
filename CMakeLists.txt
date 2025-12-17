@@ -349,7 +349,7 @@ if (CCUCTS_CALCULATED_HOST_POSIX)
   list(
     APPEND
     ccutils_akigo_ADDITIONAL_ITEMS
-    PosixFDCtlNetConnAdapter
+    net_code
   )
 endif()
 

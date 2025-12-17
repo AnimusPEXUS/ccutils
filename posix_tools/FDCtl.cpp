@@ -30,8 +30,8 @@ std::shared_ptr<FDCtl> FDCtl::create(int fd, FDCtlInitOptions opts)
 
 FDCtl::FDCtl(int fd, FDCtlInitOptions opts)
 {
-    this->opts         = opts;
-    this->effective_fd = fd;
+    this->opts = opts;
+    this->fd   = fd;
 }
 
 FDCtl::~FDCtl()
@@ -46,7 +46,7 @@ err_errNoS FDCtl::close()
 {
     opts.is_open = false;
 
-    int ret = ::close(effective_fd);
+    int ret = ::close(this->fd);
     if (ret != 0)
     {
         return {ret, errno};
@@ -69,14 +69,14 @@ err_errNoS FDCtl::Close()
 
 void FDCtl::setFD(int newfd, FDCtlInitOptions opts)
 {
-    effective_fd = newfd;
-    this->opts   = opts;
+    this->fd   = newfd;
+    this->opts = opts;
     return;
 }
 
 int FDCtl::getFD()
 {
-    return effective_fd;
+    return this->fd;
 }
 
 void FDCtl::setOpen(bool value)
@@ -93,7 +93,7 @@ res_errNoS FDCtl::dup()
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::dup(this->effective_fd);
+    ret.res = ::dup(this->fd);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -105,7 +105,7 @@ res_errNoS FDCtl::dup2(int newfd)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::dup2(this->effective_fd, newfd);
+    ret.res = ::dup2(this->fd, newfd);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -129,7 +129,7 @@ err_errNoS FDCtl::bind(struct sockaddr *addr, socklen_t length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::bind(this->effective_fd, addr, length);
+    ret.err = ::bind(this->fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -141,7 +141,7 @@ err_errNoS FDCtl::getsockname(struct sockaddr *addr, socklen_t *length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::getsockname(this->effective_fd, addr, length);
+    ret.err = ::getsockname(this->fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -153,7 +153,7 @@ err_errNoS FDCtl::getpeername(struct sockaddr *addr, socklen_t *length)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::getpeername(this->effective_fd, addr, length);
+    ret.err = ::getpeername(this->fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -165,7 +165,7 @@ res_errNoS FDCtl::connect(struct sockaddr *addr, socklen_t length)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::connect(this->effective_fd, addr, length);
+    ret.res = ::connect(this->fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -177,7 +177,7 @@ err_errNoS FDCtl::listen(int n)
 {
     err_errNoS ret = {0, 0};
 
-    ret.err = ::listen(this->effective_fd, n);
+    ret.err = ::listen(this->fd, n);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -189,7 +189,7 @@ res_errNoS FDCtl::accept(struct sockaddr *addr, socklen_t *length)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::accept(this->effective_fd, addr, length);
+    ret.res = ::accept(this->fd, addr, length);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -202,7 +202,7 @@ res_errNoS FDCtl::ioctl(unsigned long request, Args... args)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::ioctl(this->effective_fd, request, args...);
+    ret.res = ::ioctl(this->fd, request, args...);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -215,7 +215,7 @@ res_errNoS FDCtl::fcntl(int cmd, Args... args)
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::fcntl(this->effective_fd, cmd, args...);
+    ret.res = ::fcntl(this->fd, cmd, args...);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -232,7 +232,7 @@ res_errNoS FDCtl::getsockopt(
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::getsockopt(this->effective_fd, level, optname, optval, optlen);
+    ret.res = ::getsockopt(this->fd, level, optname, optval, optlen);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -249,7 +249,7 @@ res_errNoS FDCtl::setsockopt(
 {
     res_errNoS ret = {0, 0};
 
-    ret.res = ::setsockopt(this->effective_fd, level, optname, optval, optlen);
+    ret.res = ::setsockopt(this->fd, level, optname, optval, optlen);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -261,7 +261,7 @@ size_errNoS FDCtl::read(void *buffer, size_t size)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::read(this->effective_fd, buffer, size);
+    ret.size = ::read(this->fd, buffer, size);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -273,7 +273,7 @@ size_errNoS FDCtl::write(const void *buffer, size_t size)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::write(this->effective_fd, buffer, size);
+    ret.size = ::write(this->fd, buffer, size);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -285,7 +285,7 @@ size_errNoS FDCtl::send(const void *buffer, size_t size, int flags)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::send(this->effective_fd, buffer, size, flags);
+    ret.size = ::send(this->fd, buffer, size, flags);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -297,7 +297,7 @@ size_errNoS FDCtl::recv(void *buffer, size_t size, int flags)
 {
     size_errNoS ret = {0, 0};
 
-    ret.size = ::recv(this->effective_fd, buffer, size, flags);
+    ret.size = ::recv(this->fd, buffer, size, flags);
     if (ret.not_ok())
     {
         ret.errNo = errno;
@@ -627,7 +627,33 @@ res_errNoS FDCtl::setNonBlocking(bool blocking)
     return res;
 }
 
-socktype_res_errNoS FDCtl::getType()
+intval_res_errNoS FDCtl::getDomain()
+{
+    socktype_res_errNoS ret;
+    socklen_t           optlen;
+
+    auto res = this->getsockopt(
+        SOL_SOCKET,
+        SO_DOMAIN,
+        &ret.intval,
+        &optlen
+    );
+
+    if (res.not_ok())
+    {
+        ret.intval = 0;
+        ret.res    = res.res;
+        ret.errNo  = res.errNo;
+        return ret;
+    }
+
+    ret.res   = res.res;
+    ret.errNo = 0;
+
+    return ret;
+}
+
+intval_res_errNoS FDCtl::getType()
 {
     socktype_res_errNoS ret;
     socklen_t           optlen;
@@ -635,21 +661,89 @@ socktype_res_errNoS FDCtl::getType()
     auto res = this->getsockopt(
         SOL_SOCKET,
         SO_TYPE,
-        &ret.type,
+        &ret.intval,
         &optlen
     );
 
     if (res.not_ok())
     {
-        socktype_res_errNoS err;
-        err.type  = 0;
-        err.res   = res.res;
-        err.errNo = res.errNo;
-        return err;
+        ret.intval = 0;
+        ret.res    = res.res;
+        ret.errNo  = res.errNo;
+        return ret;
     }
 
     ret.res   = res.res;
     ret.errNo = 0;
+
+    return ret;
+}
+
+intval_res_errNoS FDCtl::getProtocol()
+{
+    socktype_res_errNoS ret;
+    socklen_t           optlen;
+
+    auto res = this->getsockopt(
+        SOL_SOCKET,
+        SO_PROTOCOL,
+        &ret.intval,
+        &optlen
+    );
+
+    if (res.not_ok())
+    {
+        ret.intval = 0;
+        ret.res    = res.res;
+        ret.errNo  = res.errNo;
+        return ret;
+    }
+
+    ret.res   = res.res;
+    ret.errNo = 0;
+
+    return ret;
+}
+
+domain_type_protocol_res_errNoS getDomainTypeProtocol()
+{
+    domain_type_protocol_res_errNoS ret;
+    ret->domain   = 0;
+    ret->type     = 0;
+    ret->protocol = 0;
+    ret->res      = 1; // error by default
+    ret->errNo    = 1; // error by default
+
+    auto domain   = getDomain();
+    auto type     = getType();
+    auto protocol = getProtocol();
+
+    if (domain->res != 0)
+    {
+        ret->res   = domain->res;
+        ret->errNo = domain->errNo;
+        return ret;
+    }
+
+    if (type->res != 0)
+    {
+        ret->res   = type->res;
+        ret->errNo = type->errNo;
+        return ret;
+    }
+
+    if (protocol->res != 0)
+    {
+        ret->res   = protocol->res;
+        ret->errNo = protocol->errNo;
+        return ret;
+    }
+
+    ret->domain   = domain->intval;
+    ret->type     = type->intval;
+    ret->protocol = protocol->intval;
+    ret->res      = 0;
+    ret->errNo    = 0;
 
     return ret;
 }

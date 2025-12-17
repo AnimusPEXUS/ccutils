@@ -28,6 +28,25 @@ using FDCtl_weak = std::weak_ptr<FDCtl>;
 // class FDAddress;
 // int FDAddress::setAddrBuff(std::vector<std::uint8_t> addr_buff);
 
+// result structures naming
+//
+//   ends with S indicating it's a struct
+//   res   - for function result returned with return keyword;
+//           res is for functions, which doesn't use return to tell
+//           about errors.
+//   err   - unlike ret, err is for functions, which use return to
+//           rell about errors
+//   errNo - errno value. unix/posix functions sets special variable
+//             named 'errno' to provide additional error info
+//   size  - some functions return size
+//
+//  error results:
+//    you can quick-check with not_ok() function if value is not ok.
+//    for 'res'  functions -1 usually means error;
+//    for 'err'  functions  0 usually means ok, and other
+//                  values means errors or some conditions;
+//    for 'size' functions -1 usually means error;
+
 struct errS
 {
     int  err = -1; // real func result
@@ -88,9 +107,16 @@ struct FDCtl_FDAddress_res_errNoS : res_errNoS
     FDAddress_ptr addr;
 };
 
-struct socktype_res_errNoS : res_errNoS
+struct intval_res_errNoS : res_errNoS
 {
+    int intval;
+};
+
+struct domain_type_protocol_res_errNoS : res_errNoS
+{
+    int doamin;
     int type;
+    int protocol;
 };
 
 struct FDCtlInitOptions
@@ -99,8 +125,8 @@ struct FDCtlInitOptions
     bool close_on_destroy = false;
 
     // todo: make funcs use those
-    bool guard_lower_functions_from_running_if_closed  = false;
-    bool guard_higher_functions_from_running_if_closed = false;
+    bool guard_lower_functions_from_running_if_fdctl_in_closed_state  = true;
+    bool guard_higher_functions_from_running_if_fdctl_in_closed_state = true;
 };
 
 consteval FDCtlInitOptions fdctl_normal_closed_options();
@@ -108,18 +134,28 @@ consteval FDCtlInitOptions fdctl_normal_open_options();
 
 class FDCtl
 {
-  private:
-    FDCtl_weak own_ptr;
+    // todo: add file-related functions
+
+    // todo: make more handy create() and constructor functions,
+    //       to shortcut FDCtlInitOptions opts
+
+  public:
+    // creates new FDCtl. if you have no predefined fd - it's safe to pass 0 as fd.
+    // internal fd value will be replaced by calling some functions below.
+    // for example select/Select functions replaces FdCtl instance's fd value.
+    static FDCtl_ptr create(int fd, FDCtlInitOptions opts);
 
   protected:
     FDCtl(int fd, FDCtlInitOptions opts);
 
   public:
-    static FDCtl_ptr create(int fd, FDCtlInitOptions opts);
-
     ~FDCtl();
 
-    int              effective_fd = 0;
+  private:
+    FDCtl_weak own_ptr;
+
+  public:
+    int              fd = 0;
     FDCtlInitOptions opts;
 
     // does direct call without any checks and/or precautions.
@@ -130,6 +166,7 @@ class FDCtl
     // if already closed - this is not error.
     err_errNoS Close();
 
+    // this doesn't performs any checks and simply replaces contained fd and options
     void setFD(int newfd, FDCtlInitOptions opts);
     int  getFD();
 
@@ -203,8 +240,10 @@ class FDCtl
     //   require maintaining db and checking if result of dup2 is same as newfd
     // FDCtl_err_errNoS Dup2(FDCtl_ptr newfd);
 
-    // closes current fd (if it [is set] and [not closed]) and
-    // calls socket() in this object's class with same parameters
+    // Closes current fd (if it [is set] and [not closed]) and
+    // calls socket() in this object's class with same parameters.
+    // Doesn't preserve copy of domain/type/protocol values.
+    // use getDomainTypeProtocol() to get back those values form actual socket itself.
     res_errNoS Socket(
         int domain,
         int type,
@@ -239,26 +278,36 @@ class FDCtl
     FDCtl_FDAddress_res_errNoS Accept();
     FDCtl_FDAddress_res_errNoS Accept(FDCtlInitOptions opts);
 
-    // 0 on success // shortcut to getsockopt
+    // res==0 on success // shortcut to getsockopt
     res_errNoS getRecvTimeout(timeval &r);
 
-    // 0 on success  // shortcut to getsockopt
+    // res==0 on success  // shortcut to getsockopt
     res_errNoS getSendTimeout(timeval &s);
 
-    // 0 on success  // shortcut to getsockopt
+    // res==0 on success  // shortcut to getsockopt
     res_errNoS setRecvTimeout(timeval &r);
 
-    // 0 on success  // shortcut to getsockopt
+    // res==0 on success  // shortcut to getsockopt
     res_errNoS setSendTimeout(timeval &s);
 
-    // 0 on success  // shortcut to fcntl
+    // res==0 on success  // shortcut to fcntl
     res_errNoS isNonBlocking(bool &ret);
 
-    // 0 on success // shortcut to fcntl
+    // res==0 on success // shortcut to fcntl
     res_errNoS setNonBlocking(bool blocking);
 
-    // 0 on success
-    socktype_res_errNoS getType();
+    // res==0 on success
+    intval_res_errNoS getDomain();
+
+    // res==0 on success
+    intval_res_errNoS getType();
+
+    // res==0 on success
+    intval_res_errNoS getProtocol();
+
+    // internally calls getDomain/getType/getProtocol and returns
+    // combined result or one of errors
+    domain_type_protocol_res_errNoS getDomainTypeProtocol();
 
     // -----------------------------------------------------
     // ^ ^ ^ function shortcuts and usages ^ ^ ^
