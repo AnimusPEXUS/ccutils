@@ -21,6 +21,21 @@ consteval FDCtlInitOptions fdctl_normal_open_options()
     return ret;
 }
 
+std::shared_ptr<FDCtl> FDCtl::create()
+{
+    return FDCtl::create(0, fdctl_normal_open_options());
+}
+
+std::shared_ptr<FDCtl> FDCtl::create(int fd)
+{
+    return FDCtl::create(fd, fdctl_normal_open_options());
+}
+
+std::shared_ptr<FDCtl> FDCtl::create(FDCtlInitOptions opts)
+{
+    return FDCtl::create(0, opts);
+}
+
 std::shared_ptr<FDCtl> FDCtl::create(int fd, FDCtlInitOptions opts)
 {
     auto ret     = FDCtl_ptr(new FDCtl(fd, opts));
@@ -383,6 +398,8 @@ res_errNoS FDCtl::Socket(
     {
         Close();
         // todo: report errors?
+        // todo: yes - if close makes error - Socket() function should not progress
+#warning "todo"
     }
 
     auto res = this->socket(domain, type, protocol);
@@ -394,6 +411,11 @@ res_errNoS FDCtl::Socket(
     setFD(res.res, opts);
 
     return res;
+}
+
+err_errNoS FDCtl::Bind(FDAddress_ptr addr)
+{
+#warning "todo"
 }
 
 FDAddress_err_errNoS FDCtl::Get_X_Name(bool sock_or_peer)
@@ -485,6 +507,17 @@ FDCtl_res_errNoS FDCtl::Connect(
     ret.errNo = 0;
 
     return ret;
+}
+
+err_errNoS FDCtl::Listen()
+{
+    // todo: something better for backlog parameter should be done. 10 constant for now.
+    return this->listen(10);
+}
+
+err_errNoS FDCtl::Listen(int n)
+{
+    return this->listen(n);
 }
 
 FDCtl_FDAddress_res_errNoS FDCtl::Accept()

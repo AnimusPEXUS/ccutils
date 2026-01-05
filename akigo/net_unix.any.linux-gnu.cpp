@@ -30,8 +30,13 @@ LocalUnixListener::LocalUnixListener(
     error_ptr   &err
 )
 {
-    // todo: something better for backlog parameter should be done. 10 constant for now.
-    fdctl = wayround_i2p::ccutils::posix_tools::FDCtl::create(0, 10);
+    auto naddr = wayround_i2p::ccutils::posix_tools::FDAddress::create();
+    naddr->setUnixAddress(laddr->Name);
+
+    fdctl = wayround_i2p::ccutils::posix_tools::FDCtl::create();
+    fdctl->Socket(AF_UNIX, SOCK_STREAM // todo: SOCK_STREAM is not sure here);
+    fdctl->Bind(naddr);
+    fdctl->Listen();
 }
 
 LocalUnixListener::~LocalUnixListener()

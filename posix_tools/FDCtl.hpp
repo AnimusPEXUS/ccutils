@@ -138,11 +138,15 @@ class FDCtl
 
     // todo: make more handy create() and constructor functions,
     //       to shortcut FDCtlInitOptions opts
+    // todo: enough?
 
   public:
     // creates new FDCtl. if you have no predefined fd - it's safe to pass 0 as fd.
     // internal fd value will be replaced by calling some functions below.
     // for example select/Select functions replaces FdCtl instance's fd value.
+    static FDCtl_ptr create();
+    static FDCtl_ptr create(int fd);
+    static FDCtl_ptr create(FDCtlInitOptions opts);
     static FDCtl_ptr create(int fd, FDCtlInitOptions opts);
 
   protected:
@@ -191,7 +195,7 @@ class FDCtl
     err_errNoS getsockname(struct sockaddr *addr, socklen_t *length);
     err_errNoS getpeername(struct sockaddr *addr, socklen_t *length);
     res_errNoS connect(struct sockaddr *addr, socklen_t length);
-    err_errNoS listen(int n);
+    err_errNoS listen(int n); // todo: something wise needs to be done about this 'n' parameter
     res_errNoS accept(struct sockaddr *addr, socklen_t *length_ptr);
 
     // man 2 ioctl
@@ -274,6 +278,9 @@ class FDCtl
         FDAddress_ptr    addr,
         FDCtlInitOptions opts
     );
+
+    err_errNoS Listen();
+    err_errNoS Listen(int n); // todo: something wise needs to be done about this 'n' parameter
 
     FDCtl_FDAddress_res_errNoS Accept();
     FDCtl_FDAddress_res_errNoS Accept(FDCtlInitOptions opts);
