@@ -114,7 +114,7 @@ struct intval_res_errNoS : res_errNoS
 
 struct domain_type_protocol_res_errNoS : res_errNoS
 {
-    int doamin;
+    int domain;
     int type;
     int protocol;
 };

@@ -7,10 +7,10 @@ namespace wayround_i2p::ccutils::posix_tools
 consteval FDCtlInitOptions fdctl_normal_closed_options()
 {
     return {
-        .is_open                                       = false,
-        .close_on_destroy                              = true,
-        .guard_lower_functions_from_running_if_closed  = true,
-        .guard_higher_functions_from_running_if_closed = true
+        .is_open                                                      = false,
+        .close_on_destroy                                             = true,
+        .guard_lower_functions_from_running_if_fdctl_in_closed_state  = true,
+        .guard_higher_functions_from_running_if_fdctl_in_closed_state = true
     };
 }
 
@@ -629,8 +629,8 @@ res_errNoS FDCtl::setNonBlocking(bool blocking)
 
 intval_res_errNoS FDCtl::getDomain()
 {
-    socktype_res_errNoS ret;
-    socklen_t           optlen;
+    intval_res_errNoS ret;
+    socklen_t         optlen;
 
     auto res = this->getsockopt(
         SOL_SOCKET,
@@ -655,8 +655,8 @@ intval_res_errNoS FDCtl::getDomain()
 
 intval_res_errNoS FDCtl::getType()
 {
-    socktype_res_errNoS ret;
-    socklen_t           optlen;
+    intval_res_errNoS ret;
+    socklen_t         optlen;
 
     auto res = this->getsockopt(
         SOL_SOCKET,
@@ -681,8 +681,8 @@ intval_res_errNoS FDCtl::getType()
 
 intval_res_errNoS FDCtl::getProtocol()
 {
-    socktype_res_errNoS ret;
-    socklen_t           optlen;
+    intval_res_errNoS ret;
+    socklen_t         optlen;
 
     auto res = this->getsockopt(
         SOL_SOCKET,
@@ -705,45 +705,45 @@ intval_res_errNoS FDCtl::getProtocol()
     return ret;
 }
 
-domain_type_protocol_res_errNoS getDomainTypeProtocol()
+domain_type_protocol_res_errNoS FDCtl::getDomainTypeProtocol()
 {
     domain_type_protocol_res_errNoS ret;
-    ret->domain   = 0;
-    ret->type     = 0;
-    ret->protocol = 0;
-    ret->res      = 1; // error by default
-    ret->errNo    = 1; // error by default
+    ret.domain   = 0;
+    ret.type     = 0;
+    ret.protocol = 0;
+    ret.res      = 1; // error by default
+    ret.errNo    = 1; // error by default
 
     auto domain   = getDomain();
     auto type     = getType();
     auto protocol = getProtocol();
 
-    if (domain->res != 0)
+    if (domain.res != 0)
     {
-        ret->res   = domain->res;
-        ret->errNo = domain->errNo;
+        ret.res   = domain.res;
+        ret.errNo = domain.errNo;
         return ret;
     }
 
-    if (type->res != 0)
+    if (type.res != 0)
     {
-        ret->res   = type->res;
-        ret->errNo = type->errNo;
+        ret.res   = type.res;
+        ret.errNo = type.errNo;
         return ret;
     }
 
-    if (protocol->res != 0)
+    if (protocol.res != 0)
     {
-        ret->res   = protocol->res;
-        ret->errNo = protocol->errNo;
+        ret.res   = protocol.res;
+        ret.errNo = protocol.errNo;
         return ret;
     }
 
-    ret->domain   = domain->intval;
-    ret->type     = type->intval;
-    ret->protocol = protocol->intval;
-    ret->res      = 0;
-    ret->errNo    = 0;
+    ret.domain   = domain.intval;
+    ret.type     = type.intval;
+    ret.protocol = protocol.intval;
+    ret.res      = 0;
+    ret.errNo    = 0;
 
     return ret;
 }
