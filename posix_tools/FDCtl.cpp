@@ -415,7 +415,98 @@ res_errNoS FDCtl::Socket(
 
 err_errNoS FDCtl::Bind(FDAddress_ptr addr)
 {
-#warning "todo"
+    auto addr_family_tuple = addr->getFamily();
+    auto addr_family       = std::get<0>(addr_family_tuple);
+    auto addr_family_err   = std::get<1>(addr_family_tuple);
+
+    err_errNoS ret;
+
+    if (addr_family_err != 0)
+    {
+        ret.err   = addr_family_err;
+        ret.errNo = errno;
+        return ret;
+    }
+
+    auto this_domain_res = getDomain();
+
+    if (this_domain_res.res != 0)
+    {
+        ret.err   = this_domain_res.res;
+        ret.errNo = this_domain_res.errNo;
+        return ret;
+    }
+
+    if (addr_family != this_domain_res.intval)
+    {
+        ret.err   = 10;
+        ret.errNo = errno;
+        return ret;
+    }
+
+#warning "todo: make template for switch's cases here"
+
+    switch (addr_family)
+    {
+        default:
+        {
+            ret.err   = 15;
+            ret.errNo = errno;
+            return ret;
+        }
+        case AF_UNIX:
+        {
+            auto u_addr_tuple = addr->get_sockaddr_un();
+            auto u_addr       = std::get<0>(u_addr_tuple);
+            auto u_addr_err   = std::get<1>(u_addr_tuple);
+
+            if (u_addr_err != 0)
+            {
+                ret.err   = u_addr_err;
+                ret.errNo = errno;
+                return ret;
+            }
+
+            this->bind((sockaddr *)(u_addr.get()), sizeof(u_addr));
+            break;
+        }
+        case AF_INET:
+        {
+            auto in_addr_tuple = addr->get_sockaddr_in();
+            auto in_addr       = std::get<0>(in_addr_tuple);
+            auto in_addr_err   = std::get<1>(in_addr_tuple);
+
+            if (in_addr_err != 0)
+            {
+                ret.err   = in_addr_err;
+                ret.errNo = errno;
+                return ret;
+            }
+
+            this->bind((sockaddr *)(in_addr.get()), sizeof(in_addr));
+            break;
+        }
+        case AF_INET6:
+        {
+            auto in6_addr_tuple = addr->get_sockaddr_in6();
+            auto in6_addr       = std::get<0>(in6_addr_tuple);
+            auto in6_addr_err   = std::get<1>(in6_addr_tuple);
+
+            if (in6_addr_err != 0)
+            {
+                ret.err   = in6_addr_err;
+                ret.errNo = errno;
+                return ret;
+            }
+
+            this->bind((sockaddr *)(in6_addr.get()), sizeof(in6_addr));
+            break;
+        }
+    }
+
+    ret.err   = 0;
+    ret.errNo = 0;
+    return ret;
 }
 
 FDAddress_err_errNoS FDCtl::Get_X_Name(bool sock_or_peer)

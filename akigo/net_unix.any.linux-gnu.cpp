@@ -34,7 +34,7 @@ LocalUnixListener::LocalUnixListener(
     naddr->setUnixAddress(laddr->Name);
 
     fdctl = wayround_i2p::ccutils::posix_tools::FDCtl::create();
-    fdctl->Socket(AF_UNIX, SOCK_STREAM // todo: SOCK_STREAM is not sure here);
+    fdctl->Socket(AF_UNIX, SOCK_STREAM /* todo: SOCK_STREAM here needs evaluation */, 0);
     fdctl->Bind(naddr);
     fdctl->Listen();
 }
@@ -46,7 +46,7 @@ LocalUnixListener::~LocalUnixListener()
 std::tuple<Conn_ptr, error_ptr>
     LocalUnixListener::Accept()
 {
-    FDCtl_FDAddress_res_errNoS res = fdctl->Accept();
+    wayround_i2p::ccutils::posix_tools::FDCtl_FDAddress_res_errNoS res = fdctl->Accept();
     // todo: wrap FDCtl with Conn and return
     return std::tuple(NULL, NULL);
 }
