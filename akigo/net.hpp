@@ -7,6 +7,7 @@
 
 #include <wayround_i2p/ccutils/akigo/builtin.hpp>
 #include <wayround_i2p/ccutils/akigo/context.hpp>
+#include <wayround_i2p/ccutils/akigo/io.hpp>
 #include <wayround_i2p/ccutils/akigo/os.hpp>
 #include <wayround_i2p/ccutils/akigo/time.hpp>
 
@@ -49,38 +50,47 @@ using byte_slice  = wayround_i2p::akigo::builtin::byte_slice;
 using Context_ptr = wayround_i2p::akigo::context::Context_ptr;
 using File_ptr    = wayround_i2p::akigo::os::File_ptr;
 
-class Error : public error
+class Error
+    : public error
 {
     virtual bool Timeout() = 0;
 };
 
 class Addr
 {
+  public:
     virtual ustring Network() = 0;
     virtual ustring String()  = 0;
 };
 
 using Addr_ptr = std::shared_ptr<Addr>;
 
+class Addressed
+{
+  public:
+    // LocalAddr() Addr
+    virtual Addr_ptr LocalAddr()  = 0;
+    // RemoteAddr() Addr
+    virtual Addr_ptr RemoteAddr() = 0;
+};
+
 /**
  * WARNING!: in distinction to Go's net.Conn, akigo's [net::Conn]s support
  *           non-blocking states via 3 additional functions
  */
-class Conn : public Closer, public ReadWriter
+class Conn
+    : public Addressed
+    , public wayround_i2p::akigo::io::ReadWriteCloser
+    , public wayround_i2p::akigo::io::Deadlined
 {
-    virtual Addr_ptr LocalAddr()  = 0;
-    virtual Addr_ptr RemoteAddr() = 0;
-
-    virtual std::tuple<size_type, error_ptr> Read(byte_slice b)  = 0;
-    virtual std::tuple<size_type, error_ptr> Write(byte_slice b) = 0;
 };
 
 using Conn_ptr = std::shared_ptr<Conn>;
 
-class PacketConn : public ConnBase
+class PacketConn
+    : public Conn
+    , public wayround_i2p::akigo::io::ReadWriterFromTo
 {
-    virtual std::tuple<size_type, Addr_ptr, error_ptr> ReadFrom(byte_slice b)               = 0;
-    virtual std::tuple<size_type, error_ptr>           WriteTo(byte_slice b, Addr_ptr addr) = 0;
 };
 
 using PacketConn_ptr = std::shared_ptr<PacketConn>;
@@ -126,8 +136,14 @@ using Listener_ptr = std::shared_ptr<Listener>;
 class Listener
 {
   public:
+    // Accept() (Conn, error)
     virtual std::tuple<Conn_ptr, error_ptr> Accept() = 0;
-    virtual error_ptr                       Close()  = 0;
+
+    // Close() error
+    virtual error_ptr Close() = 0;
+
+    // Addr() Addr
+    virtual Addr_ptr Addr() = 0;
 };
 
 class IP
@@ -142,7 +158,8 @@ class IPNet
 {
 };
 
-class IPAddr : public IP
+class IPAddr
+    : public IP
 {
     std::string Zone;
 
@@ -150,35 +167,43 @@ class IPAddr : public IP
     bool   Equal(IP);
 };
 
-class IPConn : public Conn, public PacketConn
+class IPConn
+    : public Conn
+    , public PacketConn
 {
 };
 
 std::tuple<Listener_ptr, error_ptr> FileListener(File_ptr f);
 
-class TCPAddr : public IP
+class TCPAddr
+    : public IP
 {
   public:
     int     Port;
     ustring Zone;
 };
 
-class TCPConn : public Conn
+class TCPConn
+    : public Conn
 {
 };
 
-class TCPListener : public Listener
+class TCPListener
+    : public Listener
 {
 };
 
-class UDPAddr : public IP
+class UDPAddr
+    : public IP
 {
   public:
     int     Port;
     ustring Zone;
 };
 
-class UDPConn : public Conn, public PacketConn
+class UDPConn
+    : public Conn
+    , public PacketConn
 {
 };
 
@@ -196,23 +221,13 @@ using UnixAddr_ptr = std::shared_ptr<UnixAddr>;
 
 std::tuple<UnixAddr_ptr, error_ptr> ResolveUnixAddr();
 
-class UnixConn : public Conn,
-                 public Deadlined,
-                 public Buffered,
-                 public Closer,
-                 public PartialCloser,
-                 public Filed
+class UnixConn
+    : public PacketConn
+    , public Buffered
+    , public PartialCloser
+    , public Filed
 {
   public:
-    // func (c *UnixConn) LocalAddr() Addr
-    virtual Addr_ptr LocalAddr() = 0;
-
-    // func (c *UnixConn) Read(b []byte) (int, error)
-    virtual std::tuple<int, error_ptr> Read(byte_slice b) = 0;
-
-    // func (c *UnixConn) ReadFrom(b []byte) (int, Addr, error)
-    virtual std::tuple<int, Addr_ptr, error_ptr> ReadFrom(byte_slice b) = 0;
-
     // func (c *UnixConn) ReadFromUnix(b []byte) (int, *UnixAddr, error)
     virtual std::tuple<int, UnixAddr_ptr, error_ptr> ReadFromUnix(byte_slice b) = 0;
 
@@ -230,15 +245,9 @@ class UnixConn : public Conn,
         )
         = 0;
 
-    // func (c *UnixConn) RemoteAddr() Addr
-    virtual Addr_ptr RemoteAddr() = 0;
-
-    // func (c *UnixConn) SetReadDeadline(t time.Time) error
-    // func (c *UnixConn) SetWriteDeadline(t time.Time) error
     // func (c *UnixConn) SyscallConn() (syscall.RawConn, error)
-    // func (c *UnixConn) Write(b []byte) (int, error)
+
     // func (c *UnixConn) WriteMsgUnix(b, oob []byte, addr *UnixAddr) (n, oobn int, err error)
-    // func (c *UnixConn) WriteTo(b []byte, addr Addr) (int, error)
     // func (c *UnixConn) WriteToUnix(b []byte, addr *UnixAddr) (int, error)
 };
 
