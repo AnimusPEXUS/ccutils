@@ -18,7 +18,7 @@ class LocalUnixListener;
 using LocalUnixListener_ptr  = std::shared_ptr<LocalUnixListener>;
 using LocalUnixListener_weak = std::weak_ptr<LocalUnixListener>;
 
-class LocalUnixListener : public wayround_i2p::akigo::net::UnixListener
+class LocalUnixListener : public UnixListener
 {
   private:
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl;
@@ -45,7 +45,7 @@ class LocalUnixListener : public wayround_i2p::akigo::net::UnixListener
 
     std::tuple<UnixConn_ptr, error_ptr> AcceptUnix();
 
-    std::tuple<wayround_i2p::akigo::net::Addr, error_ptr> Addr();
+    std::tuple<Addr_ptr, error_ptr> Addr();
 
     error_ptr Close();
 

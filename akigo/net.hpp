@@ -42,6 +42,7 @@
 
 namespace wayround_i2p::akigo::net
 {
+
 using error_ptr   = wayround_i2p::akigo::builtin::error_ptr;
 using error       = wayround_i2p::akigo::builtin::error;
 using ustring     = wayround_i2p::akigo::builtin::ustring;
@@ -143,7 +144,10 @@ class Listener
     virtual error_ptr Close() = 0;
 
     // Addr() Addr
-    virtual Addr_ptr Addr() = 0;
+    // note: this differs to Golang: Addr returns error_ptr if
+    //       it can't get address, because underlying system may return this
+    //       error
+    virtual std::tuple<Addr_ptr, error_ptr> Addr() = 0;
 };
 
 class IP
@@ -168,8 +172,7 @@ class IPAddr
 };
 
 class IPConn
-    : public Conn
-    , public PacketConn
+    : public PacketConn
 {
 };
 
@@ -202,8 +205,7 @@ class UDPAddr
 };
 
 class UDPConn
-    : public Conn
-    , public PacketConn
+    : public PacketConn
 {
 };
 
@@ -223,9 +225,9 @@ std::tuple<UnixAddr_ptr, error_ptr> ResolveUnixAddr();
 
 class UnixConn
     : public PacketConn
-    , public Buffered
-    , public PartialCloser
-    , public Filed
+    , public wayround_i2p::akigo::io::Buffered
+    , public wayround_i2p::akigo::io::PartialCloser
+    , public wayround_i2p::akigo::io::Filed
 {
   public:
     // func (c *UnixConn) ReadFromUnix(b []byte) (int, *UnixAddr, error)
