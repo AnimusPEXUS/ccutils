@@ -1,5 +1,6 @@
 #include <memory>
 
+#include "errors.hpp"
 #include "net.hpp"
 #include "net_unix.any.linux-gnu.hpp"
 
@@ -46,17 +47,36 @@ LocalUnixListener::~LocalUnixListener()
 std::tuple<Conn_ptr, error_ptr>
     LocalUnixListener::Accept()
 {
-    wayround_i2p::ccutils::posix_tools::FDCtl_FDAddress_res_errNoS res = fdctl->Accept();
+#warning "todo"
     // todo: wrap FDCtl with Conn and return
-    return std::tuple(NULL, NULL);
+    return std::tuple(nullptr, nullptr);
 }
 
 std::tuple<UnixConn_ptr, error_ptr>
     LocalUnixListener::AcceptUnix()
 {
-    FDCtl_FDAddress_res_errNoS res = fdctl->Accept();
-    // todo: wrap FDCtl with UnixConn and return
-    return std::tuple(NULL, NULL);
+    auto res = fdctl->Accept();
+
+    if (!res.is_ok())
+    {
+        return std::tuple(
+            nullptr,
+            wayround_i2p::akigo::errors::New(
+                std::format(
+                    "couldn't accept connection. errno: %d",
+                    res.errNo
+                ),
+                __FILE__,
+                __LINE__
+            )
+        );
+    }
+
+    UnixConn_ptr ret;
+
+    ret = LocalUnixConn::create_for_accepted_FDCtl();
+
+    return std::tuple(ret, nullptr);
 }
 
 std::tuple<wayround_i2p::akigo::net::Addr, error_ptr>

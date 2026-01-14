@@ -82,7 +82,7 @@ class Addressed
 class Conn
     : public Addressed
     , public wayround_i2p::akigo::io::ReadWriteCloser
-    , public wayround_i2p::akigo::io::Deadlined
+    , public wayround_i2p::akigo::io::DeadlinedReadWriter
 {
 };
 
@@ -206,63 +206,6 @@ class UDPConn
     : public PacketConn
 {
 };
-
-// todo: move unix-related structures and other
-//       unix-related entities to net_unix.[hc]pp files
-
-class UnixAddr // : public IP
-{
-  public:
-    ustring Name;
-    ustring Net;
-};
-
-using UnixAddr_ptr = std::shared_ptr<UnixAddr>;
-
-std::tuple<UnixAddr_ptr, error_ptr> ResolveUnixAddr();
-
-class UnixConn
-    : public PacketConn
-    , public wayround_i2p::akigo::io::Buffered
-    , public wayround_i2p::akigo::io::PartialCloser
-    , public wayround_i2p::akigo::io::Filed
-{
-  public:
-    // func (c *UnixConn) ReadFromUnix(b []byte) (int, *UnixAddr, error)
-    virtual std::tuple<int, UnixAddr_ptr, error_ptr> ReadFromUnix(byte_slice b) = 0;
-
-    // func (c *UnixConn) ReadMsgUnix(b, oob []byte) (n, oobn, flags int, addr *UnixAddr, err error)
-    virtual std::tuple<
-        int,          // n
-        int,          // oobn
-        int,          // flags
-        UnixAddr_ptr, // addr
-        error_ptr     // error
-        >
-        ReadMsgUnix(
-            byte_slice b,
-            byte_slice oob
-        )
-        = 0;
-
-    // func (c *UnixConn) SyscallConn() (syscall.RawConn, error)
-
-    // func (c *UnixConn) WriteMsgUnix(b, oob []byte, addr *UnixAddr) (n, oobn int, err error)
-    // func (c *UnixConn) WriteToUnix(b []byte, addr *UnixAddr) (int, error)
-};
-
-using UnixConn_ptr = std::shared_ptr<UnixConn>;
-
-std::tuple<UnixConn_ptr, error_ptr> DialUnix(
-    ustring      network,
-    UnixAddr_ptr laddr,
-    UnixAddr_ptr raddr
-);
-
-std::tuple<UnixConn_ptr, error_ptr> ListenUnixgram(
-    ustring      network,
-    UnixAddr_ptr laddr
-);
 
 } // namespace wayround_i2p::akigo::net
 

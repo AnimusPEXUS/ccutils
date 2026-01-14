@@ -54,6 +54,11 @@ struct errS
     {
         return err != 0;
     }
+
+    bool is_ok()
+    {
+        return !not_ok();
+    }
 };
 
 struct resS
@@ -62,6 +67,11 @@ struct resS
     bool not_ok()
     {
         return res == -1;
+    }
+
+    bool is_ok()
+    {
+        return !not_ok();
     }
 };
 
@@ -72,6 +82,11 @@ struct sizeS
     {
         return size == -1;
     }
+
+    bool is_ok()
+    {
+        return !not_ok();
+    }
 };
 
 struct errNoS
@@ -79,40 +94,51 @@ struct errNoS
     int errNo = 1; // errno on func error
 };
 
-struct err_errNoS : errS, errNoS
+struct err_errNoS
+    : errS
+    , errNoS
 {
 };
 
-struct res_errNoS : resS, errNoS
+struct res_errNoS
+    : resS
+    , errNoS
 {
 };
 
-struct size_errNoS : sizeS, errNoS
+struct size_errNoS
+    : sizeS
+    , errNoS
 {
 };
 
-struct FDCtl_res_errNoS : res_errNoS
+struct FDCtl_res_errNoS
+    : res_errNoS
 {
     FDCtl_ptr fdctl;
 };
 
-struct FDAddress_err_errNoS : err_errNoS
+struct FDAddress_err_errNoS
+    : err_errNoS
 {
     std::shared_ptr<FDAddress> addr;
 };
 
-struct FDCtl_FDAddress_res_errNoS : res_errNoS
+struct FDCtl_FDAddress_res_errNoS
+    : res_errNoS
 {
     FDCtl_ptr     fdctl;
     FDAddress_ptr addr;
 };
 
-struct intval_res_errNoS : res_errNoS
+struct intval_res_errNoS
+    : res_errNoS
 {
     int intval;
 };
 
-struct domain_type_protocol_res_errNoS : res_errNoS
+struct domain_type_protocol_res_errNoS
+    : res_errNoS
 {
     int domain;
     int type;

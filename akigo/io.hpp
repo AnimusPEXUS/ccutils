@@ -25,7 +25,12 @@ using go_uint64  = wayround_i2p::akigo::builtin::go_uint64;
 
 class Deadlined
 {
-    virtual error_ptr SetDeadline(wayround_i2p::akigo::time::Time t)      = 0;
+    virtual error_ptr SetDeadline(wayround_i2p::akigo::time::Time t) = 0;
+};
+
+class DeadlinedReadWriter
+    : public Deadlined
+{
     virtual error_ptr SetReadDeadline(wayround_i2p::akigo::time::Time t)  = 0;
     virtual error_ptr SetWriteDeadline(wayround_i2p::akigo::time::Time t) = 0;
 };
