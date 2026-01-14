@@ -18,7 +18,8 @@ class LocalUnixListener;
 using LocalUnixListener_ptr  = std::shared_ptr<LocalUnixListener>;
 using LocalUnixListener_weak = std::weak_ptr<LocalUnixListener>;
 
-class LocalUnixListener : public UnixListener
+class LocalUnixListener final
+    : public UnixListener
 {
   private:
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl;

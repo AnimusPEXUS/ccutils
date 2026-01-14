@@ -135,13 +135,11 @@ class Listener;
 using Listener_ptr = std::shared_ptr<Listener>;
 
 class Listener
+    : public wayround_i2p::akigo::io::Closer
 {
   public:
     // Accept() (Conn, error)
     virtual std::tuple<Conn_ptr, error_ptr> Accept() = 0;
-
-    // Close() error
-    virtual error_ptr Close() = 0;
 
     // Addr() Addr
     // note: this differs to Golang: Addr returns error_ptr if

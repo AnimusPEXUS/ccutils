@@ -16,7 +16,6 @@ using UnixListener_weak = std::weak_ptr<UnixListener>;
 
 class UnixListener
     : public Listener
-    , public Conn
     , public wayround_i2p::akigo::io::Filed
 {
   public:
