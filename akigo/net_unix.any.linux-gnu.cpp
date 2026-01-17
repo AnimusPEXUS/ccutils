@@ -74,28 +74,52 @@ std::tuple<UnixConn_ptr, error_ptr>
 
     UnixConn_ptr ret;
 
-    ret = LocalUnixConn::create_for_accepted_FDCtl();
+    auto cfa_res = LocalUnixConn::create_for_accepted_FDCtl(res.fdctl);
+
+    auto err = std::get<1>(cfa_res);
+
+    if (err)
+    {
+        return std::tuple(nullptr, err);
+    }
+
+    ret = std::get<0>(cfa_res);
 
     return std::tuple(ret, nullptr);
 }
 
-std::tuple<wayround_i2p::akigo::net::Addr, error_ptr>
+std::tuple<wayround_i2p::akigo::net::Addr_ptr, error_ptr>
     LocalUnixListener::Addr()
 {
-    wayround_i2p::ccutils::posix_tools::FDAddress_err_errNoS
-        res
-        = fdctl->GetSockName();
-    if (!res || (res && !res->is_ok()))
+    auto res = fdctl->GetSockName();
+    if (!res.is_ok())
     {
-        return tuple(NULL, "couldn't get unix socket local address");
+        return {
+            nullptr,
+            wayround_i2p::akigo::errors::New(
+                "couldn't get unix socket local address",
+                __FILE__,
+                __LINE__
+            )
+        };
     }
 
-    auto ua = std::shared_ptr<UnixAddr>(new UnixAddr());
+    auto uaddr_res     = res.addr->getUnixAddress();
+    auto uaddr_res_err = std::get<1>(uaddr_res);
 
-    ustring ua;
-    int     ua_name_res;
+    if (uaddr_res_err != 0)
+    {
+        return {
+            nullptr,
+            wayround_i2p::akigo::errors::New(
+                "couldn't get unix socket local address",
+                __FILE__,
+                __LINE__
+            )
+        };
+    }
 
-    std::tie(ua, ua_name_res) = res->addr->getUnixAddress();
+	UnixAddr_ptr ret();
 
     // todo: check ua->Net is correct?
 

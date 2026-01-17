@@ -27,8 +27,8 @@ using UnixConn_weak = std::weak_ptr<UnixConn>;
 
 class UnixConn
     : public PacketConn
-    , public wayround_i2p::akigo::io::Buffered
     , public wayround_i2p::akigo::io::PartialCloser
+    , public wayround_i2p::akigo::io::Buffered
     , public wayround_i2p::akigo::io::Filed
 {
   public:
@@ -49,10 +49,23 @@ class UnixConn
         )
         = 0;
 
-    // func (c *UnixConn) SyscallConn() (syscall.RawConn, error)
-
     // func (c *UnixConn) WriteMsgUnix(b, oob []byte, addr *UnixAddr) (n, oobn int, err error)
+    virtual std::tuple<
+        int,      // n
+        int,      // oobn
+        error_ptr // err
+        >
+        WriteMsgUnix(
+            byte_slice   b,
+            byte_slice   oob,
+            UnixAddr_ptr addr
+        )
+        = 0;
+
     // func (c *UnixConn) WriteToUnix(b []byte, addr *UnixAddr) (int, error)
+    virtual std::tuple<int, error_ptr> WriteToUnix(byte_slice b, UnixAddr_ptr addr) = 0;
+
+    // func (c *UnixConn) SyscallConn() (syscall.RawConn, error)
 };
 
 class UnixListener;

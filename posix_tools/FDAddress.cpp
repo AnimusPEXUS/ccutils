@@ -259,9 +259,10 @@ int FDAddress::setInet6Address(std::shared_ptr<sockaddr_in6> addr)
 std::tuple<wayround_i2p::ccutils::unicode::UString, int> FDAddress::getUnixAddress()
 {
     auto res = get_sockaddr_un();
-    if (std::get<1>(res) != 0)
+    auto err = std::get<1>(res);
+    if (err != 0)
     {
-        return {nullptr, std::get<1>(res)};
+        return {nullptr, err};
     }
 
     return {std::get<0>(res)->sun_path, 0};

@@ -44,7 +44,6 @@ namespace wayround_i2p::akigo::net
 {
 
 using error_ptr   = wayround_i2p::akigo::builtin::error_ptr;
-using error       = wayround_i2p::akigo::builtin::error;
 using ustring     = wayround_i2p::akigo::builtin::ustring;
 using size_type   = wayround_i2p::akigo::builtin::size_type;
 using byte_slice  = wayround_i2p::akigo::builtin::byte_slice;
@@ -52,7 +51,7 @@ using Context_ptr = wayround_i2p::akigo::context::Context_ptr;
 using File_ptr    = wayround_i2p::akigo::os::File_ptr;
 
 class Error
-    : public error
+    : public error_ptr::element_type
 {
     virtual bool Timeout() = 0;
 };

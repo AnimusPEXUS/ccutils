@@ -121,7 +121,7 @@ struct FDCtl_res_errNoS
 struct FDAddress_err_errNoS
     : err_errNoS
 {
-    std::shared_ptr<FDAddress> addr;
+    FDAddress_ptr addr;
 };
 
 struct FDCtl_FDAddress_res_errNoS

@@ -7,8 +7,8 @@
 
 namespace wayround_i2p::akigo::errors
 {
+
 using error_ptr = wayround_i2p::akigo::builtin::error_ptr;
-using error     = wayround_i2p::akigo::builtin::error;
 using ustring   = wayround_i2p::akigo::builtin::ustring;
 
 inline error_ptr New(ustring text, ustring file, std::size_t line)

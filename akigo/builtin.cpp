@@ -4,6 +4,4 @@
 namespace wayround_i2p::akigo::builtin
 {
 
-
-
 } // namespace wayround_i2p::akigo::builtin

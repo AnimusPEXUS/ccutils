@@ -17,7 +17,7 @@
 namespace wayround_i2p::akigo::builtin
 {
 
-using error     = wayround_i2p::ccutils::errors::error;
+// using error     = wayround_i2p::ccutils::errors::error;
 using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
 
 using go_byte = std::uint8_t;
