@@ -119,14 +119,20 @@ std::tuple<wayround_i2p::akigo::net::Addr_ptr, error_ptr>
         };
     }
 
-	UnixAddr_ptr ret();
+    auto ret = UnixAddr_ptr(new UnixAddr());
 
-    // todo: check ua->Net is correct?
+    ret->Name = std::get<0>(uaddr_res);
+    ret->Net  = "unix";
+
+    // todo: check `ret->Net = "unix"` is correct?
 
     // todo: maybe better soulution should be found,
     //       because old unix-socket functions does not support long file paths
 
-    return;
+    return std::tuple<wayround_i2p::akigo::net::Addr_ptr, error_ptr>(
+        std::dynamic_pointer_cast<wayround_i2p::akigo::net::Addr>(ret),
+        nullptr
+    );
 }
 
 error_ptr

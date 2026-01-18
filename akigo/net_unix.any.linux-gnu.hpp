@@ -14,6 +14,20 @@
 namespace wayround_i2p::akigo::net
 {
 
+/*
+
+// note: UnixAddr should be enough by it self. I doubt UnixAddr should not be final
+
+class LocalUnixAddr;
+class LocalUnixAddr_ptr  = std::shared_ptr<LocalUnixAddr>;
+using LocalUnixAddr_weak = std::weak_ptr<LocalUnixAddr>;
+
+class LocalUnixAddr
+    : final public UnixAddr
+{
+};
+*/
+
 class LocalUnixListener;
 using LocalUnixListener_ptr  = std::shared_ptr<LocalUnixListener>;
 using LocalUnixListener_weak = std::weak_ptr<LocalUnixListener>;

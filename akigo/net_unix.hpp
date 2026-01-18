@@ -10,11 +10,15 @@
 namespace wayround_i2p::akigo::net
 {
 
-class UnixAddr // : public IP
+class UnixAddr final
+    : public Addr
 {
   public:
     ustring Name;
     ustring Net;
+
+    ustring Network();
+    ustring String();
 };
 
 using UnixAddr_ptr = std::shared_ptr<UnixAddr>;
