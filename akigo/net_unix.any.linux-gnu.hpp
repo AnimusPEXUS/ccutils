@@ -56,19 +56,26 @@ class LocalUnixListener final
     LocalUnixListener_ptr own_ptr;
 
   public:
-    std::tuple<Conn_ptr, error_ptr> Accept();
+    std::tuple<Conn_ptr, error_ptr>
+        Accept();
 
-    std::tuple<UnixConn_ptr, error_ptr> AcceptUnix();
+    std::tuple<UnixConn_ptr, error_ptr>
+        AcceptUnix();
 
-    std::tuple<Addr_ptr, error_ptr> Addr();
+    std::tuple<Addr_ptr, error_ptr>
+        Addr();
 
-    error_ptr Close();
+    error_ptr
+        Close();
 
-    std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr> File();
+    std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr>
+        File();
 
-    error_ptr SetDeadline(wayround_i2p::akigo::time::Time t);
+    error_ptr
+        SetDeadline(wayround_i2p::akigo::time::Time t);
 
-    void SetUnlinkOnClose(bool unlink);
+    void
+        SetUnlinkOnClose(bool unlink);
 };
 
 class LocalUnixConn;
@@ -83,17 +90,20 @@ class LocalUnixConn final
 
   public:
     static std::tuple<LocalUnixConn_ptr, error_ptr>
-        create(ustring network, UnixAddr_ptr laddr);
+        create(
+            ustring      network,
+            UnixAddr_ptr laddr
+        );
 
-    static std::tuple<LocalUnixConn_ptr, error_ptr> create_for_accepted_FDCtl(
-        wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
-    );
+    static std::tuple<LocalUnixConn_ptr, error_ptr>
+        create_for_accepted_FDCtl(
+            wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
+        );
 
   protected:
     LocalUnixConn(
         ustring      network,
-        UnixAddr_ptr laddr,
-        error_ptr   &err
+        UnixAddr_ptr laddr
     );
 
   public:

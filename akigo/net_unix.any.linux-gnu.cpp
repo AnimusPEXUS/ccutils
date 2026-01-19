@@ -22,7 +22,7 @@ std::tuple<LocalUnixListener_ptr, error_ptr>
         )
     );
     ret->own_ptr = ret;
-    return std::tuple(ret, err);
+    return {ret, err};
 }
 
 LocalUnixListener::LocalUnixListener(
@@ -35,7 +35,11 @@ LocalUnixListener::LocalUnixListener(
     naddr->setUnixAddress(laddr->Name);
 
     fdctl = wayround_i2p::ccutils::posix_tools::FDCtl::create();
-    fdctl->Socket(AF_UNIX, SOCK_STREAM /* todo: SOCK_STREAM here needs evaluation */, 0);
+    fdctl->Socket(
+        AF_UNIX,
+        SOCK_STREAM /* todo: SOCK_STREAM here needs evaluation */,
+        0
+    );
     fdctl->Bind(naddr);
     fdctl->Listen();
 }
@@ -47,9 +51,19 @@ LocalUnixListener::~LocalUnixListener()
 std::tuple<Conn_ptr, error_ptr>
     LocalUnixListener::Accept()
 {
-#warning "todo"
-    // todo: wrap FDCtl with Conn and return
-    return std::tuple(nullptr, nullptr);
+    auto res = AcceptUnix();
+    auto err = std::get<1>(res);
+
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {
+        std::dynamic_pointer_cast<
+            wayround_i2p::akigo::net::Conn>(std::get<0>(res)),
+        nullptr
+    };
 }
 
 std::tuple<UnixConn_ptr, error_ptr>
@@ -59,7 +73,7 @@ std::tuple<UnixConn_ptr, error_ptr>
 
     if (!res.is_ok())
     {
-        return std::tuple(
+        return {
             nullptr,
             wayround_i2p::akigo::errors::New(
                 std::format(
@@ -69,7 +83,7 @@ std::tuple<UnixConn_ptr, error_ptr>
                 __FILE__,
                 __LINE__
             )
-        );
+        };
     }
 
     UnixConn_ptr ret;
@@ -80,12 +94,12 @@ std::tuple<UnixConn_ptr, error_ptr>
 
     if (err)
     {
-        return std::tuple(nullptr, err);
+        return {nullptr, err};
     }
 
     ret = std::get<0>(cfa_res);
 
-    return std::tuple(ret, nullptr);
+    return {ret, nullptr};
 }
 
 std::tuple<wayround_i2p::akigo::net::Addr_ptr, error_ptr>
@@ -129,28 +143,99 @@ std::tuple<wayround_i2p::akigo::net::Addr_ptr, error_ptr>
     // todo: maybe better soulution should be found,
     //       because old unix-socket functions does not support long file paths
 
-    return std::tuple<wayround_i2p::akigo::net::Addr_ptr, error_ptr>(
+    return {
         std::dynamic_pointer_cast<wayround_i2p::akigo::net::Addr>(ret),
         nullptr
-    );
+    };
 }
 
 error_ptr
     LocalUnixListener::Close()
 {
+    auto res = fdctl->Close();
+    if (!res.is_ok())
+    {
+        return wayround_i2p::akigo::errors::New(
+            "Couldn't close file",
+            __FILE__,
+            __LINE__
+        );
+    }
+    return nullptr;
 }
 
 std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr>
     LocalUnixListener::File()
 {
+#warning "todo"
+    return {
+        wayround_i2p::akigo::os::File_ptr(
+            new wayround_i2p::akigo::os::File()
+        ),
+        wayround_i2p::akigo::errors::New(
+            "todo",
+            __FILE__,
+            __LINE__
+        )
+    };
 }
 
 error_ptr
     LocalUnixListener::SetDeadline(wayround_i2p::akigo::time::Time t)
 {
+#warning "todo"
+    return wayround_i2p::akigo::errors::New(
+        "todo",
+        __FILE__,
+        __LINE__
+    );
 }
 
-void SetUnlinkOnClose(bool unlink)
+void LocalUnixListener::SetUnlinkOnClose(bool unlink)
+{
+#warning "todo"
+}
+
+static std::tuple<LocalUnixConn_ptr, error_ptr>
+    LocalUnixConn::create(
+        ustring      network,
+        UnixAddr_ptr laddr
+    )
+{
+    error_ptr err;
+
+    auto ret = LocalUnixConn_ptr(
+        new LocalUnixConn(
+            // "unix" /*check this*. todo: is this needed at all? use laddr.Net? /,
+            laddr.Net,
+            laddr,
+            err
+        )
+    );
+
+    if (err)
+    {
+        return {nullptr, err};
+    }
+
+    return {ret, nullptr};
+}
+
+std::tuple<LocalUnixConn_ptr, error_ptr>
+    LocalUnixConn::create_for_accepted_FDCtl(
+        wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
+    )
+{
+}
+
+LocalUnixConn::LocalUnixConn(
+    ustring      network,
+    UnixAddr_ptr laddr
+)
+{
+}
+
+LocalUnixConn::~LocalUnixConn()
 {
 }
 
