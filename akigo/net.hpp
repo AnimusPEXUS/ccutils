@@ -43,10 +43,8 @@
 namespace wayround_i2p::akigo::net
 {
 
-using error_ptr   = wayround_i2p::akigo::builtin::error_ptr;
-using ustring     = wayround_i2p::akigo::builtin::ustring;
-using size_type   = wayround_i2p::akigo::builtin::size_type;
-using byte_slice  = wayround_i2p::akigo::builtin::byte_slice;
+CCUTILS_MACRO_USE_TYPES_SET00
+
 using Context_ptr = wayround_i2p::akigo::context::Context_ptr;
 using File_ptr    = wayround_i2p::akigo::os::File_ptr;
 

@@ -113,6 +113,47 @@ class LocalUnixConn final
     LocalUnixConn_ptr own_ptr;
 
   public:
+    std::tuple<go_int, error_ptr>                            Write(byte_slice p);
+    error_ptr                                                Close();
+    std::tuple<go_int, error_ptr>                            Read(byte_slice p);
+    error_ptr                                                SetDeadline(wayround_i2p::akigo::time::Time t);
+    error_ptr                                                SetReadDeadline(wayround_i2p::akigo::time::Time t);
+    error_ptr                                                SetWriteDeadline(wayround_i2p::akigo::time::Time t);
+    std::tuple<go_int64, error_ptr>                          WriteTo(wayround_i2p::akigo::io::Writer_ptr w);
+    std::tuple<go_int64, error_ptr>                          ReadFrom(wayround_i2p::akigo::io::Reader_ptr r);
+    error_ptr                                                CloseRead();
+    error_ptr                                                CloseWrite();
+    error_ptr                                                SetReadBuffer(int bytes);
+    error_ptr                                                SetWriteBuffer(int bytes);
+    std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr> File();
+    Addr_ptr                                                 LocalAddr();
+    Addr_ptr                                                 RemoteAddr();
+    std::tuple<int, UnixAddr_ptr, error_ptr>                 ReadFromUnix(byte_slice b);
+
+    std::tuple<
+        int,          // n
+        int,          // oobn
+        int,          // flags
+        UnixAddr_ptr, // addr
+        error_ptr     // error
+        >
+        ReadMsgUnix(
+            byte_slice b,
+            byte_slice oob
+        );
+
+    std::tuple<
+        int,      // n
+        int,      // oobn
+        error_ptr // err
+        >
+        WriteMsgUnix(
+            byte_slice   b,
+            byte_slice   oob,
+            UnixAddr_ptr addr
+        );
+
+    std::tuple<int, error_ptr> WriteToUnix(byte_slice b, UnixAddr_ptr addr);
 };
 
 } // namespace wayround_i2p::akigo::net

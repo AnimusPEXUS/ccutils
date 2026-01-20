@@ -12,16 +12,7 @@
 namespace wayround_i2p::akigo::io
 {
 
-using error_ptr  = wayround_i2p::akigo::builtin::error_ptr;
-using size_type  = wayround_i2p::akigo::builtin::size_type;
-using byte_slice = wayround_i2p::akigo::builtin::byte_slice;
-using ustring    = wayround_i2p::akigo::builtin::ustring;
-using go_byte    = wayround_i2p::akigo::builtin::go_byte;
-using go_rune    = wayround_i2p::akigo::builtin::go_rune;
-using go_int     = wayround_i2p::akigo::builtin::go_int;
-using go_uint    = wayround_i2p::akigo::builtin::go_uint;
-using go_int64   = wayround_i2p::akigo::builtin::go_int64;
-using go_uint64  = wayround_i2p::akigo::builtin::go_uint64;
+CCUTILS_MACRO_USE_TYPES_SET00
 
 class Deadlined
 {

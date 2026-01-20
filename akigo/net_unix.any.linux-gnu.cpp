@@ -196,7 +196,7 @@ void LocalUnixListener::SetUnlinkOnClose(bool unlink)
 #warning "todo"
 }
 
-static std::tuple<LocalUnixConn_ptr, error_ptr>
+std::tuple<LocalUnixConn_ptr, error_ptr>
     LocalUnixConn::create(
         ustring      network,
         UnixAddr_ptr laddr
@@ -207,7 +207,7 @@ static std::tuple<LocalUnixConn_ptr, error_ptr>
     auto ret = LocalUnixConn_ptr(
         new LocalUnixConn(
             // "unix" /*check this*. todo: is this needed at all? use laddr.Net? /,
-            laddr.Net,
+            laddr->Net,
             laddr,
             err
         )
@@ -218,7 +218,7 @@ static std::tuple<LocalUnixConn_ptr, error_ptr>
         return {nullptr, err};
     }
 
-    return {ret, nullptr};
+    return std::tuple<LocalUnixConn_ptr, error_ptr>(ret, nullptr);
 }
 
 std::tuple<LocalUnixConn_ptr, error_ptr>
@@ -236,6 +236,101 @@ LocalUnixConn::LocalUnixConn(
 }
 
 LocalUnixConn::~LocalUnixConn()
+{
+}
+
+std::tuple<go_int, error_ptr> LocalUnixConn::Write(byte_slice p)
+{
+}
+
+error_ptr LocalUnixConn::Close()
+{
+}
+
+std::tuple<go_int, error_ptr> LocalUnixConn::Read(byte_slice p)
+{
+}
+
+error_ptr LocalUnixConn::SetDeadline(wayround_i2p::akigo::time::Time t)
+{
+}
+
+error_ptr LocalUnixConn::SetReadDeadline(wayround_i2p::akigo::time::Time t)
+{
+}
+
+error_ptr LocalUnixConn::SetWriteDeadline(wayround_i2p::akigo::time::Time t)
+{
+}
+
+std::tuple<go_int64, error_ptr> LocalUnixConn::WriteTo(Writer_ptr w)
+{
+}
+
+std::tuple<go_int64, error_ptr> LocalUnixConn::ReadFrom(Reader_ptr r)
+{
+}
+
+error_ptr LocalUnixConn::CloseRead()
+{
+}
+
+error_ptr LocalUnixConn::CloseWrite()
+{
+}
+
+error_ptr LocalUnixConn::SetReadBuffer(int bytes)
+{
+}
+
+error_ptr LocalUnixConn::SetWriteBuffer(int bytes)
+{
+}
+
+std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr> LocalUnixConn::File()
+{
+}
+
+Addr_ptr LocalUnixConn::LocalAddr()
+{
+}
+
+Addr_ptr LocalUnixConn::RemoteAddr()
+{
+}
+
+std::tuple<int, UnixAddr_ptr, error_ptr> LocalUnixConn::ReadFromUnix(byte_slice b)
+{
+}
+
+std::tuple<
+    int,          // n
+    int,          // oobn
+    int,          // flags
+    UnixAddr_ptr, // addr
+    error_ptr     // error
+    >
+    LocalUnixConn::ReadMsgUnix(
+        byte_slice b,
+        byte_slice oob
+    )
+{
+}
+
+std::tuple<
+    int,      // n
+    int,      // oobn
+    error_ptr // err
+    >
+    LocalUnixConn::WriteMsgUnix(
+        byte_slice   b,
+        byte_slice   oob,
+        UnixAddr_ptr addr
+    )
+{
+}
+
+std::tuple<int, error_ptr> LocalUnixConn::WriteToUnix(byte_slice b, UnixAddr_ptr addr)
 {
 }
 
