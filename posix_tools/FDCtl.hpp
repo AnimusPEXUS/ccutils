@@ -248,11 +248,41 @@ class FDCtl
         socklen_t   optlen
     );
 
-    size_errNoS read(void *buffer, size_t size);
-    size_errNoS write(const void *buffer, size_t size);
+    size_errNoS read(
+        std::shared_ptr<std::vector<std::uint8_t>> buffer
+    );
+    size_errNoS read(
+        void  *buffer,
+        size_t size
+    );
 
-    size_errNoS send(const void *buffer, size_t size, int flags);
-    size_errNoS recv(void *buffer, size_t size, int flags);
+    size_errNoS write(
+        const std::shared_ptr<std::vector<std::uint8_t>> buffer
+    );
+    size_errNoS write(
+        const void *buffer,
+        size_t      size
+    );
+
+    size_errNoS recv(
+        std::shared_ptr<std::vector<std::uint8_t>> buffer,
+        int                                        flags
+    );
+    size_errNoS recv(
+        void  *buffer,
+        size_t size,
+        int    flags
+    );
+
+    size_errNoS send(
+        const std::shared_ptr<std::vector<std::uint8_t>> buffer,
+        int                                              flags
+    );
+    size_errNoS send(
+        const void *buffer,
+        size_t      size,
+        int         flags
+    );
 
     // -----------------------------------------------------
     // ^ ^ ^ function direct forwardings ^ ^ ^
@@ -310,6 +340,42 @@ class FDCtl
 
     FDCtl_FDAddress_res_errNoS Accept();
     FDCtl_FDAddress_res_errNoS Accept(FDCtlInitOptions opts);
+
+    size_errNoS Read(
+        std::shared_ptr<std::vector<std::uint8_t>> buffer
+    );
+    size_errNoS Read(
+        void  *buffer,
+        size_t size
+    );
+
+    size_errNoS Write(
+        const std::shared_ptr<std::vector<std::uint8_t>> buffer
+    );
+    size_errNoS Write(
+        const void *buffer,
+        size_t      size
+    );
+
+    size_errNoS Recv(
+        std::shared_ptr<std::vector<std::uint8_t>> buffer,
+        int                                        flags
+    );
+    size_errNoS Recv(
+        void  *buffer,
+        size_t size,
+        int    flags
+    );
+
+    size_errNoS Send(
+        const std::shared_ptr<std::vector<std::uint8_t>> buffer,
+        int                                              flags
+    );
+    size_errNoS Send(
+        const void *buffer,
+        size_t      size,
+        int         flags
+    );
 
     // res==0 on success // shortcut to getsockopt
     res_errNoS getRecvTimeout(timeval &r);

@@ -206,6 +206,8 @@ class UDPConn
 
 } // namespace wayround_i2p::akigo::net
 
+#include <wayround_i2p/ccutils/akigo/net._local_headers.hpp>
+
 #include <wayround_i2p/ccutils/akigo/net_tcp.hpp>
 #include <wayround_i2p/ccutils/akigo/net_udp.hpp>
 #include <wayround_i2p/ccutils/akigo/net_unix.hpp>

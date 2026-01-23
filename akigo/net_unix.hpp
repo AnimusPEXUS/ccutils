@@ -31,7 +31,7 @@ using UnixConn_weak = std::weak_ptr<UnixConn>;
 
 class UnixConn
     : public PacketConn
-    , public wayround_i2p::akigo::io::PartialCloser
+    // , public wayround_i2p::akigo::io::PartialCloser
     , public wayround_i2p::akigo::io::Buffered
     , public wayround_i2p::akigo::io::Filed
 {

@@ -272,6 +272,12 @@ res_errNoS FDCtl::setsockopt(
     return ret;
 }
 
+size_errNoS FDCtl::read(std::shared_ptr<std::vector<std::uint8_t>> buffer)
+{
+    auto t = buffer;
+    return read(t->data(), t->size());
+}
+
 size_errNoS FDCtl::read(void *buffer, size_t size)
 {
     size_errNoS ret = {0, 0};
@@ -282,6 +288,12 @@ size_errNoS FDCtl::read(void *buffer, size_t size)
         ret.errNo = errno;
     }
     return ret;
+}
+
+size_errNoS FDCtl::write(const std::shared_ptr<std::vector<std::uint8_t>> buffer)
+{
+    auto t = buffer;
+    return write(t->data(), t->size());
 }
 
 size_errNoS FDCtl::write(const void *buffer, size_t size)
@@ -296,16 +308,10 @@ size_errNoS FDCtl::write(const void *buffer, size_t size)
     return ret;
 }
 
-size_errNoS FDCtl::send(const void *buffer, size_t size, int flags)
+size_errNoS FDCtl::recv(std::shared_ptr<std::vector<std::uint8_t>> buffer, int flags)
 {
-    size_errNoS ret = {0, 0};
-
-    ret.size = ::send(this->fd, buffer, size, flags);
-    if (ret.not_ok())
-    {
-        ret.errNo = errno;
-    }
-    return ret;
+    auto t = buffer;
+    return recv(t->data(), t->size(), flags);
 }
 
 size_errNoS FDCtl::recv(void *buffer, size_t size, int flags)
@@ -320,14 +326,32 @@ size_errNoS FDCtl::recv(void *buffer, size_t size, int flags)
     return ret;
 }
 
+size_errNoS FDCtl::send(const std::shared_ptr<std::vector<std::uint8_t>> buffer, int flags)
+{
+    auto t = buffer;
+    return send(t->data(), t->size(), flags);
+}
+
+size_errNoS FDCtl::send(const void *buffer, size_t size, int flags)
+{
+    size_errNoS ret = {0, 0};
+
+    ret.size = ::send(this->fd, buffer, size, flags);
+    if (ret.not_ok())
+    {
+        ret.errNo = errno;
+    }
+    return ret;
+}
+
 FDCtl_res_errNoS FDCtl::Dup(FDCtlInitOptions opts)
 {
     res_errNoS res = this->dup();
     if (res.not_ok())
     {
-        return FDCtl_res_errNoS{
-            res,
-            nullptr
+        return FDCtl_res_errNoS{/* todo: is this correct? */
+                                res,
+                                nullptr
         };
     }
 
@@ -645,6 +669,46 @@ FDCtl_FDAddress_res_errNoS FDCtl::Accept(FDCtlInitOptions opts)
     ret.errNo = 0;
 
     return ret;
+}
+
+size_errNoS FDCtl::Read(std::shared_ptr<std::vector<std::uint8_t>> buffer)
+{
+    return read(buffer);
+}
+
+size_errNoS FDCtl::Read(void *buffer, size_t size)
+{
+    return read(buffer, size);
+}
+
+size_errNoS FDCtl::Write(const std::shared_ptr<std::vector<std::uint8_t>> buffer)
+{
+    return write(buffer);
+}
+
+size_errNoS FDCtl::Write(const void *buffer, size_t size)
+{
+    return write(buffer, size);
+}
+
+size_errNoS FDCtl::Recv(std::shared_ptr<std::vector<std::uint8_t>> buffer, int flags)
+{
+    return recv(buffer, flags);
+}
+
+size_errNoS FDCtl::Recv(void *buffer, size_t size, int flags)
+{
+    return recv(buffer, size, flags);
+}
+
+size_errNoS FDCtl::Send(const std::shared_ptr<std::vector<std::uint8_t>> buffer, int flags)
+{
+    return send(buffer, flags);
+}
+
+size_errNoS FDCtl::Send(const void *buffer, size_t size, int flags)
+{
+    return send(buffer, size, flags);
 }
 
 res_errNoS FDCtl::getRecvTimeout(timeval &r)

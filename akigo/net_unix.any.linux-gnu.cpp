@@ -222,16 +222,23 @@ std::tuple<LocalUnixConn_ptr, error_ptr>
 }
 
 std::tuple<LocalUnixConn_ptr, error_ptr>
-    LocalUnixConn::create_for_accepted_FDCtl(
+    LocalUnixConn::create_for_FDCtl(
         wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
     )
 {
+    auto ret = LocalUnixConn_ptr(
+        new LocalUnixConn(fdctl)
+    );
+
+    ret->own_ptr = ret;
+
+    return ret;
 }
 
 LocalUnixConn::LocalUnixConn(
-    ustring      network,
-    UnixAddr_ptr laddr
-)
+    wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
+) : fdctl(fdctl),
+    is_open(true)
 {
 }
 
@@ -245,6 +252,16 @@ std::tuple<go_int, error_ptr> LocalUnixConn::Write(byte_slice p)
 
 error_ptr LocalUnixConn::Close()
 {
+    is_open  = false;
+    auto res = fdctl->Close();
+
+    auto err = res.err;
+    if (err)
+    {
+        return err;
+    }
+
+    return nullptr;
 }
 
 std::tuple<go_int, error_ptr> LocalUnixConn::Read(byte_slice p)

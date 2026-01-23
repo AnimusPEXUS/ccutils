@@ -7,9 +7,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <wayround_i2p/ccutils/akigo/net.hpp>
 #include <wayround_i2p/ccutils/posix_tools/FDCtl.hpp>
-
-#include "net_unix.hpp"
 
 namespace wayround_i2p::akigo::net
 {
@@ -83,52 +82,32 @@ using LocalUnixConn_ptr  = std::shared_ptr<LocalUnixConn>;
 using LocalUnixConn_weak = std::weak_ptr<LocalUnixConn>;
 
 class LocalUnixConn final
-    : public wayround_i2p::akigo::net::UnixConn
+    : public wayround_i2p::akigo::net::LocalConn
+    , public wayround_i2p::akigo::net::UnixConn
 {
   private:
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl;
+    bool                                          is_open = true;
 
   public:
     static std::tuple<LocalUnixConn_ptr, error_ptr>
-        create(
-            ustring      network,
-            UnixAddr_ptr laddr
-        );
-
-    static std::tuple<LocalUnixConn_ptr, error_ptr>
-        create_for_accepted_FDCtl(
+        create_for_FDCtl(
             wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
         );
 
   protected:
     LocalUnixConn(
-        ustring      network,
-        UnixAddr_ptr laddr
+        wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
     );
 
   public:
     ~LocalUnixConn();
 
   private:
-    LocalUnixConn_ptr own_ptr;
+    LocalUnixConn_weak own_ptr;
 
   public:
-    std::tuple<go_int, error_ptr>                            Write(byte_slice p);
-    error_ptr                                                Close();
-    std::tuple<go_int, error_ptr>                            Read(byte_slice p);
-    error_ptr                                                SetDeadline(wayround_i2p::akigo::time::Time t);
-    error_ptr                                                SetReadDeadline(wayround_i2p::akigo::time::Time t);
-    error_ptr                                                SetWriteDeadline(wayround_i2p::akigo::time::Time t);
-    std::tuple<go_int64, error_ptr>                          WriteTo(wayround_i2p::akigo::io::Writer_ptr w);
-    std::tuple<go_int64, error_ptr>                          ReadFrom(wayround_i2p::akigo::io::Reader_ptr r);
-    error_ptr                                                CloseRead();
-    error_ptr                                                CloseWrite();
-    error_ptr                                                SetReadBuffer(int bytes);
-    error_ptr                                                SetWriteBuffer(int bytes);
-    std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr> File();
-    Addr_ptr                                                 LocalAddr();
-    Addr_ptr                                                 RemoteAddr();
-    std::tuple<int, UnixAddr_ptr, error_ptr>                 ReadFromUnix(byte_slice b);
+    std::tuple<int, UnixAddr_ptr, error_ptr> ReadFromUnix(byte_slice b);
 
     std::tuple<
         int,          // n
