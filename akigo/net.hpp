@@ -7,6 +7,7 @@
 
 #include <wayround_i2p/ccutils/akigo/builtin.hpp>
 #include <wayround_i2p/ccutils/akigo/context.hpp>
+#include <wayround_i2p/ccutils/akigo/errors.hpp>
 #include <wayround_i2p/ccutils/akigo/io.hpp>
 #include <wayround_i2p/ccutils/akigo/os.hpp>
 #include <wayround_i2p/ccutils/akigo/time.hpp>

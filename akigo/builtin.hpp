@@ -29,7 +29,7 @@ using go_int64  = std::int64_t;
 using go_uint64 = std::uint64_t;
 
 using size_type   = std::vector<std::uint8_t>::size_type;
-using byte_vector = std::vector<std::uint8_t>;
+using byte_vector = std::shared_ptr<std::vector<std::uint8_t>>;
 using byte_slice  = byte_vector;
 using ustring     = wayround_i2p::ccutils::unicode::UString;
 

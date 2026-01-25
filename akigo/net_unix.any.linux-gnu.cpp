@@ -88,7 +88,7 @@ std::tuple<UnixConn_ptr, error_ptr>
 
     UnixConn_ptr ret;
 
-    auto cfa_res = LocalUnixConn::create_for_accepted_FDCtl(res.fdctl);
+    auto cfa_res = LocalUnixConn::create_for_FDCtl(res.fdctl);
 
     auto err = std::get<1>(cfa_res);
 
@@ -194,31 +194,6 @@ error_ptr
 void LocalUnixListener::SetUnlinkOnClose(bool unlink)
 {
 #warning "todo"
-}
-
-std::tuple<LocalUnixConn_ptr, error_ptr>
-    LocalUnixConn::create(
-        ustring      network,
-        UnixAddr_ptr laddr
-    )
-{
-    error_ptr err;
-
-    auto ret = LocalUnixConn_ptr(
-        new LocalUnixConn(
-            // "unix" /*check this*. todo: is this needed at all? use laddr.Net? /,
-            laddr->Net,
-            laddr,
-            err
-        )
-    );
-
-    if (err)
-    {
-        return {nullptr, err};
-    }
-
-    return std::tuple<LocalUnixConn_ptr, error_ptr>(ret, nullptr);
 }
 
 std::tuple<LocalUnixConn_ptr, error_ptr>

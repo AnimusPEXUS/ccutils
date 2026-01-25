@@ -345,13 +345,14 @@ ccucts_define_package(
 )
 
 set(ccutils_akigo_ADDITIONAL_ITEMS)
-if (CCUCTS_CALCULATED_HOST_POSIX)
-  list(
-    APPEND
-    ccutils_akigo_ADDITIONAL_ITEMS
-    net_code
-  )
-endif()
+
+#if (CCUCTS_CALCULATED_HOST_POSIX)
+#  list(
+#    APPEND
+#    ccutils_akigo_ADDITIONAL_ITEMS
+#    net_code
+#  )
+#endif()
 
 ccucts_define_package(
   DOMAIN_NAME ${ccutils_DOMAIN_NAME}
@@ -370,7 +371,7 @@ ccucts_define_package(
   time
   context
   os
-  ${ccutils_akigo_ADDITIONAL_ITEMS}
+  #${ccutils_akigo_ADDITIONAL_ITEMS}
 
   LIBS_PUB
   ccutils_posix_tools
