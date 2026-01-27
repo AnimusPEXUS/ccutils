@@ -11,7 +11,7 @@ namespace wayround_i2p::akigo::net
 {
 
 class UnixAddr final
-    : public Addr
+    : public virtual Addr
 {
   public:
     ustring Name;
@@ -30,10 +30,10 @@ using UnixConn_ptr  = std::shared_ptr<UnixConn>;
 using UnixConn_weak = std::weak_ptr<UnixConn>;
 
 class UnixConn
-    : public PacketConn
-    , public wayround_i2p::akigo::io::PartialCloser
-    , public wayround_i2p::akigo::io::Buffered
-    , public wayround_i2p::akigo::io::Filed
+    : public virtual PacketConn
+    , public virtual wayround_i2p::akigo::io::PartialCloser
+    , public virtual wayround_i2p::akigo::io::Buffered
+    , public virtual wayround_i2p::akigo::io::Filed
 {
   public:
     // func (c *UnixConn) ReadFromUnix(b []byte) (int, *UnixAddr, error)
@@ -77,8 +77,8 @@ using UnixListener_ptr  = std::shared_ptr<UnixListener>;
 using UnixListener_weak = std::weak_ptr<UnixListener>;
 
 class UnixListener
-    : public Listener
-    , public wayround_i2p::akigo::io::Filed
+    : public virtual Listener
+    , public virtual wayround_i2p::akigo::io::Filed
 {
   public:
     // func (l *UnixListener) AcceptUnix() (*UnixConn, error)

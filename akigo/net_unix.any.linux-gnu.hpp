@@ -32,7 +32,7 @@ using LocalUnixListener_ptr  = std::shared_ptr<LocalUnixListener>;
 using LocalUnixListener_weak = std::weak_ptr<LocalUnixListener>;
 
 class LocalUnixListener final
-    : public UnixListener
+    : public virtual UnixListener
 {
   private:
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl;
@@ -83,7 +83,7 @@ using LocalUnixConn_weak = std::weak_ptr<LocalUnixConn>;
 
 class LocalUnixConn final
     : public wayround_i2p::akigo::net::LocalConn
-    , public wayround_i2p::akigo::net::UnixConn
+    , public virtual wayround_i2p::akigo::net::UnixConn
 {
   private:
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl;

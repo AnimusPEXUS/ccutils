@@ -15,7 +15,7 @@ using LocalConn_ptr  = std::shared_ptr<LocalConn>;
 using LocalConn_weak = std::weak_ptr<LocalConn>;
 
 class LocalConn
-    : public wayround_i2p::akigo::net::Conn
+    : public virtual wayround_i2p::akigo::net::Conn
 {
   private:
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl;

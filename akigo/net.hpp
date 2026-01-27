@@ -78,18 +78,34 @@ class Addressed
  *           non-blocking states via 3 additional functions
  */
 class Conn
-    : public Addressed
-    , public wayround_i2p::akigo::io::ReadWriteCloser
-    , public wayround_i2p::akigo::io::DeadlinedReadWriter
+    : public virtual Addressed
+    , public virtual wayround_i2p::akigo::io::ReadWriteCloser
+    , public virtual wayround_i2p::akigo::io::DeadlinedReadWriter
 {
 };
 
 using Conn_ptr = std::shared_ptr<Conn>;
 
 class PacketConn
-    : public Conn
-    , public wayround_i2p::akigo::io::ReadWriterFromTo
+    : public virtual Conn
+// /* pay attention: not wayround_i2p::akigo::io::ReadWriterFromTo */
+// , public virtual wayround_i2p::akigo::io::ReadWriterFromTo
+
 {
+    // ReadFrom(p []byte) (n int, addr Addr, err error)
+    virtual std::tuple<
+        int,      // n
+        Addr_ptr, // addr
+        error_ptr // err
+        >
+        ReadFrom(byte_slice p) = 0;
+
+    // WriteTo(p []byte, addr Addr) (n int, err error)
+    virtual std::tuple<
+        int,      // n
+        error_ptr // err
+        >
+        WriteTo(byte_slice p, Addr_ptr addr) = 0;
 };
 
 using PacketConn_ptr = std::shared_ptr<PacketConn>;
@@ -133,7 +149,7 @@ class Listener;
 using Listener_ptr = std::shared_ptr<Listener>;
 
 class Listener
-    : public wayround_i2p::akigo::io::Closer
+    : public virtual wayround_i2p::akigo::io::Closer
 {
   public:
     // Accept() (Conn, error)
@@ -159,7 +175,7 @@ class IPNet
 };
 
 class IPAddr
-    : public IP
+    : public virtual IP
 {
     std::string Zone;
 
@@ -168,14 +184,14 @@ class IPAddr
 };
 
 class IPConn
-    : public PacketConn
+    : public virtual PacketConn
 {
 };
 
 std::tuple<Listener_ptr, error_ptr> FileListener(File_ptr f);
 
 class TCPAddr
-    : public IP
+    : public virtual IP
 {
   public:
     int     Port;
@@ -183,17 +199,17 @@ class TCPAddr
 };
 
 class TCPConn
-    : public Conn
+    : public virtual Conn
 {
 };
 
 class TCPListener
-    : public Listener
+    : public virtual Listener
 {
 };
 
 class UDPAddr
-    : public IP
+    : public virtual IP
 {
   public:
     int     Port;
@@ -201,7 +217,7 @@ class UDPAddr
 };
 
 class UDPConn
-    : public PacketConn
+    : public virtual PacketConn
 {
 };
 

@@ -20,7 +20,7 @@ class Deadlined
 };
 
 class DeadlinedReadWriter
-    : public Deadlined
+    : public virtual Deadlined
 {
     virtual error_ptr SetReadDeadline(wayround_i2p::akigo::time::Time t)  = 0;
     virtual error_ptr SetWriteDeadline(wayround_i2p::akigo::time::Time t) = 0;
@@ -60,7 +60,7 @@ class ByteReader
 };
 
 class ByteScanner
-    : public ByteReader
+    : public virtual ByteReader
 {
   public:
     // UnreadByte() error
@@ -144,7 +144,7 @@ class RuneReader
 };
 
 class RuneScanner
-    : public RuneReader
+    : public virtual RuneReader
 {
   public:
     // UnreadRune() error
@@ -166,59 +166,59 @@ class StringWriter
 };
 
 class ReadCloser
-    : public Reader
-    , public Closer
+    : public virtual Reader
+    , public virtual Closer
 {
 };
 
 class ReadSeekCloser
-    : public Reader
-    , public Seeker
-    , public Closer
+    : public virtual Reader
+    , public virtual Seeker
+    , public virtual Closer
 {
 };
 
 class ReadSeeker
-    : public Reader
-    , public Seeker
+    : public virtual Reader
+    , public virtual Seeker
 {
 };
 
 class ReadWriteCloser
-    : public Reader
-    , public Writer
-    , public Closer
+    : public virtual Reader
+    , public virtual Writer
+    , public virtual Closer
 {
 };
 
 class ReadWriteSeeker
-    : public Reader
-    , public Writer
-    , public Seeker
+    : public virtual Reader
+    , public virtual Writer
+    , public virtual Seeker
 {
 };
 
 class ReadWriter
-    : public Reader
-    , public Writer
+    : public virtual Reader
+    , public virtual Writer
 {
 };
 
 class ReadWriterFromTo
-    : public ReaderFrom
-    , public WriterTo
+    : public virtual ReaderFrom
+    , public virtual WriterTo
 {
 };
 
 class WriteCloser
-    : public Writer
-    , public Closer
+    : public virtual Writer
+    , public virtual Closer
 {
 };
 
 class WriteSeeker
-    : public Writer
-    , public Seeker
+    : public virtual Writer
+    , public virtual Seeker
 {
 };
 
