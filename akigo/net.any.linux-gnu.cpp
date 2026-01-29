@@ -7,7 +7,8 @@ namespace wayround_i2p::akigo::net
 
 LocalConn::LocalConn(
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
-) : fdctl(fdctl), is_open(is_open) /* todo: fix clang-format so initializers each on own line */
+)
+    : fdctl(fdctl), is_open(is_open) /* todo: fix clang-format so initializers each on own line */
 {
 }
 
@@ -190,6 +191,30 @@ Addr_ptr LocalConn::RemoteAddr()
 {
 #warning "todo"
     return nullptr;
+}
+
+error_ptr LocalConn::CloseRead()
+{
+#warning "todo"
+    return {
+        wayround_i2p::akigo::errors::New(
+            std::format("todo"),
+            __FILE__,
+            __LINE__
+        )
+    };
+}
+
+error_ptr LocalConn::CloseWrite()
+{
+#warning "todo"
+    return {
+        wayround_i2p::akigo::errors::New(
+            std::format("todo"),
+            __FILE__,
+            __LINE__
+        )
+    };
 }
 
 } // namespace wayround_i2p::akigo::net
