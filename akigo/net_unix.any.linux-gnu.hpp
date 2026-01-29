@@ -90,7 +90,7 @@ class LocalUnixConn final
     bool                                          is_open = true;
 
   public:
-    static std::tuple<LocalUnixConn_ptr, error_ptr>
+    static LocalUnixConn_ptr
         create_for_FDCtl(
             wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
         );
@@ -107,25 +107,17 @@ class LocalUnixConn final
     LocalUnixConn_weak own_ptr;
 
   public:
+    error_ptr                                CloseRead();
+    error_ptr                                CloseWrite();
     std::tuple<int, UnixAddr_ptr, error_ptr> ReadFromUnix(byte_slice b);
 
-    std::tuple<
-        int,          // n
-        int,          // oobn
-        int,          // flags
-        UnixAddr_ptr, // addr
-        error_ptr     // error
-        >
+    std::tuple<int, int, int, UnixAddr_ptr, error_ptr>
         ReadMsgUnix(
             byte_slice b,
             byte_slice oob
         );
 
-    std::tuple<
-        int,      // n
-        int,      // oobn
-        error_ptr // err
-        >
+    std::tuple<int, int, error_ptr>
         WriteMsgUnix(
             byte_slice   b,
             byte_slice   oob,

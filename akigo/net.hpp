@@ -49,10 +49,29 @@ CCUTILS_MACRO_USE_TYPES_SET00
 using Context_ptr = wayround_i2p::akigo::context::Context_ptr;
 using File_ptr    = wayround_i2p::akigo::os::File_ptr;
 
+class PartialCloser
+{
+  public:
+    // CloseRead() error
+    virtual error_ptr CloseRead()  = 0;
+    // CloseWrite() error
+    virtual error_ptr CloseWrite() = 0;
+};
+
 class Error
     : public error_ptr::element_type
 {
     virtual bool Timeout() = 0;
+};
+
+class Buffered
+{
+  public:
+    // func (c *UnixConn) SetReadBuffer(bytes int) error
+    virtual error_ptr SetReadBuffer(int bytes) = 0;
+
+    // func (c *UnixConn) SetWriteBuffer(bytes int) error
+    virtual error_ptr SetWriteBuffer(int bytes) = 0;
 };
 
 class Addr
@@ -88,9 +107,6 @@ using Conn_ptr = std::shared_ptr<Conn>;
 
 class PacketConn
     : public virtual Conn
-// /* pay attention: not wayround_i2p::akigo::io::ReadWriterFromTo */
-// , public virtual wayround_i2p::akigo::io::ReadWriterFromTo
-
 {
     // ReadFrom(p []byte) (n int, addr Addr, err error)
     virtual std::tuple<

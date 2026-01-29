@@ -284,6 +284,14 @@ class FDCtl
         int         flags
     );
 
+    // todo: recvfrom, recvmsg
+    // ssize_t recvfrom (int socket, void *buffer, size_t size, int flags, struct sockaddr *addr, socklen_t *length-ptr)
+    // ssize_t recvmsg (int socket, struct msghdr *message, int flags)
+
+    // todo: sendto, sendmsg
+    // ssize_t sendto (int socket, const void *buffer, size_t size, int flags, struct sockaddr *addr, socklen_t length)
+    // ssize_t sendmsg (int socket, const struct msghdr *message, int flags)
+
     // -----------------------------------------------------
     // ^ ^ ^ function direct forwardings ^ ^ ^
     // -----------------------------------------------------

@@ -86,18 +86,7 @@ std::tuple<UnixConn_ptr, error_ptr>
         };
     }
 
-    UnixConn_ptr ret;
-
-    auto cfa_res = LocalUnixConn::create_for_FDCtl(res.fdctl);
-
-    auto err = std::get<1>(cfa_res);
-
-    if (err)
-    {
-        return {nullptr, err};
-    }
-
-    ret = std::get<0>(cfa_res);
+    auto ret = LocalUnixConn::create_for_FDCtl(res.fdctl);
 
     return {ret, nullptr};
 }
@@ -196,7 +185,7 @@ void LocalUnixListener::SetUnlinkOnClose(bool unlink)
 #warning "todo"
 }
 
-std::tuple<LocalUnixConn_ptr, error_ptr>
+LocalUnixConn_ptr
     LocalUnixConn::create_for_FDCtl(
         wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
     )
@@ -212,8 +201,9 @@ std::tuple<LocalUnixConn_ptr, error_ptr>
 
 LocalUnixConn::LocalUnixConn(
     wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
-) : fdctl(fdctl),
-    is_open(true)
+)
+    : LocalConn(fdctl)
+    , is_open(true)
 {
 }
 
@@ -289,6 +279,30 @@ Addr_ptr LocalUnixConn::LocalAddr()
 
 Addr_ptr LocalUnixConn::RemoteAddr()
 {
+}
+
+error_ptr LocalUnixConn::CloseRead()
+{
+#warning "todo"
+    return {
+        wayround_i2p::akigo::errors::New(
+            std::format("todo"),
+            __FILE__,
+            __LINE__
+        )
+    };
+}
+
+error_ptr LocalUnixConn::CloseWrite()
+{
+#warning "todo"
+    return {
+        wayround_i2p::akigo::errors::New(
+            std::format("todo"),
+            __FILE__,
+            __LINE__
+        )
+    };
 }
 
 std::tuple<int, UnixAddr_ptr, error_ptr> LocalUnixConn::ReadFromUnix(byte_slice b)

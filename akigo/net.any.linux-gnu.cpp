@@ -15,6 +15,18 @@ LocalConn::~LocalConn()
 {
 }
 
+void LocalConn::set_fdctl(
+    wayround_i2p::ccutils::posix_tools::FDCtl_ptr fdctl
+)
+{
+    this->fdctl = fdctl;
+}
+
+wayround_i2p::ccutils::posix_tools::FDCtl_ptr LocalConn::get_fdctl()
+{
+    return fdctl;
+}
+
 std::tuple<wayround_i2p::akigo::os::File_ptr, error_ptr> LocalConn::File()
 {
 #warning "todo"
@@ -81,30 +93,6 @@ error_ptr LocalConn::Close()
     return nullptr;
 }
 
-error_ptr LocalConn::CloseRead()
-{
-    #warning "todo"
-    return {
-        wayround_i2p::akigo::errors::New(
-            std::format("todo"),
-            __FILE__,
-            __LINE__
-        )
-    };
-}
-
-error_ptr LocalConn::CloseWrite()
-{
-    #warning "todo"
-    return {
-        wayround_i2p::akigo::errors::New(
-            std::format("todo"),
-            __FILE__,
-            __LINE__
-        )
-    };
-}
-
 error_ptr LocalConn::SetDeadline(wayround_i2p::akigo::time::Time t)
 {
 #warning "todo"
@@ -141,7 +129,7 @@ error_ptr LocalConn::SetWriteDeadline(wayround_i2p::akigo::time::Time t)
     };
 }
 
-std::tuple<go_int64, error_ptr> LocalConn::WriteTo(wayround_i2p::akigo::io::Writer_ptr w)
+std::tuple<int, error_ptr> WriteTo(byte_slice p, Addr_ptr addr)
 {
 #warning "todo"
     return {
@@ -154,11 +142,12 @@ std::tuple<go_int64, error_ptr> LocalConn::WriteTo(wayround_i2p::akigo::io::Writ
     };
 }
 
-std::tuple<go_int64, error_ptr> LocalConn::ReadFrom(wayround_i2p::akigo::io::Reader_ptr r)
+std::tuple<int, Addr_ptr, error_ptr> ReadFrom(byte_slice p)
 {
 #warning "todo"
     return {
         -1,
+        nullptr,
         wayround_i2p::akigo::errors::New(
             std::format("todo"),
             __FILE__,
@@ -189,6 +178,18 @@ error_ptr LocalConn::SetWriteBuffer(int bytes)
             __LINE__
         )
     };
+}
+
+Addr_ptr LocalConn::LocalAddr()
+{
+#warning "todo"
+    return nullptr;
+}
+
+Addr_ptr LocalConn::RemoteAddr()
+{
+#warning "todo"
+    return nullptr;
 }
 
 } // namespace wayround_i2p::akigo::net

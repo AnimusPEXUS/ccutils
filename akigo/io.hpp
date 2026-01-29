@@ -26,16 +26,6 @@ class DeadlinedReadWriter
     virtual error_ptr SetWriteDeadline(wayround_i2p::akigo::time::Time t) = 0;
 };
 
-class Buffered
-{
-  public:
-    // func (c *UnixConn) SetReadBuffer(bytes int) error
-    virtual error_ptr SetReadBuffer(int bytes) = 0;
-
-    // func (c *UnixConn) SetWriteBuffer(bytes int) error
-    virtual error_ptr SetWriteBuffer(int bytes) = 0;
-};
-
 class Filed
 {
   public:
@@ -79,15 +69,6 @@ class Closer
   public:
     // Close() error
     virtual error_ptr Close() = 0;
-};
-
-class PartialCloser
-{
-  public:
-    // CloseRead() error
-    virtual error_ptr CloseRead()  = 0;
-    // CloseWrite() error
-    virtual error_ptr CloseWrite() = 0;
 };
 
 class Reader
