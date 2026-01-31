@@ -8,7 +8,7 @@ import re
 
 COOL_HEADERGUARD_TEXT = 'WAYROUND_I2P'
 
-RE_NUMBER_str = COOL_HEADERGUARD_TEXT + r'_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d+'
+RE_NUMBER_str = COOL_HEADERGUARD_TEXT + r'_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d{0:10}+'
 RE_FIRST_LINE_RE_CHECK = re.compile(r'^#ifndef '+RE_NUMBER_str+r'$')
 
 
@@ -62,7 +62,7 @@ def edit_file(fullpath_first, fullpath):
 
     a = datetime.datetime.now(datetime.UTC)
 
-    gened_name = COOL_HEADERGUARD_TEXT+'_{:04d}{:02d}{:02d}_{:02d}{:02d}{:02d}_{:d}'.format(
+    gened_name = COOL_HEADERGUARD_TEXT+'_{:04d}{:02d}{:02d}_{:02d}{:02d}{:02d}_{:010d}'.format(
         a.year, a.month, a.day, a.hour, a.minute, a.second, a.microsecond
     )
 

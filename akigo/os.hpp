@@ -1,5 +1,5 @@
-#ifndef WAYROUND_I2P_20250205_113427_122178
-#define WAYROUND_I2P_20250205_113427_122178
+#ifndef WAYROUND_I2P_20260131_182305_0000232532
+#define WAYROUND_I2P_20260131_182305_0000232532
 
 #include <memory>
 #include <tuple>
@@ -9,10 +9,7 @@
 namespace wayround_i2p::akigo::os
 {
 
-using error_ptr   = wayround_i2p::akigo::builtin::error_ptr;
-using size_type   = wayround_i2p::akigo::builtin::size_type;
-using byte_vector = wayround_i2p::akigo::builtin::byte_vector;
-using ustring     = wayround_i2p::akigo::builtin::ustring;
+CCUTILS_MACRO_USE_TYPES_SET00
 
 class File
 {

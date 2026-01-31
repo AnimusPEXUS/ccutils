@@ -10,13 +10,13 @@
 
 namespace akigo_ns = wayround_i2p::akigo;
 
-std::tuple<akigo_ns::builtin::byte_vector, bool> TryReadLine(
-    akigo_ns::builtin::byte_vector buff
+std::tuple<akigo_ns::builtin::byte_slice, bool> TryReadLine(
+    akigo_ns::builtin::byte_slice buff
 )
 {
 
-    akigo_ns::builtin::byte_vector ret_ret;
-    bool                           ret_ok;
+    akigo_ns::builtin::byte_slice ret_ret;
+    bool                          ret_ok;
 
     std::cout << "searching new line" << std::endl;
 
@@ -34,16 +34,18 @@ std::tuple<akigo_ns::builtin::byte_vector, bool> TryReadLine(
         }
     );
 
-    for (decltype(buff)::value_type i = 0; i != buff.size(); i++)
+    auto buff_p = *buff;
+
+    for (decltype(buff_p)::size_type i = 0; i != buff_p.size(); i++)
     {
-        auto v = buff.at(i);
+        auto v = buff_p.at(i);
         if (v == '\n')
         {
             return std::tuple(
-                akigo_ns::builtin::byte_vector(
-                    buff.begin(),
-                    buff.begin() + i
-                ),
+                akigo_ns::builtin::byte_slice(
+                    buff_p.begin(),
+                    buff_p.begin() + i
+                ),      
                 true
             );
         }
@@ -53,7 +55,7 @@ std::tuple<akigo_ns::builtin::byte_vector, bool> TryReadLine(
 }
 
 void ProcessLine(
-    akigo_ns::builtin::byte_vector line
+    akigo_ns::builtin::byte_slice line
 )
 {
     std::string text;
@@ -71,7 +73,7 @@ void wkr(akigo_ns::net::Conn_ptr c)
         }
     );
 
-    akigo_ns::builtin::byte_vector buff;
+    akigo_ns::builtin::byte_slice buff;
 
     while (true)
     {
