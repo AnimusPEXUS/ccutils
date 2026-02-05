@@ -363,7 +363,7 @@ ccucts_define_package(
 
   ITEMS
   builtin
-  builtin_slice
+  builtin_tf01
   io
   net
   net_tcp
