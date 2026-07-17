@@ -14,7 +14,6 @@ message(STATUS "ccutils CMakeLists.txt :: current directory is ${CCUTILS_CWD}")
 
 include("ccucts_searcher.cmake")
 
-
 project(ccutils)
 
 find_package(PkgConfig REQUIRED)
