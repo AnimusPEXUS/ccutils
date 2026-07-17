@@ -11,6 +11,7 @@ namespace wayround_i2p::akigo::errors
 using error_ptr = wayround_i2p::akigo::builtin::error_ptr;
 using ustring   = wayround_i2p::akigo::builtin::ustring;
 
+// use __FILE__ and __LINE__ for file and line params
 inline error_ptr New(ustring text, ustring file, std::size_t line)
 {
     return wayround_i2p::ccutils::errors::New(

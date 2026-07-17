@@ -1,4 +1,4 @@
-BreakInheritanceList: BeforeComma
+BreakInheritanceList: BeforeComma 
 PackConstructorInitializers: NextLineOnly
 BreakConstructorInitializers: BeforeComma
 UseTab: Never

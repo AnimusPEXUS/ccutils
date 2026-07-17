@@ -11,8 +11,9 @@
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
 // note: no 'ccutils' in namespace.
-//       why? - because I feel akigo as separate project but don't
-//       think it should really be separate from ccutils.
+//       why? - because I feel akigo as separate project but 
+//       don't think it should really be separate from 
+//       ccutils.
 
 namespace wayround_i2p::akigo::builtin
 {
@@ -28,7 +29,8 @@ using go_uint   = unsigned int;
 using go_int64  = std::int64_t;
 using go_uint64 = std::uint64_t;
 
-using size_type   = std::vector<std::uint8_t>::size_type;
+// using size_type   = std::vector<std::uint8_t>::size_type;
+using size_type   = std::size_t;
 using byte_vector = std::shared_ptr<std::vector<std::uint8_t>>;
 using byte_slice  = byte_vector;
 using ustring     = wayround_i2p::ccutils::unicode::UString;

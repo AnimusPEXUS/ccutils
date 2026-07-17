@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.31)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
@@ -8,34 +8,11 @@ include(FetchContent)
 set(CCUTILS_CWD)
 
 cmake_path(GET CMAKE_CURRENT_LIST_FILE PARENT_PATH CCUTILS_CWD)
+cmake_path(ABSOLUTE_PATH CCUTILS_CWD BASE_DIRECTORY / NORMALIZE)
 
 message(STATUS "ccutils CMakeLists.txt :: current directory is ${CCUTILS_CWD}")
 
-set(CCUCTS_DIR "${CCUTILS_CWD}/../ccucts")
-
-if (NOT DEFINED CCUCTS_VERSION)
-  # message(STATUS "CCUCTS_VERSION undefined yet, so trying to find and use CCUCTS")
-  message(STATUS "Trying to find CCUCTS as ${CCUCTS_DIR}/_import_me.cmake")
-  if (EXISTS "${CCUCTS_DIR}/_import_me.cmake")
-    message(STATUS "predownloaded CCUCTS found")
-  else()
-    message(STATUS "CCUCTS not found. fetching from GitHub")
-    FetchContent_Declare(
-      ccucts_downlod
-      GIT_REPOSITORY "https://github.com/AnimusPEXUS/ccucts.git"
-      GIT_TAG "origin/master"
-    )
-    FetchContent_MakeAvailable(ccucts_downlod)
-    FetchContent_GetProperties(
-      ccucts_downlod
-      SOURCE_DIR CCUCTS_DIR
-    )
-
-  endif()
-
-  include("${CCUCTS_DIR}/_import_me.cmake")
-
-endif()
+include("ccucts_searcher.cmake")
 
 
 project(ccutils)
@@ -363,7 +340,7 @@ ccucts_define_package(
 
   ITEMS
   builtin
-  builtin_tf01
+  builtin_slice
   io
   net
   net_tcp
