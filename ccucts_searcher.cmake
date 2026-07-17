@@ -1,4 +1,6 @@
-# CCUCTS sercher/downloader. version 2026-07-17T15:26
+# CCUCTS sercher/downloader. version 2026-07-17T17:32
+
+message(STATUS "==v== CCUCTS sercher/downloader ==v==")
 
 if (NOT DEFINED CCUCTS_VERSION)
   
@@ -40,22 +42,29 @@ if (NOT DEFINED CCUCTS_VERSION)
 
   if (NOT DEFINED CCUCTS_VERSION)
     message(STATUS "failed to find existing CCUCTS. downloading...")
+  
+    include(FetchContent)
+  
     FetchContent_Declare(
       ccucts_download
       GIT_REPOSITORY "https://github.com/AnimusPEXUS/ccucts.git"
       GIT_TAG "origin/master"
     )
+
     FetchContent_MakeAvailable(ccucts_download)
+
     FetchContent_GetProperties(
       ccucts_download
       SOURCE_DIR CCUCTS_DIR
     )
+
     if (EXISTS "${CCUCTS_DIR}/_import_me.cmake")
       message(STATUS "downloaded. importing CCUCTS...")
       include("${CCUCTS_DIR}/_import_me.cmake")
     else()
       message(STATUS "downloading failed.")
     endif()
+
   endif()
 
   if (NOT DEFINED CCUCTS_VERSION)
@@ -64,5 +73,11 @@ if (NOT DEFINED CCUCTS_VERSION)
     message(STATUS "CCUCTS deployed")
   endif()
 
+else()
+  message(STATUS "already defined CCUCTS version detected: ${CCUCTS_VERSION}")
 endif()
-message(STATUS "CCUCTS version detected: ${CCUCTS_VERSION}")
+
+unset(CCUCTS_DIR_SEARCH_CURRENT_PATH)
+unset(CCUCTS_DIR_SEARCH_CURRENT_PATH_FILE_TO_CHECK)
+
+message(STATUS "==^== CCUCTS sercher/downloader ==^==")
