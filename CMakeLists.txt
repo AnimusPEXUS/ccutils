@@ -12,13 +12,7 @@ cmake_path(ABSOLUTE_PATH CCUTILS_CWD BASE_DIRECTORY / NORMALIZE)
 
 message(STATUS "ccutils CMakeLists.txt :: current directory is ${CCUTILS_CWD}")
 
-#set(CCUCTS_VERSION)
 include("ccucts_searcher.cmake")
-#ccucts_search_ccucts(CCUCTS_VERSION)
-#if (NOT DEFINED CCUCTS_VERSION)
-#  message(FATAL_ERROR "NOT DEFINED CCUCTS_VERSION")
-#endif()
-#message(STATUS "ccutils using CCUCTS: ${CCUCTS_VERSION}")
 
 project(ccutils)
 
