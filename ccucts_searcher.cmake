@@ -1,6 +1,6 @@
-# CCUCTS sercher/downloader. version 2026-07-17T17:32
+# CCUCTS sercher/downloader. version 2026-07-21T13:30
 
-message(STATUS "==v== CCUCTS sercher/downloader ==v==")
+message(STATUS "==v== CCUCTS searcher/downloader ==v==")
 
 if (NOT DEFINED CCUCTS_VERSION)
   
@@ -80,4 +80,4 @@ endif()
 unset(CCUCTS_DIR_SEARCH_CURRENT_PATH)
 unset(CCUCTS_DIR_SEARCH_CURRENT_PATH_FILE_TO_CHECK)
 
-message(STATUS "==^== CCUCTS sercher/downloader ==^==")
+message(STATUS "==^== CCUCTS searcher/downloader ==^==")
