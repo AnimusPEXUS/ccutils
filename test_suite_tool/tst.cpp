@@ -131,6 +131,7 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
     std::vector<const TSTInfo *> failure_list;
     std::vector<const TSTInfo *> expected_failure_list;
     std::vector<const TSTInfo *> unexpected_success_list;
+    std::vector<const TSTInfo *> unexpected_success_counts_failure_list;
 
     if (!rtp.logger)
     {
@@ -148,17 +149,19 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                 std::format(
                     R"+++(
    total test count: {}
-                  success: {}
-                 failures: {}
-        expected failures: {}
-       unexpected success: {}
+                                      success: {}
+                                     failures: {}
+                            expected failures: {}
+                           unexpected success: {}
+       unexpected success counted as failures: {}
 
 )+++",
                     total_count,
                     success_list.size(),
                     failure_list.size(),
                     expected_failure_list.size(),
-                    unexpected_success_list.size()
+                    unexpected_success_list.size(),
+                    unexpected_success_counts_failure_list.size()
                 )
             );
             rtp.logger->Log(
@@ -329,7 +332,14 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
                                 wayround_i2p::ccutils::logger::UnexpectedSuccess,
                                 "Test Unexpectedly Succeeded"
                             );
-                            unexpected_success_list.push_back(&x);
+                            if (x.if_expected_failure_but_unexpected_success___is_bad)
+                            {
+                                unexpected_success_counts_failure_list.push_back(&x);
+                            }
+                            else
+                            {
+                                unexpected_success_list.push_back(&x);
+                            }
                         }
                         else
                         {
@@ -368,7 +378,8 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
         }
     }
 
-    if (failure_list.size() == 0)
+    if (failure_list.size() == 0
+        && unexpected_success_counts_failure_list.size() == 0)
     {
         rtp.logger->Log(
             wayround_i2p::ccutils::logger::Success,

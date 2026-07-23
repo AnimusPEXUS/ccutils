@@ -41,7 +41,8 @@ struct TSTInfo
     UString description;
     bool    description_print;
 
-    bool expected_failure = false;
+    bool expected_failure                                    = false;
+    bool if_expected_failure_but_unexpected_success___is_bad = false;
 
     TST_TEST_FUNCTION func;
 };
