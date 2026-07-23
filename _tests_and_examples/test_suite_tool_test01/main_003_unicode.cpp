@@ -11,7 +11,7 @@ wayround_i2p::ccutils::tst::TSTFuncResult main_003_unicode(
         wayround_i2p::ccutils::logger::LoggerMSGType::Info,
         std::format(
             "checking unicode. length of \"{}\" == {}. should be 15",
-            x,
+            x.to_string(),
             x.length()
         )
     );

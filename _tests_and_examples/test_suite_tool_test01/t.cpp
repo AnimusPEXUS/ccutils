@@ -13,10 +13,13 @@
 
 int main(int argc, char **args)
 {
+    auto logger = wayround_i2p::ccutils::logger::TerminalLogger::create();
+
     wayround_i2p::ccutils::tst::run_tests_Parameters params{
         .title       = "test suite for WayRound.I2P test suite tool",
         .description = "currently I use it while developping suite itself",
-        .uri         = "https://github.com/AnimusPEXUS/ccutils/test_suite_tool"
+        .uri         = "https://github.com/AnimusPEXUS/ccutils/test_suite_tool",
+        .logger      = logger
     };
 
     params.AddTest(main_001_i);

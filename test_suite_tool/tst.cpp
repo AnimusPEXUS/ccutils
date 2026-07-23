@@ -132,6 +132,14 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
     std::vector<const TSTInfo *> expected_failure_list;
     std::vector<const TSTInfo *> unexpected_success_list;
 
+    if (!rtp.logger)
+    {
+        std::cout << "error: rtp.logger is unset. "
+                     "you must define logger. tests can't work without logger"
+                  << std::endl;
+        return 5;
+    }
+
     auto se01 = std::experimental::scope_exit(
         [&]()
         {
@@ -162,6 +170,12 @@ int run_tests(int argc, char **args, const run_tests_Parameters &rtp)
     );
 
     print_head(rtp);
+
+    if (!rtp.logger)
+    {
+        std::cout << "error: rtp.logger is unset and this is very strange" << std::endl;
+        return 5;
+    }
 
     rtp.logger->Log(
         wayround_i2p::ccutils::logger::Status,
@@ -389,8 +403,8 @@ std::shared_ptr<IndividualFunctionLogger> IndividualFunctionLogger::create(
 IndividualFunctionLogger::IndividualFunctionLogger(
     const run_tests_Parameters &params,
     const TSTInfo              &test_info
-) :
-    params(params), test_info(test_info)
+)
+    : params(params), test_info(test_info)
 {
 }
 
