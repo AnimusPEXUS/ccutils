@@ -1,6 +1,8 @@
-# CCUCTS sercher/downloader. version 2026-07-21T13:30
+# CCUCTS sercher/downloader. version 2026-07-21T14:45`
 
 message(STATUS "==v== CCUCTS searcher/downloader ==v==")
+
+set(CCUCTS_IMPORT_FILENAME "_import_me.cmake")
 
 if (NOT DEFINED CCUCTS_VERSION)
   
@@ -11,9 +13,9 @@ if (NOT DEFINED CCUCTS_VERSION)
   message(STATUS "checking CCUCTS_DIR variable")
   if ((DEFINED CCUCTS_DIR))
     message(STATUS "CCUCTS_DIR already defined. trying to import from ${CCUCTS_DIR}")
-    if (EXISTS "${CCUCTS_DIR}/_import_me.cmake")
+    if (EXISTS "${CCUCTS_DIR}/${CCUCTS_IMPORT_FILENAME}")
       message(STATUS "check success. importing CCUCTS...")
-      include("${CCUCTS_DIR}/_import_me.cmake")
+      include("${CCUCTS_DIR}/${CCUCTS_IMPORT_FILENAME}")
     endif()
   endif()
 
@@ -28,7 +30,7 @@ if (NOT DEFINED CCUCTS_VERSION)
           break()
       endif()
       message(STATUS "searching in ${CCUCTS_DIR_SEARCH_CURRENT_PATH}/ccucts")
-      set(CCUCTS_DIR_SEARCH_CURRENT_PATH_FILE_TO_CHECK "${CCUCTS_DIR_SEARCH_CURRENT_PATH}/ccucts/_import_me.cmake")
+      set(CCUCTS_DIR_SEARCH_CURRENT_PATH_FILE_TO_CHECK "${CCUCTS_DIR_SEARCH_CURRENT_PATH}/ccucts/${CCUCTS_IMPORT_FILENAME}")
       if (EXISTS "${CCUCTS_DIR_SEARCH_CURRENT_PATH_FILE_TO_CHECK}")
         message(STATUS "importing file ${CCUCTS_DIR_SEARCH_CURRENT_PATH_FILE_TO_CHECK}")
         include("${CCUCTS_DIR_SEARCH_CURRENT_PATH_FILE_TO_CHECK}")
@@ -58,9 +60,9 @@ if (NOT DEFINED CCUCTS_VERSION)
       SOURCE_DIR CCUCTS_DIR
     )
 
-    if (EXISTS "${CCUCTS_DIR}/_import_me.cmake")
+    if (EXISTS "${CCUCTS_DIR}/${CCUCTS_IMPORT_FILENAME}")
       message(STATUS "downloaded. importing CCUCTS...")
-      include("${CCUCTS_DIR}/_import_me.cmake")
+      include("${CCUCTS_DIR}/${CCUCTS_IMPORT_FILENAME}")
     else()
       message(STATUS "downloading failed.")
     endif()
