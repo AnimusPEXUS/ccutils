@@ -1,12 +1,14 @@
 wayround_i2p::ccutils::tst::TSTFuncResult main_002(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    opts.Log(
-        wayround_i2p::ccutils::tst::Info,
+    logger->Log(
+        wayround_i2p::ccutils::logger::LoggerMSGType::Info,
         std::format(
             "getting iitm[\"x\"]..: {}",
-            std::any_cast<int>(opts.iitm["x"])
+            std::any_cast<int>(iitm["x"])
         )
     );
 

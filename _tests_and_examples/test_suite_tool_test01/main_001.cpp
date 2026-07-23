@@ -1,13 +1,15 @@
 wayround_i2p::ccutils::tst::TSTFuncResult main_001(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
-    opts.Log(
-        wayround_i2p::ccutils::tst::Info,
+    logger->Log(
+        wayround_i2p::ccutils::logger::LoggerMSGType::Info,
         "setting iitm[\"x\"] to 123.."
     );
 
-    opts.iitm["x"] = 123;
+    iitm["x"] = 123;
 
     return {
         true

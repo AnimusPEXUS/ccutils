@@ -1,21 +1,23 @@
 wayround_i2p::ccutils::tst::TSTFuncResult main_003_unicode(
-    const wayround_i2p::ccutils::tst::TSTFuncOpts &opts
+    const wayround_i2p::ccutils::tst::TSTInfo    &func_info,
+    std::map<std::string, std::any>              &iitm,
+    wayround_i2p::ccutils::logger::LoggerI_shared logger
 )
 {
 
     auto x = wayround_i2p::ccutils::unicode::UString("тестовая строка");
 
-    opts.Log(
-        wayround_i2p::ccutils::tst::Info,
+    logger->Log(
+        wayround_i2p::ccutils::logger::LoggerMSGType::Info,
         std::format(
-            "проверяем юникод. длинна \"{}\" == {}",
-            x.string_utf8(),
-            x.size()
+            "checking unicode. length of \"{}\" == {}. should be 15",
+            x,
+            x.length()
         )
     );
 
     return {
-        x.size() == 15
+        x.length() == 15
     };
 }
 
