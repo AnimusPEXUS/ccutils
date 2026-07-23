@@ -216,15 +216,15 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     );
 
     /**
-    sometimes it is better to manipulate vectors and/or deques, than UStrings.
+    sometimes it is better/faster to manipulate vectors and/or deques, than UStrings.
     so here are easy UString constructors to fast/easy convert those back to UStrings
     */
+
+    // todo: try better functions for UString, to avoid need of conversions
+    //       to/from vectors/deques as better as possible
+
     UString(const std::vector<UChar> &val);
 
-    /**
-    sometimes it is better to manipulate vectors and/or deques, than UStrings.
-    so here are easy UString constructors to fast/easy convert those back to UStrings
-    */
     UString(const std::deque<UChar> &val);
 
     ~UString();

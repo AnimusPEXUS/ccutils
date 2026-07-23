@@ -9,6 +9,8 @@
 #include <wayround_i2p/ccutils/regexp/regexp.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
+// todo: string representable/parsable regexp patterns.
+
 namespace wayround_i2p::ccutils::ip
 {
 
