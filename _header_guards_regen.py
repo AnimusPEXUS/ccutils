@@ -8,7 +8,8 @@ import re
 
 COOL_HEADERGUARD_TEXT = 'WAYROUND_I2P'
 
-RE_NUMBER_str = COOL_HEADERGUARD_TEXT + r'_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d{10}'
+RE_NUMBER_str = COOL_HEADERGUARD_TEXT + \
+    r'_\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}_\d{10}'
 RE_FIRST_LINE_RE_CHECK = re.compile(r'^#ifndef '+RE_NUMBER_str+r'$')
 
 
@@ -36,9 +37,14 @@ def edit_file(fullpath_first, fullpath):
 
             del lns[0]
         else:
-            # some unexpected code on line one - don't edit file
-            print(f"  skipping (code 1) {relp}")
-            return
+            if lns[0].startswith('#ifndef fixme'):
+                # regeneration required, so continuing
+
+                del lns[0]
+            else:
+                # some unexpected code on line one - don't edit file
+                print(f"  skipping (code 1) {relp}")
+                return
 
     if len(lns) > 0:
         if lns[0].startswith('#define'):
