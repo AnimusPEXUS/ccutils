@@ -320,6 +320,24 @@ ccucts_define_package(
   ccutils_regexp
 )
 
+ccucts_define_package(
+  DOMAIN_NAME ${ccutils_DOMAIN_NAME}
+  DOMAIN_DIRNAME ${ccutils_DOMAIN_DIRNAME}
+  PROJECT_NAME ${ccutils_PROJECT_NAME}
+  PACKAGE_NAME ccutils_cliapp
+  SUBDIR cliapp
+
+  ITEMS
+  program
+  getopt
+
+  LIBS_PUB
+  ccutils_unicode
+  ccutils_errors
+  ccutils_regexp
+)
+
+
 set(ccutils_akigo_ADDITIONAL_ITEMS)
 
 #if (CCUCTS_CALCULATED_HOST_POSIX)
