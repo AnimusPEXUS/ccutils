@@ -12,12 +12,14 @@ namespace ccu_uni = wayround_i2p::ccutils::unicode;
 namespace ccu_err = wayround_i2p::ccutils::errors;
 
 struct RetOptItem;
+struct AppCmdNode;
+struct GetOptCheckListItem;
 
 struct GetOptResult
 {
-    std::shared_ptr<AppCmdNode>             node_info;
-    std::deque<ccu_uni::UString>            args;
-    std::deque<std::shared_ptr<RetOptItem>> opts;
+    const AppCmdNode                             &node_info;
+    const std::deque<ccu_uni::UString>            args;
+    const std::deque<std::shared_ptr<RetOptItem>> opts;
 
     ccu_uni::UString String();
 
@@ -29,7 +31,7 @@ struct GetOptResult
     std::deque<std::shared_ptr<RetOptItem>> GetAllNamedRetOptItems(ccu_uni::UString name);
 
     // check result accordingly with AvailableOptions passed to
-    std::deque<std::shared_ptr<const ccu_err::error_ptr>> CheckOptResult();
+    std::deque<ccu_err::error_ptr> CheckOptResult();
 
     // check if option with name 'name' has been supplied
     bool DoesHaveNamedRetOptItem(ccu_uni::UString name);
@@ -37,7 +39,7 @@ struct GetOptResult
     // check if option with name 'name' has been supplied and it have some value
     bool DoesNamedRetOptItemHaveValue(ccu_uni::UString name);
 
-    std::shared_ptr<GetOptCheckListItem> GetOptionByName(ccu_uni::UString name);
+    const GetOptCheckListItem &GetNodeOptionByName(ccu_uni::UString name);
 };
 
 struct RetOptItem
@@ -53,34 +55,43 @@ struct GetOptCheckListItem
     /*
         must be with leading '-' (minuses) and without trailing '=' equals
     */
-    ccu_uni::UString name;
+    const ccu_uni::UString name;
 
     /*
         set this to true if Default value have meaning
     */
-    bool has_default_value;
+    const bool has_default_value;
 
     /*
         default value in case if defined without value
     */
-    ccu_uni::UString default_value;
+    const ccu_uni::UString default_value;
 
     /*
-        put here true, if user MUST set this flag
+        put here true, if user MUST explicitly define this option
     */
-    bool is_required;
+    const bool is_required;
 
     /* insist on value to flag.
     if this is true, and value not passed to option,
     then if HaveDefault is true then Default is used as value.
     */
-    bool must_have_value;
+    const bool must_have_value;
 
-    ccu_uni::UString description; // this text will be printed beside option on --help parameter
-
-    std::shared_ptr<GetOptCheckListItem> GetByName(ccu_uni::UString name);
-    ccu_uni::UString                     HelpString();
+    const ccu_uni::UString description; // this text will be printed beside option on --help parameter
 };
+
+struct GetOptCheckList
+{
+    GetOptCheckListItem items[];
+};
+
+std::shared_ptr<GetOptCheckListItem> GetByName(
+    ccu_uni::UString       name,
+    const GetOptCheckList &lst
+);
+
+ccu_uni::UString HelpString(const GetOptCheckList &lst);
 
 } // namespace wayround_i2p::ccutils::cliapp
 

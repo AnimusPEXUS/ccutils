@@ -14,7 +14,6 @@ namespace wayround_i2p::ccutils::cliapp
 
 namespace ccu_uni = wayround_i2p::ccutils::unicode;
 
-// make read-only (const?)
 struct AppResult
 {
     int              code;
@@ -23,66 +22,69 @@ struct AppResult
 };
 
 struct AppCmdNode;
+struct GetOptCheckList;
 
-// make read-only (const?)
-struct AdditionalInfo
+struct AppCmdRuntimeInfo
 {
-    std::vector<ccu_uni::UString> opts_and_args;
-    GetOptCheckList               available_options;
-    std::vector<ccu_uni::UString> depth_level;
-    std::shared_ptr<AppCmdNode>   subnode;
-    std::shared_ptr<AppCmdNode>   root;
-    ccu_uni::UString              arg0;
+    const std::vector<ccu_uni::UString> opts_and_args;
+    const GetOptCheckList              &cmd_options;
+    const std::vector<ccu_uni::UString> depth_level;
+    const AppCmdNode                   &parent_node;
+    const AppCmdNode                   &current_node;
+    const AppCmdNode                   &root;
+    const ccu_uni::UString              arg0;
 };
 
 struct GetOptResult;
 
-// make read-only (const?)
+// instances of this struct must be only compile-time and const
 struct AppCmdNode
 {
-    ccu_uni::UString                         name;
-    ccu_uni::UString                         short_description;
-    ccu_uni::UString                         version;
-    ccu_uni::UString                         versionInfo;
-    ccu_uni::UString                         devStatus;
-    ccu_uni::UString                         description;
-    ccu_uni::UString                         license;
-    ccu_uni::UString                         date;
-    std::vector<ccu_uni::UString>            developers;
-    std::vector<ccu_uni::UString>            URIs;
-    std::vector<ccu_uni::UString>            man_pages;
-    std::vector<ccu_uni::UString>            info_pages;
-    std::vector<std::shared_ptr<AppCmdNode>> sub_cmds;
+    const ccu_uni::UString              name;
+    const ccu_uni::UString              short_description;
+    const ccu_uni::UString              version;
+    const ccu_uni::UString              versionInfo;
+    const ccu_uni::UString              devStatus;
+    const ccu_uni::UString              description;
+    const ccu_uni::UString              license;
+    const ccu_uni::UString              date;
+    const std::vector<ccu_uni::UString> developers;
+    const std::vector<ccu_uni::UString> URIs;
+    const std::vector<ccu_uni::UString> man_pages;
+    const std::vector<ccu_uni::UString> info_pages;
+    const std::vector<AppCmdNode>       sub_cmds;
 
-    std::function<
-        std::shared_ptr<AppResult>(
-            std::shared_ptr<GetOptResult>   getopt_result,
-            std::shared_ptr<AdditionalInfo> additional_info
-        )>
+    const std::function<std::shared_ptr<AppResult>(
+        std::shared_ptr<GetOptResult>      getopt_result,
+        std::shared_ptr<AppCmdRuntimeInfo> additional_info
+    )>
         callable;
 
-    GetOptCheckList available_options;
+    const std::vector<GetOptCheckList> cmd_options;
 
-    bool cahck_args;
-    int  min_args;
-    int  max_args;
+    const bool check_args;
+    const int  min_args;
+    const int  max_args;
 };
 
 // returns 0 if no errors
-int CheckAppCmdNode(std::shared_ptr<AppCmdNode> in, std::deque<ccu_uni::UString> depth);
+int CheckAppCmdNode(
+    const AppCmdNode                   &in,
+    const std::deque<ccu_uni::UString> &depth
+);
 
 // note: in Golang version, this function does not return,
 //       but in this c++ version it does.
 int RunApp(
-    std::shared_ptr<AppCmdNode> rootnode,
-    std::any                    pass_data
+    const AppCmdNode &rootnode,
+    const std::any    pass_data
 );
 
-std::shared_ptr<AppResult> RunCmd(
-    ccu_uni::UString             arg0,
-    std::deque<ccu_uni::UString> opts_and_args,
-    std::shared_ptr<AppCmdNode>  rootnode,
-    std::any                     pass_data
+std::shared_ptr<const AppResult> RunCmd(
+    const ccu_uni::UString             &arg0,
+    const std::deque<ccu_uni::UString> &opts_and_args,
+    const AppCmdNode                   &rootnode,
+    const std::any                      pass_data
 );
 
 } // namespace wayround_i2p::ccutils::cliapp

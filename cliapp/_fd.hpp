@@ -7,10 +7,6 @@
 namespace wayround_i2p::ccutils::cliapp
 {
 
-struct GetOptCheckListItem;
-
-using GetOptCheckList = std::vector<std::shared_ptr<GetOptCheckListItem>>;
-
 } // namespace wayround_i2p::ccutils::cliapp
 
 #endif

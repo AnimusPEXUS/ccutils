@@ -4,9 +4,9 @@
 namespace wayround_i2p::ccutils::cliapp
 {
 
-UString GetOptResult::String()
+ccu_uni::UString GetOptResult::String()
 {
-    UString ret = "";
+    ccu_uni::UString ret = "";
 
     for (std::size_t i = 0; i < this->opts.size(); i++)
     {
@@ -30,35 +30,56 @@ UString GetOptResult::String()
     return ret;
 }
 
-std::shared_ptr<RetOptItem> GetOptResult::GetLastNamedRetOptItem(UString name)
+std::shared_ptr<RetOptItem> GetOptResult::GetLastNamedRetOptItem(ccu_uni::UString name)
+{
+    std::shared_ptr<RetOptItem> ret;
+    for (auto i : this->opts)
+    {
+        if (i->name == name)
+        {
+            ret = i;
+        }
+    }
+    return ret;
+}
+
+std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(ccu_uni::UString name)
+{
+    std::deque<std::shared_ptr<RetOptItem>> ret;
+    for (auto i : this->opts)
+    {
+        if (i->name == name)
+        {
+            ret.push_back(i);
+        }
+    }
+    return ret;
+}
+
+std::deque<ccu_err::error_ptr> GetOptResult::CheckOptResult()
 {
 }
 
-std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(UString name)
+bool GetOptResult::DoesHaveNamedRetOptItem(ccu_uni::UString name)
 {
 }
 
-std::deque<std::shared_ptr<const error>> GetOptResult::CheckOptResult()
+bool GetOptResult::DoesNamedRetOptItemHaveValue(ccu_uni::UString name)
 {
 }
 
-bool GetOptResult::DoesHaveNamedRetOptItem(UString name)
+const GetOptCheckListItem &GetOptResult::GetNodeOptionByName(ccu_uni::UString name)
 {
 }
 
-bool GetOptResult::DoesNamedRetOptItemHaveValue(UString name)
+const GetOptCheckListItem &GetByName(
+    const GetOptCheckList &lst,
+    ccu_uni::UString       name
+)
 {
 }
 
-std::shared_ptr<GetOptCheckListItem> GetOptResult::GetOptionByName(UString name)
-{
-}
-
-std::shared_ptr<GetOptCheckListItem> GetOptCheckListItem::GetByName(UString name)
-{
-}
-
-UString GetOptCheckListItem::HelpString()
+ccu_uni::UString HelpString(const GetOptCheckList &lst)
 {
 }
 
