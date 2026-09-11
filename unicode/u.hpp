@@ -322,6 +322,8 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     UString ljust(std::size_t width, UChar fillchar = ' ') const;
     UString rjust(std::size_t width, UChar fillchar = ' ') const;
 
+    UString join(std::initializer_list<UString> iterable);
+
     std::deque<UString> &split(
         std::deque<UString> &ret,
         UString              sep,
