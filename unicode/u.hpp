@@ -223,8 +223,10 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     // todo: try better functions for UString, to avoid need of conversions
     //       to/from vectors/deques as better as possible
 
+    // todo: use std::initializer_list
     UString(const std::vector<UChar> &val);
 
+    // todo: use std::initializer_list
     UString(const std::deque<UChar> &val);
 
     ~UString();
@@ -256,6 +258,18 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
         UString suffix,
         ssize_t start = -1,
         ssize_t end   = -1
+    ) const;
+
+    bool startswith(
+        const std::initializer_list<UString> prefix,
+        ssize_t                              start = -1,
+        ssize_t                              end   = -1
+    ) const;
+
+    bool endswith(
+        const std::initializer_list<UString> suffix,
+        ssize_t                              start = -1,
+        ssize_t                              end   = -1
     ) const;
 
     UString expandtabs(std::size_t tabsize = 8) const;

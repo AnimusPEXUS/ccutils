@@ -335,6 +335,7 @@ ccucts_define_package(
   ccutils_unicode
   ccutils_errors
   ccutils_regexp
+  ccutils_utils_concepts
 )
 
 

@@ -13,42 +13,42 @@
 namespace wayround_i2p::ccutils::unicode
 {
 
-UChar::UChar(const char *std_nullterminated_cstring) :
-    UChar(UString(std_nullterminated_cstring))
+UChar::UChar(const char *std_nullterminated_cstring)
+    : UChar(UString(std_nullterminated_cstring))
 {
 }
 
-UChar::UChar(std::string stdstring) :
-    UChar(UString(stdstring))
+UChar::UChar(std::string stdstring)
+    : UChar(UString(stdstring))
 {
 }
 
-UChar::UChar(char val) :
-    UChar((std::int32_t)val)
+UChar::UChar(char val)
+    : UChar((std::int32_t)val)
 {
 }
 
 // todo: testing required
-UChar::UChar(UString val) :
-    UChar(
-        [val]() -> std::int32_t
-        {
-            auto vl = val.length();
-            if (vl != 1)
-            {
-                throw wayround_i2p::ccutils::errors::New(
-                    std::format(
-                        "UChar::UChar(UString val) - invalid `val` size: {}",
-                        vl
-                    ),
-                    __FILE__,
-                    __LINE__
-                );
-            }
+UChar::UChar(UString val)
+    : UChar(
+          [val]() -> std::int32_t
+          {
+              auto vl = val.length();
+              if (vl != 1)
+              {
+                  throw wayround_i2p::ccutils::errors::New(
+                      std::format(
+                          "UChar::UChar(UString val) - invalid `val` size: {}",
+                          vl
+                      ),
+                      __FILE__,
+                      __LINE__
+                  );
+              }
 
-            return val[0].as_int32();
-        }()
-    )
+              return val[0].as_int32();
+          }()
+      )
 {
 }
 
@@ -286,8 +286,8 @@ void allcasedcharscheck(
     x = true;
 }
 
-UString::UString() :
-    data("")
+UString::UString()
+    : data("")
 {
 }
 
@@ -298,13 +298,13 @@ UString::UString(UString other) :
 }
 */
 
-UString::UString(const UString &other) :
-    data(other.data)
+UString::UString(const UString &other)
+    : data(other.data)
 {
 }
 
-UString::UString(const UChar &other) :
-    UString(std::vector<UChar>{other})
+UString::UString(const UChar &other)
+    : UString(std::vector<UChar>{other})
 {
 }
 
@@ -473,6 +473,38 @@ bool UString::endswith(
     return res == end_min_suff_len;
 }
 
+bool UString::startswith(
+    const std::initializer_list<UString> prefix,
+    ssize_t                              start,
+    ssize_t                              end
+) const
+{
+    for (const auto &i : prefix)
+    {
+        if (this->startswith(i, start, end))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool UString::endswith(
+    const std::initializer_list<UString> suffix,
+    ssize_t                              start,
+    ssize_t                              end
+) const
+{
+    for (const auto &i : suffix)
+    {
+        if (this->endswith(i, start, end))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 UString UString::expandtabs(std::size_t tabsize) const
 {
     // todo: maybe use std::vector<UChar>. benchmark needed?
@@ -519,8 +551,7 @@ ssize_t UString::index(
     for (
         ssize_t i = (!backwards ? start : end_min_sub_len);
         (!backwards ? i <= end_min_sub_len : i >= start);
-        (!backwards ? i++ : i--)
-    )
+        (!backwards ? i++ : i--))
     {
         for (ssize_t j = 0; j < sub_len; j++)
         {
@@ -995,8 +1026,8 @@ std::deque<UString> &UString::splitlines(
             {
                 i_start_index = search_res_deque[i]
                                     ->match_end;
-                i_end_index = search_res_deque[i + 1]
-                                  ->match_start;
+                i_end_index   = search_res_deque[i + 1]
+                                    ->match_start;
                 assert(i_start_index <= i_end_index);
                 ret.push_back(
                     this->substr(

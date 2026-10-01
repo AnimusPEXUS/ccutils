@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 
+#include <wayround_i2p/ccutils/errors/e.hpp>
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
 #include "_package.hpp"
@@ -13,6 +14,7 @@ namespace wayround_i2p::ccutils::cliapp
 {
 
 namespace ccu_uni = wayround_i2p::ccutils::unicode;
+namespace ccu_err = wayround_i2p::ccutils::errors;
 
 struct AppResult
 {
@@ -60,12 +62,37 @@ struct AppCmdNode
     )>
         callable;
 
-    const std::vector<GetOptCheckList> cmd_options;
+    const GetOptCheckList *options;
 
     const bool check_args;
     const int  min_args;
     const int  max_args;
 };
+
+constexpr bool validate_AppCmdNode(const AppCmdNode &node_data)
+{
+    if (!(node_data.min_args >= -1))
+    {
+        return false;
+    }
+
+    if (!(node_data.max_args >= -1))
+    {
+        return false;
+    }
+
+    if (!(node_data.max_args >= node_data.min_args))
+    {
+        return false;
+    }
+
+    if (!(node_data.callable != nullptr))
+    {
+        return false;
+    }
+
+    return true;
+}
 
 // returns 0 if no errors
 int CheckAppCmdNode(
@@ -73,18 +100,17 @@ int CheckAppCmdNode(
     const std::deque<ccu_uni::UString> &depth
 );
 
-// note: in Golang version, this function does not return,
-//       but in this c++ version it does.
-int RunApp(
-    const AppCmdNode &rootnode,
-    const std::any    pass_data
-);
-
 std::shared_ptr<const AppResult> RunCmd(
     const ccu_uni::UString             &arg0,
     const std::deque<ccu_uni::UString> &opts_and_args,
     const AppCmdNode                   &rootnode,
     const std::any                      pass_data
+);
+
+std::deque<ccu_uni::UString> &convert_libc_args(
+    int                           argc,
+    char                        **args,
+    std::deque<ccu_uni::UString> &ret
 );
 
 } // namespace wayround_i2p::ccutils::cliapp
