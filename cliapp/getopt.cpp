@@ -4,12 +4,14 @@
 namespace wayround_i2p::ccutils::cliapp
 {
 
-GetOptResult::GetOptResult(const AppCmdNode &node_info)
+/*
+GetOptResult::GetOptResult(AppCmdNode *node_info)
     : node_info(node_info)
 {
 }
+*/
 
-ccu_uni::UString GetOptResult::String()
+ccu_uni::UString GetOptResult::String() const
 {
     ccu_uni::UString ret = "";
 
@@ -35,7 +37,7 @@ ccu_uni::UString GetOptResult::String()
     return ret;
 }
 
-std::shared_ptr<RetOptItem> GetOptResult::GetLastNamedRetOptItem(ccu_uni::UString name)
+std::shared_ptr<RetOptItem> GetOptResult::GetLastNamedRetOptItem(ccu_uni::UString name) const
 {
     std::shared_ptr<RetOptItem> ret;
     for (auto i : this->opts)
@@ -48,7 +50,7 @@ std::shared_ptr<RetOptItem> GetOptResult::GetLastNamedRetOptItem(ccu_uni::UStrin
     return ret;
 }
 
-std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(ccu_uni::UString name)
+std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(ccu_uni::UString name) const
 {
     std::deque<std::shared_ptr<RetOptItem>> ret;
     for (auto i : this->opts)
@@ -61,22 +63,24 @@ std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(ccu
     return ret;
 }
 
-std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_ptr> &err)
+std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_ptr> &err) const
 {
     err.clear();
 
     // check opts required but absent
 
-    for (auto &i : this->node_info.options->items)
+    assert(this->node_info.has_value());
+
+    for (auto i : this->node_info.value_or(nullptr)->options->items)
     {
-        if (i.is_required)
+        if (i->is_required)
         {
-            auto res = this->GetLastNamedRetOptItem(i.name);
+            auto res = this->GetLastNamedRetOptItem(i->name);
             if (!res)
             {
                 err.push_back(
                     ccu_err::New(
-                        std::format("option %s is required but absent, i.name"),
+                        std::format("option %s is required but absent", i->name),
                         __FILE__,
                         __LINE__
                     )
@@ -85,21 +89,21 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
         }
 
         // check option's values which must have values
-        if (i.must_have_value)
+        if (i->must_have_value)
         {
-            auto item = this->GetLastNamedRetOptItem(i.name);
+            auto item = this->GetLastNamedRetOptItem(i->name);
             if (item && !item->has_value)
             {
-                if (i.has_default_value)
+                if (i->has_default_value)
                 {
                     item->has_value = true;
-                    item->value     = i.default_value;
+                    item->value     = i->default_value;
                 }
                 else
                 {
                     err.push_back(
                         ccu_err::New(
-                            std::format("option %s must have value", i.name),
+                            std::format("option %s must have value", i->name),
                             __FILE__,
                             __LINE__
                         )
@@ -114,9 +118,9 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
     {
         bool found = false;
 
-        for (auto &ii : this->node_info.options->items)
+        for (auto ii : this->node_info.value_or(nullptr)->options->items)
         {
-            if (ii.name == i->name)
+            if (ii->name == i->name)
             {
                 found = true;
                 break;
@@ -137,11 +141,11 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
 
     // check count of given args
     // todo: check this
-    if (this->node_info.check_args)
+    if (this->node_info.value_or(nullptr)->check_args)
     {
         auto len_args = this->args.size();
 
-        if (len_args < this->node_info.min_args)
+        if (len_args < this->node_info.value_or(nullptr)->min_args)
         {
             err.push_back(
                 ccu_err::New(
@@ -152,7 +156,8 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
             );
         }
 
-        if (this->node_info.min_args > -1 && len_args > this->node_info.max_args)
+        if (this->node_info.value_or(nullptr)->min_args > -1
+            && len_args > this->node_info.value_or(nullptr)->max_args)
         {
             err.push_back(
                 ccu_err::New(
@@ -167,7 +172,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
     return err;
 }
 
-bool GetOptResult::DoesHaveNamedRetOptItem(ccu_uni::UString name)
+bool GetOptResult::DoesHaveNamedRetOptItem(ccu_uni::UString name) const
 {
     for (auto &i : this->opts)
     {
@@ -179,41 +184,13 @@ bool GetOptResult::DoesHaveNamedRetOptItem(ccu_uni::UString name)
     return false;
 }
 
-bool GetOptResult::DoesNamedRetOptItemHaveValue(ccu_uni::UString name)
+bool GetOptResult::DoesNamedRetOptItemHaveValue(ccu_uni::UString name) const
 {
     if (this->DoesHaveNamedRetOptItem(name))
     {
         return this->GetLastNamedRetOptItem(name)->has_value;
     }
     return false;
-}
-
-/* this is not in go version and I don't remember why this is here.
-const GetOptCheckListItem &GetOptResult::GetNodeOptionByName(ccu_uni::UString name)
-{
-}
-*/
-
-const GetOptCheckListItem *GetOptCheckList::GetByName(ccu_uni::UString name) const
-{
-    for (auto &i : this->items)
-    {
-        if (i.name == name)
-        {
-            return &i;
-        }
-    }
-    return nullptr;
-}
-
-ccu_uni::UString GetOptCheckListItem::HelpString() const
-{
-    return "Help String (todo)";
-}
-
-ccu_uni::UString GetOptCheckList::HelpString() const
-{
-    return "Help String (todo)";
 }
 
 std::shared_ptr<GetOptResult>
@@ -239,6 +216,20 @@ std::shared_ptr<GetOptResult>
     }
 
     return getopt(params, node_info, false, arg0);
+}
+
+std::deque<ccu_uni::UString> &convert_libc_args(
+    int                           argc,
+    char                        **args,
+    std::deque<ccu_uni::UString> &ret
+)
+{
+    ret.clear();
+    for (std::size_t i = 0; i < argc; i++)
+    {
+        ret.push_back(args[i]);
+    }
+    return ret;
 }
 
 } // namespace wayround_i2p::ccutils::cliapp

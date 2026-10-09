@@ -4,14 +4,27 @@
 namespace wayround_i2p::ccutils::cliapp
 {
 
-/* this has to be in compile-time
-int CheckAppCmdNode(
-    const AppCmdNode                   &in,
-    const std::deque<ccu_uni::UString> &depth
-)
+ccu_uni::UString AppCmdNodeOptionsItem::HelpString() const
 {
+    return "Help String (todo)";
 }
-*/
+
+ccu_uni::UString AppCmdNodeOptions::HelpString() const
+{
+    return "Help String (todo)";
+}
+
+std::optional<const AppCmdNodeOptionsItem *> AppCmdNodeOptions::GetByName(ccu_uni::UString name) const
+{
+    for (auto &i : this->items)
+    {
+        if (i->name == name)
+        {
+            return i;
+        }
+    }
+    return nullptr;
+}
 
 std::shared_ptr<const AppResult> RunCmd(
     const ccu_uni::UString             &arg0,
@@ -27,58 +40,105 @@ std::shared_ptr<const AppResult> RunCmd(
     ret->do_not_print_result = false;
 
     std::deque<ccu_uni::UString> depth_level;
-    AppCmdNode                  *subtree;
+    const AppCmdNode            *subtree;
 
-    getopt_result = getopt();
+    auto getopt_result = getopt(opts_and_args, rootnode, false, arg0);
 
+    // searching subtree and/or command
+
+    // todo: perform rootnode sanity checks
+    // auto check_result = getopt_result.Check(std::deque<ccu_err::error_ptr>());
+
+    subtree = &rootnode;
+
+    depth_level.clear();
+
+    for (const auto &i : getopt_result->args)
     {
-        check();
-
-        loop through getopt.args
+        for (const auto &j : subtree->sub_cmds)
         {
-            loop through subcommands
+            if (j.name == i)
             {
-                if arg
-                    == subcommand name
-                    {
-                        save subcommand                 as subtree;
-                        append subcommand name to depth level;
-            in go version here was check for subtree.Callable != nil:
-                           if true - stop searching and exit the loops;
-            if
-                false - continue looking;
-            if loop
-                anded and nothing found - return error;
-            but this is wrong - needs fixing;
-                    }
+                subtree = &j;
+                depth_level.push_back(i);
+
+                if (subtree->callable)
+                {
+                    goto search_success;
+                }
+                goto continue_look_for_requested_cmd_or_subtree;
             }
         }
+
+        ret->code                = 100;
+        ret->message             = "arguments error: invalid command or subsection name";
+        ret->do_not_print_result = false;
+        return ret;
+
+    continue_look_for_requested_cmd_or_subtree:
     }
 
-    if everything
-        is still ok, try to find-- help option.
+    // at this point search considered successfull
 
-                         if show_help
-                         == true,
-            then
+search_success:
+    // showing help or executing command
+
+    auto help_option = getopt_result->GetLastNamedRetOptItem("--help");
+    if (help_option)
+    {
+        if (help_option->has_value)
         {
-            PrintHelp(depth_level, rootnode, subtree);
-            ret = &AppResult{0, "help text printed", false};
+            ret->code                = 1;
+            ret->message             = "options error: option --help does not assume additional value";
+            ret->do_not_print_result = false;
+            return ret;
         }
+
+        PrintHelp(depth_level, rootnode, *subtree);
+        ret->code                = 0;
+        ret->message             = "printing help text";
+        ret->do_not_print_result = false;
+        return ret;
+    }
+
+    if (!subtree->callable)
+    {
+        ret->code                = 100;
+        ret->message             = "not callable";
+        ret->do_not_print_result = false;
+        return ret;
+    }
+
+    getopt_result->node_info = subtree;
+
+    auto additional_info = std::make_shared<AppCmdRuntimeInfo>();
+
+    ret = subtree->callable(
+        getopt_result,
+        additional_info
+    );
+
+    if (!ret)
+    {
+        ret = std::make_shared<AppResult>();
+
+        ret->code = 0;
+    }
+
+    if (ret->code == 0 && ret->message == "")
+    {
+        ret->message = "No Error";
+    }
+
+    return ret;
 }
 
-std::deque<ccu_uni::UString> &convert_libc_args(
-    int                           argc,
-    char                        **args,
-    std::deque<ccu_uni::UString> &ret
+void PrintHelp(
+    const std::deque<ccu_uni::UString> depth_level,
+    const AppCmdNode                  &rootnode,
+    const AppCmdNode                  &render_for
 )
 {
-    ret.clear();
-    for (std::size_t i = 0; i < argc; i++)
-    {
-        ret.push_back(args[i]);
-    }
-    return ret;
 }
 
 } // namespace wayround_i2p::ccutils::cliapp

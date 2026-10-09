@@ -8,12 +8,23 @@
 namespace ccu_cliapp = wayround_i2p::ccutils::cliapp;
 namespace ccu_uni    = wayround_i2p::ccutils::unicode;
 
-constexpr ccu_cliapp::AppCmdNode app_struct{
-    .name "testapp",
-    cmd_options : {}
+const ccu_cliapp::AppCmdNodeOptionsItem cli_main_menu_item_help{
+    .name        = "--help",
+    .description = "show help"
 };
 
-static_assert(ccu_cliapp::validate_AppCmdNode(app_struct));
+const ccu_cliapp::AppCmdNodeOptions cli_main_menu_options{
+    .items = {
+              &cli_main_menu_item_help,
+              }
+};
+
+const ccu_cliapp::AppCmdNode cli_main_menu{
+    .name    = "testapp",
+    .options = &cli_main_menu_options
+};
+
+// static_assert(ccu_cliapp::validate_AppCmdNode(&cli_main_menu_options));
 
 int main(int argc, char **args)
 {
@@ -28,7 +39,7 @@ int main(int argc, char **args)
     auto res = ccu_cliapp::RunCmd(
         opts_and_args[0],
         opts_and_args,
-        app_struct,
+        cli_main_menu,
         0
     );
 

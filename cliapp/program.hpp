@@ -24,17 +24,18 @@ struct AppResult
 };
 
 struct AppCmdNode;
-struct GetOptCheckList;
+struct AppCmdNodeOptions;
+struct AppCmdNodeOptionsItem;
 
 struct AppCmdRuntimeInfo
 {
-    const std::vector<ccu_uni::UString> opts_and_args;
-    const GetOptCheckList              &cmd_options;
-    const std::vector<ccu_uni::UString> depth_level;
-    const AppCmdNode                   &parent_node;
-    const AppCmdNode                   &current_node;
-    const AppCmdNode                   &root;
-    const ccu_uni::UString              arg0;
+    std::vector<ccu_uni::UString>            params;
+    std::optional<const AppCmdNodeOptions *> cmd_options;
+    std::vector<ccu_uni::UString>            depth_level;
+    std::optional<const AppCmdNode *>        parent_node;
+    std::optional<const AppCmdNode *>        current_node;
+    std::optional<const AppCmdNode *>        root;
+    const ccu_uni::UString                   arg0;
 };
 
 struct GetOptResult;
@@ -62,11 +63,55 @@ struct AppCmdNode
     )>
         callable;
 
-    const GetOptCheckList *options;
+    const AppCmdNodeOptions *options;
 
     const bool check_args;
     const int  min_args;
     const int  max_args;
+};
+
+struct AppCmdNodeOptionsItem
+{
+    /*
+        must be with leading '-' (minuses) and without trailing '=' equals
+    */
+    const ccu_uni::UString name;
+
+    /*
+        set this to true if Default value have meaning
+    */
+    const bool has_default_value = false;
+
+    /*
+        default value in case if defined without value
+    */
+    const ccu_uni::UString default_value = "";
+
+    /*
+        put here true, if user MUST explicitly define this option
+    */
+    const bool is_required = false;
+
+    /* insist on value to flag.
+    if this is true, and value not passed to option,
+    then if HaveDefault is true then Default is used as value.
+    */
+    const bool must_have_value = false;
+
+    const ccu_uni::UString description = ""; // this text will be printed beside option on --help parameter
+
+    ccu_uni::UString HelpString() const;
+};
+
+struct AppCmdNodeOptions
+{
+    const std::vector<const AppCmdNodeOptionsItem *> items;
+
+    std::optional<const AppCmdNodeOptionsItem *> GetByName(
+        ccu_uni::UString name
+    ) const;
+
+    ccu_uni::UString HelpString() const;
 };
 
 constexpr bool validate_AppCmdNode(const AppCmdNode &node_data)
@@ -102,15 +147,15 @@ int CheckAppCmdNode(
 
 std::shared_ptr<const AppResult> RunCmd(
     const ccu_uni::UString             &arg0,
-    const std::deque<ccu_uni::UString> &opts_and_args,
+    const std::deque<ccu_uni::UString> &params,
     const AppCmdNode                   &rootnode,
     const std::any                      pass_data
 );
 
-std::deque<ccu_uni::UString> &convert_libc_args(
-    int                           argc,
-    char                        **args,
-    std::deque<ccu_uni::UString> &ret
+void PrintHelp(
+    const std::deque<ccu_uni::UString> depth_level,
+    const AppCmdNode                  &rootnode,
+    const AppCmdNode                  &render_for
 );
 
 } // namespace wayround_i2p::ccutils::cliapp

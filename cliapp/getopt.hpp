@@ -22,32 +22,30 @@ struct GetOptCheckListItem;
 
 struct GetOptResult
 {
-    GetOptResult(const AppCmdNode &node_info);
+    // GetOptResult(AppCmdNode &node_info);
 
-    const AppCmdNode                       &node_info;
+    std::optional<const AppCmdNode *>       node_info;
     ccu_uni::UString                        arg0;
     std::deque<ccu_uni::UString>            args;
     std::deque<std::shared_ptr<RetOptItem>> opts;
 
-    ccu_uni::UString String();
+    ccu_uni::UString String() const;
 
     // If arguments contained many options with name 'name', then return only last
     // of them
-    std::shared_ptr<RetOptItem> GetLastNamedRetOptItem(ccu_uni::UString name);
+    std::shared_ptr<RetOptItem> GetLastNamedRetOptItem(ccu_uni::UString name) const;
 
     // return all options with name 'name'
-    std::deque<std::shared_ptr<RetOptItem>> GetAllNamedRetOptItems(ccu_uni::UString name);
+    std::deque<std::shared_ptr<RetOptItem>> GetAllNamedRetOptItems(ccu_uni::UString name) const;
 
     // check result accordingly with AvailableOptions passed to
-    std::deque<ccu_err::error_ptr> &Check(std::deque<ccu_err::error_ptr> &err);
+    std::deque<ccu_err::error_ptr> &Check(std::deque<ccu_err::error_ptr> &err) const;
 
     // check if option with name 'name' has been supplied
-    bool DoesHaveNamedRetOptItem(ccu_uni::UString name);
+    bool DoesHaveNamedRetOptItem(ccu_uni::UString name) const;
 
     // check if option with name 'name' has been supplied and it have some value
-    bool DoesNamedRetOptItemHaveValue(ccu_uni::UString name);
-
-    const GetOptCheckListItem &GetNodeOptionByName(ccu_uni::UString name);
+    bool DoesNamedRetOptItemHaveValue(ccu_uni::UString name) const;
 };
 
 struct RetOptItem
@@ -56,53 +54,6 @@ struct RetOptItem
     bool             has_value;
     ccu_uni::UString value;
 };
-
-// getopt configuration
-struct GetOptCheckListItem
-{
-    /*
-        must be with leading '-' (minuses) and without trailing '=' equals
-    */
-    const ccu_uni::UString name;
-
-    /*
-        set this to true if Default value have meaning
-    */
-    const bool has_default_value;
-
-    /*
-        default value in case if defined without value
-    */
-    const ccu_uni::UString default_value;
-
-    /*
-        put here true, if user MUST explicitly define this option
-    */
-    const bool is_required;
-
-    /* insist on value to flag.
-    if this is true, and value not passed to option,
-    then if HaveDefault is true then Default is used as value.
-    */
-    const bool must_have_value;
-
-    const ccu_uni::UString description; // this text will be printed beside option on --help parameter
-
-    ccu_uni::UString HelpString() const;
-};
-
-struct GetOptCheckList
-{
-    const std::vector<GetOptCheckListItem> items;
-
-    const GetOptCheckListItem *GetByName(
-        ccu_uni::UString name
-    ) const;
-
-    ccu_uni::UString HelpString() const;
-};
-
-ccu_uni::UString HelpString(const GetOptCheckList &lst);
 
 // if args doen't contains arg 0, arg 0 should be provided as arg0
 std::shared_ptr<GetOptResult>
@@ -117,18 +68,20 @@ std::shared_ptr<GetOptResult>
 template <ccu_uti::IsDequeOrVectorOfType<ccu_uni::UString> TypeToCheck>
 std::shared_ptr<GetOptResult>
     getopt(
-        TypeToCheck       params,
+        const TypeToCheck params,
         const AppCmdNode &node_info,
         bool              params_includes_arg0,
         ccu_uni::UString  arg0
     )
 {
-    auto ret             = std::make_shared<GetOptResult>(node_info);
+    auto ret             = std::make_shared<GetOptResult>();
     bool last_opt_switch = false;
     int  len_args        = 0;
     int  i               = 0;
     int  args_i_len      = 0;
     int  eq_pos          = 0;
+
+    ret->node_info = &node_info;
 
     if (params_includes_arg0)
     {
@@ -221,6 +174,12 @@ std::shared_ptr<GetOptResult>
 
     return ret;
 }
+
+std::deque<ccu_uni::UString> &convert_libc_args(
+    int                           argc,
+    char                        **args,
+    std::deque<ccu_uni::UString> &ret
+);
 
 } // namespace wayround_i2p::ccutils::cliapp
 
