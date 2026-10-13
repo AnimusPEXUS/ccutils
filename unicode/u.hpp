@@ -17,6 +17,7 @@
 #include <wayround_i2p/ccutils/regexp/regexp_fds_and_enums.hpp>
 #include <wayround_i2p/ccutils/repr/repr.hpp>
 #include <wayround_i2p/ccutils/utils/cf.hpp>
+#include <wayround_i2p/ccutils/utils/concepts.hpp>
 
 namespace wayround_i2p::ccutils::repr
 {
@@ -65,8 +66,10 @@ namespace wayround_i2p::ccutils::unicode
 {
 
 using byte_vector = std::vector<std::uint8_t>;
+using error_ptr   = wayround_i2p::ccutils::errors::error_ptr;
 
-using error_ptr = wayround_i2p::ccutils::errors::error_ptr;
+// namespace ccu_err  = wayround_i2p::ccutils::errors;
+namespace ccu_utils = wayround_i2p::ccutils::utils;
 
 // using ssize_t = std::make_signed_t < std::size_t >> ;
 
@@ -336,13 +339,39 @@ class UString : public wayround_i2p::ccutils::repr::RepresentableAsText
     UString ljust(std::size_t width, UChar fillchar = ' ') const;
     UString rjust(std::size_t width, UChar fillchar = ' ') const;
 
-    UString join(std::initializer_list<UString> iterable);
+    template <ccu_utils::IsDequeVectorOrILOfType<UString> TypeToCheck>
+    UString join(const TypeToCheck &iterable) const
+    {
+        UString ret;
 
-    std::deque<UString> &split(
-        std::deque<UString> &ret,
-        UString              sep,
-        ssize_t              maxsplit = -1
-    ) const;
+        auto i_it = iterable.begin();
+
+        while (true)
+        {
+            if (i_it == iterable.end())
+            {
+                break;
+            }
+
+            ret += *i_it;
+
+            ++i_it;
+
+            if (i_it != iterable.end())
+            {
+                // todo: make more/better constructors/setters?
+                ret += *this;
+            }
+        }
+        return ret;
+    };
+
+    std::deque<UString> &
+        split(
+            std::deque<UString> &ret,
+            UString              sep,
+            ssize_t              maxsplit = -1
+        ) const;
 
     // split string to lines.
     // result doesn't includes splitting characters

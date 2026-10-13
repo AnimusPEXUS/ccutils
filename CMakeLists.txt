@@ -59,6 +59,8 @@ ccucts_define_package(
   concepts
 
   LIBS_PUB
+  ccutils_unicode
+  ccutils_errors
 )
 
 ccucts_define_package(
@@ -152,6 +154,7 @@ ccucts_define_package(
   ccutils_regexp
   ccutils_repr
   ccutils_utils_cf
+  ccutils_utils_concepts
   ${CCUTILS_UNICODE_LIBS_PUB_ADD}
 
 )

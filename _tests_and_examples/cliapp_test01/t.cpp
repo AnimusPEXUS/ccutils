@@ -24,21 +24,27 @@ const ccu_cliapp::AppCmdNode cli_main_menu{
     .options = &cli_main_menu_options
 };
 
-// static_assert(ccu_cliapp::validate_AppCmdNode(&cli_main_menu_options));
-
 int main(int argc, char **args)
 {
-    std::deque<ccu_uni::UString> opts_and_args;
-
-    opts_and_args = ccu_cliapp::convert_libc_args(
-        argc,
-        args,
-        opts_and_args
+    assert(
+        ccu_cliapp::AppCmdNode_Validate_and_Print(
+            &cli_main_menu
+        )
+            ->size()
+        == 0
     );
 
+    auto params = ccu_cliapp::convert_libc_args(
+        argc,
+        args
+    );
+
+    auto arg0 = params->operator[](0);
+    params->pop_front();
+
     auto res = ccu_cliapp::RunCmd(
-        opts_and_args[0],
-        opts_and_args,
+        arg0,
+        params,
         cli_main_menu,
         0
     );

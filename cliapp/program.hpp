@@ -29,21 +29,20 @@ struct AppCmdNodeOptionsItem;
 
 struct AppCmdRuntimeInfo
 {
-    std::vector<ccu_uni::UString>            params;
+    std::deque<ccu_uni::UString>             params;
     std::optional<const AppCmdNodeOptions *> cmd_options;
     std::vector<ccu_uni::UString>            depth_level;
     std::optional<const AppCmdNode *>        parent_node;
     std::optional<const AppCmdNode *>        current_node;
     std::optional<const AppCmdNode *>        root;
     const ccu_uni::UString                   arg0;
+    std::any                                 user_data;
 };
 
 struct GetOptResult;
 
-// instances of this struct must be only compile-time and const
-struct AppCmdNode
+struct AppCmdNodeInfo
 {
-    const ccu_uni::UString              name;
     const ccu_uni::UString              short_description;
     const ccu_uni::UString              version;
     const ccu_uni::UString              versionInfo;
@@ -55,20 +54,43 @@ struct AppCmdNode
     const std::vector<ccu_uni::UString> URIs;
     const std::vector<ccu_uni::UString> man_pages;
     const std::vector<ccu_uni::UString> info_pages;
-    const std::vector<AppCmdNode>       sub_cmds;
+};
 
-    const std::function<std::shared_ptr<AppResult>(
+struct AppCmdNode
+{
+    // basic part
+    ccu_uni::UString name;
+
+    AppCmdNodeInfo *info;
+
+    // section part
+
+    std::vector<AppCmdNode *> subnodes;
+
+    // command part
+
+    bool check_args;
+    int  min_args;
+    int  max_args;
+
+    std::function<std::shared_ptr<AppResult>(
         std::shared_ptr<GetOptResult>      getopt_result,
         std::shared_ptr<AppCmdRuntimeInfo> additional_info
     )>
         callable;
 
     const AppCmdNodeOptions *options;
-
-    const bool check_args;
-    const int  min_args;
-    const int  max_args;
 };
+
+std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
+    const AppCmdNode                               *node_info,
+    std::deque<ccu_uni::UString>                    depth,
+    std::shared_ptr<std::deque<ccu_err::error_ptr>> ret
+);
+
+std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate_and_Print(
+    const AppCmdNode *node_info
+);
 
 struct AppCmdNodeOptionsItem
 {
@@ -146,10 +168,10 @@ int CheckAppCmdNode(
 );
 
 std::shared_ptr<const AppResult> RunCmd(
-    const ccu_uni::UString             &arg0,
-    const std::deque<ccu_uni::UString> &params,
-    const AppCmdNode                   &rootnode,
-    const std::any                      pass_data
+    const ccu_uni::UString                             &arg0,
+    const std::shared_ptr<std::deque<ccu_uni::UString>> params,
+    const AppCmdNode                                   &rootnode,
+    const std::any                                      user_data
 );
 
 void PrintHelp(

@@ -4,13 +4,6 @@
 namespace wayround_i2p::ccutils::cliapp
 {
 
-/*
-GetOptResult::GetOptResult(AppCmdNode *node_info)
-    : node_info(node_info)
-{
-}
-*/
-
 ccu_uni::UString GetOptResult::String() const
 {
     ccu_uni::UString ret = "";
@@ -202,32 +195,140 @@ std::shared_ptr<GetOptResult>
         ccu_uni::UString  arg0
     )
 {
-    std::deque<ccu_uni::UString> params;
+    auto params = std::make_shared<std::deque<ccu_uni::UString>>();
 
     for (std::size_t i = 0; i <= argc; i++)
     {
-        params.push_back(args[i]);
+        params->push_back(args[i]);
     }
 
     if (args_includes_arg0)
     {
-        arg0 = params[0];
-        params.pop_front();
+        arg0 = params->operator[](0);
+        params->pop_front();
     }
 
     return getopt(params, node_info, false, arg0);
 }
 
-std::deque<ccu_uni::UString> &convert_libc_args(
-    int                           argc,
-    char                        **args,
-    std::deque<ccu_uni::UString> &ret
+std::shared_ptr<GetOptResult>
+    getopt(
+        const std::shared_ptr<std::deque<ccu_uni::UString>> params,
+        const AppCmdNode                                   &node_info,
+        bool                                                params_includes_arg0,
+        ccu_uni::UString                                    arg0
+    )
+{
+    auto ret             = std::make_shared<GetOptResult>();
+    bool last_opt_switch = false;
+    int  len_args        = 0;
+    int  i               = 0;
+    int  args_i_len      = 0;
+    int  eq_pos          = 0;
+
+    ret->node_info = &node_info;
+
+    if (params_includes_arg0)
+    {
+        if (ret->args.size() > 0)
+        {
+            ret->arg0 = ret->args[0];
+            ret->args.pop_front();
+        }
+        else
+        {
+            // todo: should this be an error?
+        }
+    }
+    else
+    {
+        ret->arg0 = arg0;
+    }
+
+    len_args = params->size();
+
+    i = 0;
+
+    while (true)
+    {
+        if (i >= len_args)
+        {
+            break;
+        }
+
+        auto params_i = params->begin()[i];
+
+        if (last_opt_switch)
+        {
+            goto push_back_and_continue;
+        }
+        else
+        {
+            args_i_len = params_i.length();
+
+            if (args_i_len == 0)
+            {
+                goto push_back_and_continue;
+            }
+            else
+            {
+                if (params_i == "--")
+                {
+                    last_opt_switch = true;
+                    goto no_push_back_and_continue;
+                }
+                else
+                {
+                    if (params_i.startswith("-"))
+                    {
+
+                        eq_pos = params_i.index("-");
+
+                        auto _t = std::make_shared<RetOptItem>();
+
+                        if (eq_pos != -1)
+                        {
+                            _t->name      = params_i[0, eq_pos];
+                            _t->has_value = true;
+                            _t->value     = params_i[eq_pos + 1, params_i.length()];
+                        }
+                        else
+                        {
+                            _t->name      = params_i;
+                            _t->has_value = false;
+                            _t->value     = "";
+                        }
+
+                        ret->opts.push_back(_t);
+                        goto no_push_back_and_continue;
+                    }
+                    else
+                    {
+                        goto push_back_and_continue;
+                    }
+                }
+            }
+        }
+
+        goto no_push_back_and_continue;
+    push_back_and_continue:
+        ret->args.push_back(params_i);
+    no_push_back_and_continue:
+        i++;
+    }
+
+    return ret;
+}
+
+const std::shared_ptr<std::deque<ccu_uni::UString>> convert_libc_args(
+    int    argc,
+    char **args
 )
 {
-    ret.clear();
+    auto ret = std::make_shared<std::deque<ccu_uni::UString>>();
     for (std::size_t i = 0; i < argc; i++)
     {
-        ret.push_back(args[i]);
+        ret->push_back(args[i]);
     }
     return ret;
 }

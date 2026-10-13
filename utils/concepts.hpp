@@ -51,6 +51,17 @@ concept IsDequeOrVectorOfType
           { a[b] };
       };
 
+template <class TypeToCheck, class MustBeValueType>
+concept IsDequeVectorOrILOfType
+    = (std::same_as<std::deque<MustBeValueType>, TypeToCheck>
+       || std::same_as<std::vector<MustBeValueType>, TypeToCheck>
+       || std::same_as<std::initializer_list<MustBeValueType>, TypeToCheck>)
+   && requires(TypeToCheck a, int b) {
+          { a.begin() } -> std::same_as<class TypeToCheck::iterator>;
+          { a.size() } -> std::integral;
+          { a[b] };
+      };
+
 } // namespace wayround_i2p::ccutils::utils
 
 #endif
