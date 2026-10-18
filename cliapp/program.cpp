@@ -18,9 +18,7 @@ std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
                 ccu_err::New(
                     std::format(
                         "root node must have defined name"
-                    ),
-                    __FILE__,
-                    __LINE__
+                    )
                 )
             );
         }
@@ -38,9 +36,7 @@ std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
                 std::format(
                     "{}: node can't be callable and have subnodes at the same time",
                     depth_str
-                ),
-                __FILE__,
-                __LINE__
+                )
             )
         );
     }
@@ -52,9 +48,7 @@ std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
                 std::format(
                     "{}: node must be callable or have subnodes",
                     depth_str
-                ),
-                __FILE__,
-                __LINE__
+                )
             )
         );
     }
@@ -66,9 +60,7 @@ std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
                 std::format(
                     "min_args must be >= -1. path: {}",
                     depth_str
-                ),
-                __FILE__,
-                __LINE__
+                )
             )
         );
     }
@@ -80,9 +72,7 @@ std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
                 std::format(
                     "max_args must be >= -1. path: {}",
                     depth_str
-                ),
-                __FILE__,
-                __LINE__
+                )
             )
         );
     }
@@ -94,9 +84,7 @@ std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
                 std::format(
                     "max_args must be >= min_args. path: {}",
                     depth_str
-                ),
-                __FILE__,
-                __LINE__
+                )
             )
         );
     }
@@ -127,7 +115,7 @@ std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate_and_Print(
     {
         std::cerr
             << std::format(
-                   "cmd node error: {}",
+                   "AppCmdNode error: {}",
                    i->Error()
                )
             << std::endl;

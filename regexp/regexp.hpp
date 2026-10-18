@@ -530,9 +530,7 @@ Pattern_shared makeSequence(const T &val)
     if (val.size() == 0)
     {
         throw wayround_i2p::ccutils::errors::New(
-            "`val` MUST BE not empty",
-            __FILE__,
-            __LINE__
+            "`val` MUST BE not empty"
         );
     }
 
@@ -557,11 +555,7 @@ Pattern_shared appendPatterns(
 {
     if (!pattern)
     {
-        throw wayround_i2p::ccutils::errors::New(
-            "!pattern",
-            __FILE__,
-            __LINE__
-        );
+        throw wayround_i2p::ccutils::errors::New("!pattern");
     }
 
     pattern = pattern->findFirst();
@@ -597,11 +591,10 @@ Pattern_shared appendPatterns(
 UString PatternTypeString(PatternType v);
 
 error_ptr ResultRoutineCheck(
-    Result_shared res,
-    bool          not_res_is_error,
-    bool          dismatch_is_error,
-    UString       file,
-    std::size_t   line
+    Result_shared              res,
+    bool                       not_res_is_error,
+    bool                       dismatch_is_error,
+    const std::source_location location
 );
 
 } // namespace wayround_i2p::ccutils::regexp

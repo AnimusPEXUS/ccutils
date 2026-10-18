@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <source_location>
 #include <stacktrace>
 #include <string>
 #include <tuple>
@@ -10,7 +11,7 @@
 
 #include <wayround_i2p/ccutils/unicode/u.hpp>
 
-// todo: make stacktrace when gcc will support
+// todo: enable stacktrace when gcc will support
 //       it without any additional libraries
 
 // tools for error handling
@@ -34,25 +35,24 @@ class BasicStringError : public error
 {
   public:
     BasicStringError(
-        UString     text,
-        UString     file = __FILE__,
-        std::size_t line = __LINE__
+        UString                    text,
+        const std::source_location location = std::source_location::current()
     );
-
-    ~BasicStringError();
 
     UString Error();
     UString ErrorLong();
     //    stacktrace_ptr getStacktrace();
 
   private:
-    UString     text;
-    UString     file;
-    std::size_t line;
+    UString                    text;
+    const std::source_location location;
     //    stacktrace_ptr st;
 };
 
-error_ptr New(UString text, UString file, std::size_t line);
+error_ptr New(
+    UString                    text,
+    const std::source_location location = std::source_location::current()
+);
 
 } // namespace wayround_i2p::ccutils::errors
 

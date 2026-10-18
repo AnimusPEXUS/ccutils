@@ -73,9 +73,10 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
             {
                 err.push_back(
                     ccu_err::New(
-                        std::format("option %s is required but absent", i->name),
-                        __FILE__,
-                        __LINE__
+                        std::format(
+                            "option %s is required but absent",
+                            i->name
+                        )
                     )
                 );
             }
@@ -96,9 +97,10 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
                 {
                     err.push_back(
                         ccu_err::New(
-                            std::format("option %s must have value", i->name),
-                            __FILE__,
-                            __LINE__
+                            std::format(
+                                "option %s must have value",
+                                i->name
+                            )
                         )
                     );
                 }
@@ -124,9 +126,10 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
         {
             err.push_back(
                 ccu_err::New(
-                    std::format("unsupported option passed: %s", i->name),
-                    __FILE__,
-                    __LINE__
+                    std::format(
+                        "unsupported option passed: %s",
+                        i->name
+                    )
                 )
             );
         }
@@ -142,9 +145,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
         {
             err.push_back(
                 ccu_err::New(
-                    "given too few arguments",
-                    __FILE__,
-                    __LINE__
+                    "given too few arguments"
                 )
             );
         }
@@ -154,9 +155,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
         {
             err.push_back(
                 ccu_err::New(
-                    "given too few arguments",
-                    __FILE__,
-                    __LINE__
+                    "given too few arguments"
                 )
             );
         }

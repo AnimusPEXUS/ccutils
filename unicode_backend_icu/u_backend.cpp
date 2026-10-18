@@ -5,13 +5,13 @@
 namespace wayround_i2p::ccutils::unicode
 {
 
-UChar::UChar() :
-    chr(0)
+UChar::UChar()
+    : chr(0)
 {
 }
 
-UChar::UChar(std::int32_t val) :
-    chr(val)
+UChar::UChar(std::int32_t val)
+    : chr(val)
 {
 }
 
@@ -98,8 +98,8 @@ UChar UChar::title() const
 UString::UString(
     const char *val,
     std::string encoding
-) :
-    UString()
+)
+    : UString()
 {
     if (encoding == "utf-8")
     {
@@ -108,17 +108,15 @@ UString::UString(
     }
 
     throw wayround_i2p::ccutils::errors::New(
-        "invalid 'encoding'",
-        __FILE__,
-        __LINE__
+        "invalid 'encoding'"
     );
 }
 
 UString::UString(
     const std::string &val,
     std::string        encoding
-) :
-    UString()
+)
+    : UString()
 {
     if (encoding == "utf-8")
     {
@@ -127,16 +125,14 @@ UString::UString(
     }
 
     throw wayround_i2p::ccutils::errors::New(
-        "invalid 'encoding'",
-        __FILE__,
-        __LINE__
+        "invalid 'encoding'"
     );
 }
 
 UString::UString(
     const std::deque<UChar> &val
-) :
-    UString()
+)
+    : UString()
 {
     auto vs = val.size();
 
@@ -151,8 +147,8 @@ UString::UString(
 
 UString::UString(
     const std::vector<UChar> &val
-) :
-    UString()
+)
+    : UString()
 {
     auto vs = val.size();
 

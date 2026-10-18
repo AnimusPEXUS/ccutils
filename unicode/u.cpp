@@ -40,9 +40,7 @@ UChar::UChar(UString val)
                       std::format(
                           "UChar::UChar(UString val) - invalid `val` size: {}",
                           vl
-                      ),
-                      __FILE__,
-                      __LINE__
+                      )
                   );
               }
 
@@ -366,9 +364,7 @@ void UString::exception_on_incorrect_start_end(
                 start,
                 end,
                 txt.length()
-            ),
-            __FILE__,
-            __LINE__
+            )
         );
     }
 }

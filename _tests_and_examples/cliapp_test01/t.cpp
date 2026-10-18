@@ -1,4 +1,5 @@
 
+#include <cassert>
 #include <deque>
 
 #include <wayround_i2p/ccutils/cliapp/program.hpp>
@@ -26,13 +27,13 @@ const ccu_cliapp::AppCmdNode cli_main_menu{
 
 int main(int argc, char **args)
 {
-    assert(
-        ccu_cliapp::AppCmdNode_Validate_and_Print(
-            &cli_main_menu
-        )
-            ->size()
-        == 0
-    );
+    {
+        auto menu_validation_result = AppCmdNode_Validate_and_Print(&cli_main_menu);
+        if (menu_validation_result->size() != 0)
+        {
+            std::abort();
+        }
+    }
 
     auto params = ccu_cliapp::convert_libc_args(
         argc,
