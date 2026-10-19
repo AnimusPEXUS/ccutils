@@ -29,7 +29,7 @@ struct AppCmdNodeOptionsItem;
 
 struct AppCmdRuntimeInfo
 {
-    const std::shared_ptr<std::deque<ccu_uni::UString>> params;
+    std::shared_ptr<const std::deque<ccu_uni::UString>> params;
     std::optional<const AppCmdNodeOptions *>            options;
     std::vector<ccu_uni::UString>                       depth_level;
     std::optional<const AppCmdNode *>                   parent_node;
@@ -74,8 +74,8 @@ struct AppCmdNode
     int  max_args;
 
     std::function<std::shared_ptr<AppResult>(
-        std::shared_ptr<GetOptResult>      getopt_result,
-        std::shared_ptr<AppCmdRuntimeInfo> runtime_info
+        std::shared_ptr<const GetOptResult>      getopt_result,
+        std::shared_ptr<const AppCmdRuntimeInfo> runtime_info
     )>
         callable;
 
@@ -168,11 +168,13 @@ int CheckAppCmdNode(
 );
 
 std::shared_ptr<const AppResult> RunCmd(
-    const ccu_uni::UString                             &arg0,
-    const std::shared_ptr<std::deque<ccu_uni::UString>> params,
-    const AppCmdNode                                   &rootnode,
-    const std::any                                      user_data
+    const ccu_uni::UString                       &arg0,
+    std::shared_ptr<std::deque<ccu_uni::UString>> params,
+    const AppCmdNode                             &rootnode,
+    const std::any                                user_data
 );
+
+int PrintAppResult(std::shared_ptr<const AppResult> in);
 
 void PrintHelp(
     const std::deque<ccu_uni::UString> depth_level,

@@ -56,15 +56,18 @@ std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(ccu
     return ret;
 }
 
-std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_ptr> &err) const
+std::deque<ccu_err::error_ptr> &GetOptResult::Check(
+    const AppCmdNode               *node_to_check_against,
+    std::deque<ccu_err::error_ptr> &err
+) const
 {
     err.clear();
 
     // check opts required but absent
 
-    assert(this->node_info.has_value());
+    assert(node_to_check_against);
 
-    for (auto i : this->node_info.value_or(nullptr)->options->items)
+    for (auto i : node_to_check_against->options->items)
     {
         if (i->is_required)
         {
@@ -113,7 +116,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
     {
         bool found = false;
 
-        for (auto ii : this->node_info.value_or(nullptr)->options->items)
+        for (auto ii : node_to_check_against->options->items)
         {
             if (ii->name == i->name)
             {
@@ -137,11 +140,11 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
 
     // check count of given args
     // todo: check this
-    if (this->node_info.value_or(nullptr)->check_args)
+    if (node_to_check_against->check_args)
     {
         auto len_args = this->args.size();
 
-        if (len_args < this->node_info.value_or(nullptr)->min_args)
+        if (len_args < node_to_check_against->min_args)
         {
             err.push_back(
                 ccu_err::New(
@@ -150,8 +153,8 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
             );
         }
 
-        if (this->node_info.value_or(nullptr)->min_args > -1
-            && len_args > this->node_info.value_or(nullptr)->max_args)
+        if (node_to_check_against->min_args > -1
+            && len_args > node_to_check_against->max_args)
         {
             err.push_back(
                 ccu_err::New(
@@ -185,13 +188,12 @@ bool GetOptResult::DoesNamedRetOptItemHaveValue(ccu_uni::UString name) const
     return false;
 }
 
-std::shared_ptr<GetOptResult>
+std::shared_ptr<const GetOptResult>
     getopt(
-        int               argc,
-        char            **args,
-        const AppCmdNode &node_info,
-        bool              args_includes_arg0,
-        ccu_uni::UString  arg0
+        int              argc,
+        char           **args,
+        bool             args_includes_arg0,
+        ccu_uni::UString arg0
     )
 {
     auto params = std::make_shared<std::deque<ccu_uni::UString>>();
@@ -207,15 +209,14 @@ std::shared_ptr<GetOptResult>
         params->pop_front();
     }
 
-    return getopt(params, node_info, false, arg0);
+    return getopt(params, false, arg0);
 }
 
-std::shared_ptr<GetOptResult>
+std::shared_ptr<const GetOptResult>
     getopt(
-        const std::shared_ptr<std::deque<ccu_uni::UString>> params,
-        const AppCmdNode                                   &node_info,
-        bool                                                params_includes_arg0,
-        ccu_uni::UString                                    arg0
+        std::shared_ptr<std::deque<ccu_uni::UString>> params,
+        bool                                          params_includes_arg0,
+        ccu_uni::UString                              arg0
     )
 {
     auto ret             = std::make_shared<GetOptResult>();
@@ -224,8 +225,6 @@ std::shared_ptr<GetOptResult>
     int  i               = 0;
     int  args_i_len      = 0;
     int  eq_pos          = 0;
-
-    ret->node_info = &node_info;
 
     if (params_includes_arg0)
     {
@@ -319,7 +318,7 @@ std::shared_ptr<GetOptResult>
     return ret;
 }
 
-const std::shared_ptr<std::deque<ccu_uni::UString>> convert_libc_args(
+std::shared_ptr<std::deque<ccu_uni::UString>> convert_libc_args(
     int    argc,
     char **args
 )

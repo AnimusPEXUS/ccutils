@@ -147,10 +147,10 @@ std::optional<const AppCmdNodeOptionsItem *> AppCmdNodeOptions::GetByName(ccu_un
 }
 
 std::shared_ptr<const AppResult> RunCmd(
-    const ccu_uni::UString                             &arg0,
-    const std::shared_ptr<std::deque<ccu_uni::UString>> params,
-    const AppCmdNode                                   &rootnode,
-    const std::any                                      user_data
+    const ccu_uni::UString                       &arg0,
+    std::shared_ptr<std::deque<ccu_uni::UString>> params,
+    const AppCmdNode                             &rootnode,
+    const std::any                                user_data
 )
 {
     auto ret = std::make_shared<AppResult>();
@@ -163,7 +163,7 @@ std::shared_ptr<const AppResult> RunCmd(
     const AppCmdNode            *subtree     = nullptr;
     const AppCmdNode            *parent_node = nullptr;
 
-    auto getopt_result = getopt(params, rootnode, false, arg0);
+    auto getopt_result = getopt(params, false, arg0);
 
     // searching subtree and/or command
 
@@ -232,8 +232,6 @@ search_success:
         return ret;
     }
 
-    getopt_result->node_info = subtree;
-
     auto runtime_info = std::make_shared<AppCmdRuntimeInfo>(
         AppCmdRuntimeInfo{
             .params       = params,
@@ -263,6 +261,16 @@ search_success:
         ret->message = "No Error";
     }
 
+    return ret;
+}
+
+int PrintAppResult(std::shared_ptr<const AppResult> in)
+{
+    auto ret = in->code;
+    if (!in->do_not_print_result)
+    {
+        std::cout << std::format("Exit Code: {} ({})", ret, in->message) << std::endl;
+    }
     return ret;
 }
 

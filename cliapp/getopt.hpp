@@ -22,9 +22,6 @@ struct GetOptCheckListItem;
 
 struct GetOptResult
 {
-    // GetOptResult(AppCmdNode &node_info);
-
-    std::optional<const AppCmdNode *>       node_info;
     ccu_uni::UString                        arg0;
     std::deque<ccu_uni::UString>            args;
     std::deque<std::shared_ptr<RetOptItem>> opts;
@@ -39,7 +36,10 @@ struct GetOptResult
     std::deque<std::shared_ptr<RetOptItem>> GetAllNamedRetOptItems(ccu_uni::UString name) const;
 
     // check result accordingly with AvailableOptions passed to
-    std::deque<ccu_err::error_ptr> &Check(std::deque<ccu_err::error_ptr> &err) const;
+    std::deque<ccu_err::error_ptr> &Check(
+        const AppCmdNode               *node_to_check_against,
+        std::deque<ccu_err::error_ptr> &err
+    ) const;
 
     // check if option with name 'name' has been supplied
     bool DoesHaveNamedRetOptItem(ccu_uni::UString name) const;
@@ -56,24 +56,22 @@ struct RetOptItem
 };
 
 // if args doen't contains arg 0, arg 0 should be provided as arg0
-std::shared_ptr<GetOptResult>
+std::shared_ptr<const GetOptResult>
     getopt(
-        int               argc,
-        char            **args,
-        const AppCmdNode &node_info,
-        bool              args_includes_arg0 = true,
-        ccu_uni::UString  arg0               = ""
+        int              argc,
+        char           **args,
+        bool             args_includes_arg0 = true,
+        ccu_uni::UString arg0               = ""
     );
 
-std::shared_ptr<GetOptResult>
+std::shared_ptr<const GetOptResult>
     getopt(
-        const std::shared_ptr<std::deque<ccu_uni::UString>> params,
-        const AppCmdNode                                   &node_info,
-        bool                                                params_includes_arg0,
-        ccu_uni::UString                                    arg0
+        std::shared_ptr<std::deque<ccu_uni::UString>> params,
+        bool                                          params_includes_arg0,
+        ccu_uni::UString                              arg0
     );
 
-const std::shared_ptr<std::deque<ccu_uni::UString>> convert_libc_args(
+std::shared_ptr<std::deque<ccu_uni::UString>> convert_libc_args(
     int    argc,
     char **args
 );

@@ -20,9 +20,20 @@ const ccu_cliapp::AppCmdNodeOptions cli_main_menu_options{
               }
 };
 
+std::shared_ptr<ccu_cliapp::AppResult> f1(
+    std::shared_ptr<const ccu_cliapp::GetOptResult>      getopt_result,
+    std::shared_ptr<const ccu_cliapp::AppCmdRuntimeInfo> runtime_info
+)
+{
+    auto ret = std::make_shared<ccu_cliapp::AppResult>();
+    std::cout << "test" << std::endl;
+    return ret;
+}
+
 const ccu_cliapp::AppCmdNode cli_main_menu{
-    .name    = "testapp",
-    .options = &cli_main_menu_options
+    .name     = "testapp",
+    .callable = f1,
+    .options  = &cli_main_menu_options
 };
 
 int main(int argc, char **args)
@@ -49,6 +60,8 @@ int main(int argc, char **args)
         cli_main_menu,
         0
     );
+
+    std::cout << "Exit Code: " << res->code << std::endl;
 
     return res->code;
 }
