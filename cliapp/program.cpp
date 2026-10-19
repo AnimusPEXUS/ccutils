@@ -160,7 +160,8 @@ std::shared_ptr<const AppResult> RunCmd(
     ret->do_not_print_result = false;
 
     std::deque<ccu_uni::UString> depth_level;
-    const AppCmdNode            *subtree;
+    const AppCmdNode            *subtree     = nullptr;
+    const AppCmdNode            *parent_node = nullptr;
 
     auto getopt_result = getopt(params, rootnode, false, arg0);
 
@@ -179,7 +180,9 @@ std::shared_ptr<const AppResult> RunCmd(
         {
             if (j->name == i)
             {
-                subtree = j;
+                parent_node = subtree;
+                subtree     = j;
+
                 depth_level.push_back(i);
 
                 if (subtree->callable)
@@ -231,13 +234,21 @@ search_success:
 
     getopt_result->node_info = subtree;
 
-    auto additional_info = std::make_shared<AppCmdRuntimeInfo>();
-
-    additional_info->user_data = user_data;
+    auto runtime_info = std::make_shared<AppCmdRuntimeInfo>(
+        AppCmdRuntimeInfo{
+            .params       = params,
+            .options      = subtree->options,
+            .parent_node  = parent_node,
+            .current_node = subtree,
+            .root_node    = &rootnode,
+            .arg0         = arg0,
+            .user_data    = user_data
+        }
+    );
 
     ret = subtree->callable(
         getopt_result,
-        additional_info
+        runtime_info
     );
 
     if (!ret)

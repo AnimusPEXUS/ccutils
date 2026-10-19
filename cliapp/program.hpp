@@ -29,31 +29,31 @@ struct AppCmdNodeOptionsItem;
 
 struct AppCmdRuntimeInfo
 {
-    std::deque<ccu_uni::UString>             params;
-    std::optional<const AppCmdNodeOptions *> cmd_options;
-    std::vector<ccu_uni::UString>            depth_level;
-    std::optional<const AppCmdNode *>        parent_node;
-    std::optional<const AppCmdNode *>        current_node;
-    std::optional<const AppCmdNode *>        root;
-    const ccu_uni::UString                   arg0;
-    std::any                                 user_data;
+    const std::shared_ptr<std::deque<ccu_uni::UString>> params;
+    std::optional<const AppCmdNodeOptions *>            options;
+    std::vector<ccu_uni::UString>                       depth_level;
+    std::optional<const AppCmdNode *>                   parent_node;
+    std::optional<const AppCmdNode *>                   current_node;
+    std::optional<const AppCmdNode *>                   root_node;
+    const ccu_uni::UString                              arg0;
+    std::any                                            user_data;
 };
 
 struct GetOptResult;
 
 struct AppCmdNodeInfo
 {
-    const ccu_uni::UString              short_description;
-    const ccu_uni::UString              version;
-    const ccu_uni::UString              versionInfo;
-    const ccu_uni::UString              devStatus;
-    const ccu_uni::UString              description;
-    const ccu_uni::UString              license;
-    const ccu_uni::UString              date;
-    const std::vector<ccu_uni::UString> developers;
-    const std::vector<ccu_uni::UString> URIs;
-    const std::vector<ccu_uni::UString> man_pages;
-    const std::vector<ccu_uni::UString> info_pages;
+    ccu_uni::UString              short_description;
+    ccu_uni::UString              version;
+    ccu_uni::UString              versionInfo;
+    ccu_uni::UString              devStatus;
+    ccu_uni::UString              description;
+    ccu_uni::UString              license;
+    ccu_uni::UString              date;
+    std::vector<ccu_uni::UString> developers;
+    std::vector<ccu_uni::UString> URIs;
+    std::vector<ccu_uni::UString> man_pages;
+    std::vector<ccu_uni::UString> info_pages;
 };
 
 struct AppCmdNode
@@ -75,7 +75,7 @@ struct AppCmdNode
 
     std::function<std::shared_ptr<AppResult>(
         std::shared_ptr<GetOptResult>      getopt_result,
-        std::shared_ptr<AppCmdRuntimeInfo> additional_info
+        std::shared_ptr<AppCmdRuntimeInfo> runtime_info
     )>
         callable;
 

@@ -15,7 +15,7 @@ ccu_uni::UString GetOptResult::String() const
         ret += t1->name;
         if (t1->has_value)
         {
-            ret += std::format("=%s", t1->value);
+            ret += std::format("={}", t1->value);
         }
         ret += "\n";
     }
@@ -24,7 +24,7 @@ ccu_uni::UString GetOptResult::String() const
     {
         auto &t1 = this->args[i];
 
-        ret += std::format("'%s'\n", t1);
+        ret += std::format("'{}'\n", t1);
     }
 
     return ret;
@@ -74,7 +74,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
                 err.push_back(
                     ccu_err::New(
                         std::format(
-                            "option %s is required but absent",
+                            "option {} is required but absent",
                             i->name
                         )
                     )
@@ -98,7 +98,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
                     err.push_back(
                         ccu_err::New(
                             std::format(
-                                "option %s must have value",
+                                "option {} must have value",
                                 i->name
                             )
                         )
@@ -127,7 +127,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(std::deque<ccu_err::error_pt
             err.push_back(
                 ccu_err::New(
                     std::format(
-                        "unsupported option passed: %s",
+                        "unsupported option passed: {}",
                         i->name
                     )
                 )
