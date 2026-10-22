@@ -31,10 +31,7 @@ struct AppCmdRuntimeInfo
 {
     std::shared_ptr<const std::deque<ccu_uni::UString>> params;
     std::optional<const AppCmdNodeOptions *>            options;
-    std::vector<ccu_uni::UString>                       depth_level;
-    std::optional<const AppCmdNode *>                   parent_node;
-    std::optional<const AppCmdNode *>                   current_node;
-    std::optional<const AppCmdNode *>                   root_node;
+    std::shared_ptr<std::deque<const AppCmdNode *>>     depth_level;
     const ccu_uni::UString                              arg0;
     std::any                                            user_data;
 };
@@ -136,6 +133,7 @@ struct AppCmdNodeOptions
     ccu_uni::UString HelpString() const;
 };
 
+/*
 constexpr bool validate_AppCmdNode(const AppCmdNode &node_data)
 {
     if (!(node_data.min_args >= -1))
@@ -160,12 +158,15 @@ constexpr bool validate_AppCmdNode(const AppCmdNode &node_data)
 
     return true;
 }
+*/
 
+/*
 // returns 0 if no errors
 int CheckAppCmdNode(
     const AppCmdNode                   &in,
     const std::deque<ccu_uni::UString> &depth
 );
+*/
 
 std::shared_ptr<const AppResult> RunCmd(
     const ccu_uni::UString                       &arg0,
@@ -177,9 +178,7 @@ std::shared_ptr<const AppResult> RunCmd(
 int PrintAppResult(std::shared_ptr<const AppResult> in);
 
 void PrintHelp(
-    const std::deque<ccu_uni::UString> depth_level,
-    const AppCmdNode                  &rootnode,
-    const AppCmdNode                  &render_for
+    std::shared_ptr<std::deque<const AppCmdNode *>> depth_level
 );
 
 } // namespace wayround_i2p::ccutils::cliapp

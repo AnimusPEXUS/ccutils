@@ -188,7 +188,7 @@ bool GetOptResult::DoesNamedRetOptItemHaveValue(ccu_uni::UString name) const
     return false;
 }
 
-std::shared_ptr<const GetOptResult>
+std::shared_ptr<GetOptResult>
     getopt(
         int              argc,
         char           **args,
@@ -212,7 +212,7 @@ std::shared_ptr<const GetOptResult>
     return getopt(params, false, arg0);
 }
 
-std::shared_ptr<const GetOptResult>
+std::shared_ptr<GetOptResult>
     getopt(
         std::shared_ptr<std::deque<ccu_uni::UString>> params,
         bool                                          params_includes_arg0,

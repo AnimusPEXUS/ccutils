@@ -56,7 +56,7 @@ struct RetOptItem
 };
 
 // if args doen't contains arg 0, arg 0 should be provided as arg0
-std::shared_ptr<const GetOptResult>
+std::shared_ptr<GetOptResult>
     getopt(
         int              argc,
         char           **args,
@@ -64,7 +64,7 @@ std::shared_ptr<const GetOptResult>
         ccu_uni::UString arg0               = ""
     );
 
-std::shared_ptr<const GetOptResult>
+std::shared_ptr<GetOptResult>
     getopt(
         std::shared_ptr<std::deque<ccu_uni::UString>> params,
         bool                                          params_includes_arg0,

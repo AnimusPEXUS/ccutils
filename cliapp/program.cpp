@@ -153,57 +153,71 @@ std::shared_ptr<const AppResult> RunCmd(
     const std::any                                user_data
 )
 {
-    auto ret = std::make_shared<AppResult>();
 
-    ret->code                = 0;
-    ret->message             = "No Error";
-    ret->do_not_print_result = false;
+    auto ret = std::make_shared<AppResult>(
+        AppResult{
+            .code                = 0,
+            .message             = "No Error",
+            .do_not_print_result = false
+        }
+    );
 
-    std::deque<ccu_uni::UString> depth_level;
-    const AppCmdNode            *subtree     = nullptr;
-    const AppCmdNode            *parent_node = nullptr;
+    auto depth_level = std::make_shared<std::deque<const AppCmdNode *>>();
+
+    const AppCmdNode *curren_node = nullptr;
 
     auto getopt_result = getopt(params, false, arg0);
-
-    // searching subtree and/or command
 
     // todo: perform rootnode sanity checks
     // auto check_result = getopt_result.Check(std::deque<ccu_err::error_ptr>());
 
-    subtree = &rootnode;
+    curren_node       = &rootnode;
+    std::size_t level = 0;
 
-    depth_level.clear();
+    depth_level->push_back(curren_node);
 
-    for (const auto &i : getopt_result->args)
+    // searching subtree and/or command (new)
+
+subnode_search_loop:
+{
+    if (curren_node->callable)
     {
-        for (const auto j : subtree->subnodes)
-        {
-            if (j->name == i)
-            {
-                parent_node = subtree;
-                subtree     = j;
-
-                depth_level.push_back(i);
-
-                if (subtree->callable)
-                {
-                    goto search_success;
-                }
-                goto continue_look_for_requested_cmd_or_subtree;
-            }
-        }
-
-        ret->code                = 100;
-        ret->message             = "arguments error: invalid command or subsection name";
-        ret->do_not_print_result = false;
-        return ret;
-
-    continue_look_for_requested_cmd_or_subtree:
+        goto search_success;
     }
+
+    if (getopt_result->args.size() <= level)
+    {
+        goto search_success;
+    }
+
+    auto next_name_to_search = getopt_result->args[level];
+    for (const auto subnode : curren_node->subnodes)
+    {
+        if (subnode->name == next_name_to_search)
+        {
+            level++;
+            curren_node = subnode;
+            depth_level->push_back(curren_node);
+            goto subnode_search_loop;
+        }
+    }
+
+    ret->code                = 100;
+    ret->message             = "arguments error: invalid command or subsection name";
+    ret->do_not_print_result = false;
+    return ret;
+}
 
     // at this point search considered successfull
 
 search_success:
+
+    // remove first 'level' count of args from getopt result
+    getopt_result->args.erase(
+        getopt_result->args.begin(),
+        getopt_result->args.begin() + level
+    );
+
     // showing help or executing command
 
     auto help_option = getopt_result->GetLastNamedRetOptItem("--help");
@@ -217,14 +231,16 @@ search_success:
             return ret;
         }
 
-        PrintHelp(depth_level, rootnode, *subtree);
+        PrintHelp(depth_level);
         ret->code                = 0;
         ret->message             = "printing help text";
         ret->do_not_print_result = false;
         return ret;
     }
 
-    if (!subtree->callable)
+    auto dl_size = depth_level->size();
+
+    if (depth_level->operator[](dl_size - 1)->callable)
     {
         ret->code                = 100;
         ret->message             = "not callable";
@@ -234,20 +250,15 @@ search_success:
 
     auto runtime_info = std::make_shared<AppCmdRuntimeInfo>(
         AppCmdRuntimeInfo{
-            .params       = params,
-            .options      = subtree->options,
-            .parent_node  = parent_node,
-            .current_node = subtree,
-            .root_node    = &rootnode,
-            .arg0         = arg0,
-            .user_data    = user_data
+            .params      = params,
+            .options     = depth_level->operator[](dl_size - 1)->options,
+            .depth_level = depth_level,
+            .arg0        = arg0,
+            .user_data   = user_data
         }
     );
 
-    ret = subtree->callable(
-        getopt_result,
-        runtime_info
-    );
+    ret = depth_level->operator[](dl_size - 1)->callable(getopt_result, runtime_info);
 
     if (!ret)
     {
@@ -269,17 +280,22 @@ int PrintAppResult(std::shared_ptr<const AppResult> in)
     auto ret = in->code;
     if (!in->do_not_print_result)
     {
-        std::cout << std::format("Exit Code: {} ({})", ret, in->message) << std::endl;
+        std::cout
+            << std::format(
+                   "Exit Code: {} ({})",
+                   ret,
+                   in->message
+               )
+            << std::endl;
     }
     return ret;
 }
 
 void PrintHelp(
-    const std::deque<ccu_uni::UString> depth_level,
-    const AppCmdNode                  &rootnode,
-    const AppCmdNode                  &render_for
+    std::shared_ptr<std::deque<const AppCmdNode *>> depth_level
 )
 {
+    std::cout << "todo: PrintHelp" << std::endl;
 }
 
 } // namespace wayround_i2p::ccutils::cliapp
