@@ -1217,3 +1217,8 @@ std::ostringstream &operator<<(
 */
 
 } // namespace wayround_i2p::ccutils::unicode
+
+ccUString operator""_ccUS(const char *data, std::size_t data_size)
+{
+    return ccUString(std::string(data, data_size));
+}

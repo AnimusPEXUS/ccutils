@@ -571,4 +571,8 @@ struct std::formatter<wayround_i2p::ccutils::unicode::UChar>
     }
 };
 
+using ccUString = wayround_i2p::ccutils::unicode::UString;
+
+ccUString operator""_ccUS(const char *data, std::size_t data_size);
+
 #endif

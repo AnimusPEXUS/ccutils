@@ -51,6 +51,7 @@ struct GetOptResult
 struct RetOptItem
 {
     ccu_uni::UString name;
+    bool             user_supplied_value;
     bool             has_value;
     ccu_uni::UString value;
 };

@@ -32,15 +32,24 @@ ccu_uni::UString GetOptResult::String() const
 
 std::shared_ptr<RetOptItem> GetOptResult::GetLastNamedRetOptItem(ccu_uni::UString name) const
 {
-    std::shared_ptr<RetOptItem> ret;
-    for (auto i : this->opts)
+    auto i = this->opts.end();
+
+    if (i != this->opts.begin())
     {
-        if (i->name == name)
+        do
         {
-            ret = i;
-        }
+            i--;
+
+            auto ii = *i;
+
+            if (ii->name == name)
+            {
+                return ii;
+            }
+        } while (i != this->opts.begin());
     }
-    return ret;
+
+    return nullptr;
 }
 
 std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(ccu_uni::UString name) const
@@ -56,6 +65,7 @@ std::deque<std::shared_ptr<RetOptItem>> GetOptResult::GetAllNamedRetOptItems(ccu
     return ret;
 }
 
+// todo: use shared_ptr in return?
 std::deque<ccu_err::error_ptr> &GetOptResult::Check(
     const AppCmdNode               *node_to_check_against,
     std::deque<ccu_err::error_ptr> &err
@@ -63,78 +73,118 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(
 {
     err.clear();
 
-    // check opts required but absent
-
-    assert(node_to_check_against);
-
-    for (auto i : node_to_check_against->options->items)
+    if (!node_to_check_against)
     {
-        if (i->is_required)
+        throw ccu_err::New("node_to_check_against is nullptr");
+    }
+
+    // check opts required but absent
+    for (auto i : node_to_check_against->required_options)
+    {
+
+        if (!this->DoesHaveNamedRetOptItem(i->name))
         {
-            auto res = this->GetLastNamedRetOptItem(i->name);
-            if (!res)
+            err.push_back(
+                ccu_err::New(
+                    std::format(
+                        "option {} required, but absent",
+                        i->name
+                    )
+                )
+            );
+        }
+    }
+
+    // check if unsupported options passed
+    if (node_to_check_against->options)
+    {
+        for (auto i : this->opts)
+        {
+            bool found = false;
+
+            for (auto ii : node_to_check_against->options->items)
+            {
+                if (ii->name == i->name)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
             {
                 err.push_back(
                     ccu_err::New(
                         std::format(
-                            "option {} is required but absent",
+                            "unsupported option passed: {}",
                             i->name
                         )
                     )
                 );
             }
         }
+    }
 
-        // check option's values which must have values
-        if (i->must_have_value)
+    // check option's values which must have values
+    if (node_to_check_against->options)
+    {
+        for (auto i : this->opts)
         {
-            auto item = this->GetLastNamedRetOptItem(i->name);
-            if (item && !item->has_value)
+            auto node_opt = node_to_check_against->options
+                                ->GetByName(i->name);
+
+            if (!node_opt)
             {
-                if (i->has_default_value)
-                {
-                    item->has_value = true;
-                    item->value     = i->default_value;
-                }
-                else
+                if (node_to_check_against->error_on_unsupported_options)
                 {
                     err.push_back(
                         ccu_err::New(
                             std::format(
-                                "option {} must have value",
+                                "unsupported option {}",
                                 i->name
                             )
                         )
                     );
                 }
             }
-        }
-    }
-
-    // check if unsupported options passed
-    for (auto &i : this->opts)
-    {
-        bool found = false;
-
-        for (auto ii : node_to_check_against->options->items)
-        {
-            if (ii->name == i->name)
+            else
             {
-                found = true;
-                break;
+                // value passed, but option doesn't accepts values
+                if (i->has_value)
+                {
+                    if (!node_opt->accepts_value)
+                    {
+                        err.push_back(
+                            ccu_err::New(
+                                std::format(
+                                    "option {} doesn't accepts values",
+                                    i->name
+                                )
+                            )
+                        );
+                    }
+                }
+                else
+                {
+                    if (node_opt->accepts_value)
+                    {
+                        if (node_opt->must_have_value)
+                        {
+                            if (!i->user_supplied_value)
+                            {
+                                err.push_back(
+                                    ccu_err::New(
+                                        std::format(
+                                            "value is required for option {}",
+                                            i->name
+                                        )
+                                    )
+                                );
+                            }
+                        }
+                    }
+                }
             }
-        }
-
-        if (!found)
-        {
-            err.push_back(
-                ccu_err::New(
-                    std::format(
-                        "unsupported option passed: {}",
-                        i->name
-                    )
-                )
-            );
         }
     }
 
@@ -147,9 +197,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(
         if (len_args < node_to_check_against->min_args)
         {
             err.push_back(
-                ccu_err::New(
-                    "given too few arguments"
-                )
+                ccu_err::New("given too few arguments")
             );
         }
 
@@ -157,9 +205,7 @@ std::deque<ccu_err::error_ptr> &GetOptResult::Check(
             && len_args > node_to_check_against->max_args)
         {
             err.push_back(
-                ccu_err::New(
-                    "given too few arguments"
-                )
+                ccu_err::New("given too few arguments")
             );
         }
     }
@@ -219,12 +265,9 @@ std::shared_ptr<GetOptResult>
         ccu_uni::UString                              arg0
     )
 {
-    auto ret             = std::make_shared<GetOptResult>();
+    auto ret = std::make_shared<GetOptResult>();
+
     bool last_opt_switch = false;
-    int  len_args        = 0;
-    int  i               = 0;
-    int  args_i_len      = 0;
-    int  eq_pos          = 0;
 
     if (params_includes_arg0)
     {
@@ -243,9 +286,9 @@ std::shared_ptr<GetOptResult>
         ret->arg0 = arg0;
     }
 
-    len_args = params->size();
+    auto len_args = params->size();
 
-    i = 0;
+    int i = 0;
 
     while (true)
     {
@@ -262,7 +305,7 @@ std::shared_ptr<GetOptResult>
         }
         else
         {
-            args_i_len = params_i.length();
+            auto args_i_len = params_i.length();
 
             if (args_i_len == 0)
             {
@@ -279,8 +322,7 @@ std::shared_ptr<GetOptResult>
                 {
                     if (params_i.startswith("-"))
                     {
-
-                        eq_pos = params_i.index("-");
+                        auto eq_pos = params_i.index("=");
 
                         auto _t = std::make_shared<RetOptItem>();
 

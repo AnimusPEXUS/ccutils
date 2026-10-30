@@ -40,11 +40,12 @@ struct GetOptResult;
 
 struct AppCmdNodeInfo
 {
-    ccu_uni::UString              short_description;
+    ccu_uni::UString              shortDescription;
     ccu_uni::UString              version;
     ccu_uni::UString              versionInfo;
     ccu_uni::UString              devStatus;
     ccu_uni::UString              description;
+    ccu_uni::UString              argumentsDescription;
     ccu_uni::UString              license;
     ccu_uni::UString              date;
     std::vector<ccu_uni::UString> developers;
@@ -58,7 +59,7 @@ struct AppCmdNode
     // basic part
     ccu_uni::UString name;
 
-    AppCmdNodeInfo *info;
+    const AppCmdNodeInfo *info;
 
     // section part
 
@@ -76,40 +77,40 @@ struct AppCmdNode
     )>
         callable;
 
-    const AppCmdNodeOptions *options;
+    const AppCmdNodeOptions                         *options;
+    bool                                             error_on_unsupported_options = true;
+    const std::vector<const AppCmdNodeOptionsItem *> required_options;
+
+    bool is_required_option(const AppCmdNodeOptionsItem *val);
 };
 
 std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate(
-    const AppCmdNode                               *node_info,
+    const AppCmdNode                               *node,
     std::deque<ccu_uni::UString>                    depth,
     std::shared_ptr<std::deque<ccu_err::error_ptr>> ret
 );
 
 std::shared_ptr<std::deque<ccu_err::error_ptr>> AppCmdNode_Validate_and_Print(
-    const AppCmdNode *node_info
+    const AppCmdNode *node
 );
 
 struct AppCmdNodeOptionsItem
 {
     /*
-        must be with leading '-' (minuses) and without trailing '=' equals
+        must be with leading '-' (minuses) (more than 2 is allowed)
+        and without trailing '=' (equals)
     */
     const ccu_uni::UString name;
 
     /*
-        set this to true if Default value have meaning
+        set this to true if option allows value
     */
-    const bool has_default_value = false;
+    const bool accepts_value = false;
 
     /*
-        default value in case if defined without value
+        default value if value not supplied by user
     */
     const ccu_uni::UString default_value = "";
-
-    /*
-        put here true, if user MUST explicitly define this option
-    */
-    const bool is_required = false;
 
     /* insist on value to flag.
     if this is true, and value not passed to option,
@@ -117,20 +118,30 @@ struct AppCmdNodeOptionsItem
     */
     const bool must_have_value = false;
 
-    const ccu_uni::UString description = ""; // this text will be printed beside option on --help parameter
+    /*
+    what to print after `=' in --help text
+    (if allows_value is true, then inline_descr must be not empty)
+    */
+    const ccu_uni::UString inline_descr = "";
+
+    /*
+    this text will be printed beside option on --help parameter
+    */
+    const ccu_uni::UString description = "";
 
     ccu_uni::UString HelpString() const;
 };
 
+// todo: confirm this really is required to be separate class, and not just vector.
 struct AppCmdNodeOptions
 {
     const std::vector<const AppCmdNodeOptionsItem *> items;
 
-    std::optional<const AppCmdNodeOptionsItem *> GetByName(
+    const AppCmdNodeOptionsItem *GetByName(
         ccu_uni::UString name
     ) const;
 
-    ccu_uni::UString HelpString() const;
+    // ccu_uni::UString HelpString() const;
 };
 
 /*
@@ -179,6 +190,16 @@ int PrintAppResult(std::shared_ptr<const AppResult> in);
 
 void PrintHelp(
     std::shared_ptr<std::deque<const AppCmdNode *>> depth_level
+);
+
+void PrintDepthLevel(
+    std::shared_ptr<std::deque<const AppCmdNode *>> depth_level,
+    ccu_uni::UString                                separator
+);
+
+ccu_uni::UString DepthLevelToString(
+    std::shared_ptr<std::deque<const AppCmdNode *>> depth_level,
+    ccu_uni::UString                                separator
 );
 
 } // namespace wayround_i2p::ccutils::cliapp
